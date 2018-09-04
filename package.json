@@ -1,0 +1,26 @@
+{
+  "name": "odata-typescript-client",
+  "version": "0.0.5",
+  "description": "OData TypeScript Client",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cbrianball/odata-typescript-client.git"
+  },
+  "keywords": [
+    "odata-client",
+    "typescript"
+  ],
+  "author": "Brian Ball",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cbrianball/odata-typescript-client/issues"
+  },
+  "homepage": "https://github.com/cbrianball/odata-typescript-client#readme",
+  "devDependencies": {
+    "typescript": "^3.0.3"
+  }
+}
