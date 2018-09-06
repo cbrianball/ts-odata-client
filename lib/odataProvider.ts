@@ -44,34 +44,34 @@ export class ODataProvider {
         } as QueryClauses;
     }
 
-    private combineFilterClauses(left: string[], right: string[]){
-        if(!left && !right) return;
+    private combineFilterClauses(left: string[], right: string[]) {
+        if (!left && !right) return;
 
-        if(!left) return right;
-        if(!right) return left;
+        if (!left) return right;
+        if (!right) return left;
 
         const result: string[] = [];
 
-        if(left.length > 1){
-            result.push(`(${left.join('')})`);
+        if (left.length > 1) {
+            result.push(`(${left.join(' ')})`);
         }
-        else{
+        else {
             result.push(...left);
         }
 
-        if(right.length > 1){
-            result.push(`(${right.join('')})`);
+        if (right.length > 1) {
+            result.push(`(${right.join(' ')})`);
         }
-        else{
+        else {
             result.push(...right);
         }
 
         return result;
-    }    
+    }
 
     public toString() {
         const queryString = [];
-        
+
         if (!this.queryClauses.key && this.queryClauses.filter && this.queryClauses.filter.length > 0)
             queryString.push(`$filter=${this.queryClauses.filter.join(' and ')}`);
 
@@ -95,7 +95,7 @@ export class ODataProvider {
             value += '?' + queryString.join('&');
 
         return value;
-    }    
+    }
 }
 
 export async function executeAsync(url: string, requestInit: RequestInit) {
