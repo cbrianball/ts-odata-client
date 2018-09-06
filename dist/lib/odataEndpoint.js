@@ -35,7 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var filter_builder_1 = require("./filter-builder");
+var filterBuilder_1 = require("./filterBuilder");
 var ODataEndpoint = /** @class */ (function () {
     function ODataEndpoint(provider) {
         this.provider = provider;
@@ -93,8 +93,8 @@ var ODataEndpoint = /** @class */ (function () {
      */
     ODataEndpoint.prototype.filter = function (predicate) {
         if (typeof predicate === "function")
-            predicate = predicate(filter_builder_1.FilterBuilder.for(this));
-        return new ODataEndpoint(this.provider.createQuery({ filter: predicate.toString() }));
+            predicate = predicate(filterBuilder_1.FilterBuilder.for(this));
+        return new ODataEndpoint(this.provider.createQuery({ filter: predicate.filterClauses }));
     };
     /**
      * Filters the records with a predicate that is not supported by FilterBuilder; calls to filter() and customFilter() are cumulative (as well as UNIONed (AND)).
@@ -102,7 +102,7 @@ var ODataEndpoint = /** @class */ (function () {
      * @param predicate An unescaped URL query string fragment.
      */
     ODataEndpoint.prototype.customFilter = function (predicate) {
-        return new ODataEndpoint(this.provider.createQuery({ filter: predicate }));
+        return new ODataEndpoint(this.provider.createQuery({ filter: [predicate] }));
     };
     /**
      * Returns a single record with the provided key value. Some functions (such as top, skip, filter, etc.) are ignored when this function is invoked.

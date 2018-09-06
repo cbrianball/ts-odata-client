@@ -35,21 +35,22 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var odata_endpoint_1 = require("./odata-endpoint");
+var odataEndpoint_1 = require("./odataEndpoint");
+var odataProvider_1 = require("./odataProvider");
 var ODataContext = /** @class */ (function () {
     function ODataContext(basePath, requestHeaders) {
         this.basePath = basePath;
         this.requestHeaders = requestHeaders;
     }
     ODataContext.prototype.createProvider = function (endpointFragment) {
-        return new ODataProvider({ baseUrl: this.basePath + endpointFragment, headersCallback: this.requestHeaders });
+        return new odataProvider_1.ODataProvider({ baseUrl: this.basePath + endpointFragment, headersCallback: this.requestHeaders });
     };
     /**
      * Create and ODataEndpoint by combining the basePath with the provided path.
      * @param path The path, relative to the basePath, of the endpoint
      */
     ODataContext.prototype.createQuery = function (path) {
-        return new odata_endpoint_1.ODataEndpoint(this.createProvider(path));
+        return new odataEndpoint_1.ODataEndpoint(this.createProvider(path));
     };
     /**
      * Retrieves the next page of records based on the @odata.nextLink value provided.
@@ -62,7 +63,7 @@ var ODataContext = /** @class */ (function () {
                     case 0:
                         if (!results["@odata.nextLink"])
                             return [2 /*return*/, undefined];
-                        return [4 /*yield*/, executeAsync(results["@odata.nextLink"], this.requestHeaders ? this.requestHeaders() : {})];
+                        return [4 /*yield*/, odataProvider_1.executeAsync(results["@odata.nextLink"], this.requestHeaders ? this.requestHeaders() : {})];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });

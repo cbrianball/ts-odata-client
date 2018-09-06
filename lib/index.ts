@@ -1,4 +1,5 @@
-import {ODataEndpoint} from "./odata-endpoint";
+import { ODataEndpoint } from "./odataEndpoint";
+import { ODataProvider, executeAsync } from "./odataProvider";
 
 export class ODataContext {
     constructor(private readonly basePath: string, private readonly requestHeaders?: () => RequestInit) { }
@@ -19,7 +20,7 @@ export class ODataContext {
      * Retrieves the next page of records based on the @odata.nextLink value provided.
      * @param results
      */
-    public async getNextPageAsync<_, T extends ODataQueryResponse<_>>(results: T) {        
+    public async getNextPageAsync<_, T extends ODataQueryResponse<_>>(results: T) {
         if (!results["@odata.nextLink"]) return undefined;
 
         return await executeAsync(results["@odata.nextLink"] as string, this.requestHeaders ? this.requestHeaders() : {}) as T;

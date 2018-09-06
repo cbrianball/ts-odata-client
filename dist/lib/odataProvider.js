@@ -45,6 +45,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var ODataProvider = /** @class */ (function () {
     function ODataProvider(remoteInformation, queryClauses) {
         if (queryClauses === void 0) { queryClauses = ODataProvider.emptyClauses; }
@@ -63,7 +64,7 @@ var ODataProvider = /** @class */ (function () {
                 top: 0,
                 skip: 0,
                 orderBy: [],
-                filter: ""
+                filter: []
             };
         },
         enumerable: true,
@@ -92,26 +93,39 @@ var ODataProvider = /** @class */ (function () {
         return {
             count: next.count || previous.count,
             key: next.key || previous.key,
-            filter: (previous.filter && next.filter) ? this.groupFilterClauseIfNeeded(previous.filter.trim()) + ' and ' + this.groupFilterClauseIfNeeded(next.filter.trim()) : (next.filter || previous.filter),
+            filter: this.combineFilterClauses(previous.filter, next.filter),
             orderBy: previous.orderBy.concat(next.orderBy),
             select: next.select.length > 0 ? next.select : previous.select,
             skip: next.skip || previous.skip,
             top: next.top || previous.top,
         };
     };
-    ODataProvider.prototype.groupFilterClauseIfNeeded = function (filterClause) {
-        if (!filterClause)
+    ODataProvider.prototype.combineFilterClauses = function (left, right) {
+        if (!left && !right)
             return;
-        //look for "and" or "or" with a space on either side to determine if this is a filter with multiple criteria
-        var result = / and | or /i.test(filterClause);
-        if (result)
-            return "(" + filterClause + ")";
-        return filterClause;
+        if (!left)
+            return right;
+        if (!right)
+            return left;
+        var result = [];
+        if (left.length > 1) {
+            result.push("(" + left.join('') + ")");
+        }
+        else {
+            result.push.apply(result, left);
+        }
+        if (right.length > 1) {
+            result.push("(" + right.join('') + ")");
+        }
+        else {
+            result.push.apply(result, right);
+        }
+        return result;
     };
     ODataProvider.prototype.toString = function () {
         var queryString = [];
-        if (!this.queryClauses.key && this.queryClauses.filter)
-            queryString.push("$filter=" + this.queryClauses.filter);
+        if (!this.queryClauses.key && this.queryClauses.filter && this.queryClauses.filter.length > 0)
+            queryString.push("$filter=" + this.queryClauses.filter.join(' and '));
         if (!this.queryClauses.key && this.queryClauses.orderBy.length > 0)
             queryString.push("$orderby=" + this.queryClauses.orderBy.join(','));
         if (this.queryClauses.select.length > 0)
@@ -131,6 +145,7 @@ var ODataProvider = /** @class */ (function () {
     };
     return ODataProvider;
 }());
+exports.ODataProvider = ODataProvider;
 function executeAsync(url, requestInit) {
     return __awaiter(this, void 0, void 0, function () {
         var response;
@@ -147,3 +162,4 @@ function executeAsync(url, requestInit) {
         });
     });
 }
+exports.executeAsync = executeAsync;

@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var FilterBuilder = /** @class */ (function () {
-    function FilterBuilder(filterClause) {
-        this.filterClause = filterClause;
+    function FilterBuilder(filterClauses) {
+        this.filterClauses = filterClauses;
     }
     FilterBuilder.for = function (query) { return new FilterBuilder([]); };
     FilterBuilder.prototype.transformValue = function (value) {
@@ -33,16 +33,16 @@ var FilterBuilder = /** @class */ (function () {
         throw new Error("object type with constructor '" + value.constructor.name + "' not supported");
     };
     FilterBuilder.prototype.conjunctionBuilder = function (conjunction, predicate) {
-        if (this.filterClause.length === 0)
+        if (this.filterClauses.length === 0)
             throw new Error("Cannot use '" + conjunction + "()' as the first call to FilterBuilder");
-        if (!predicate || !predicate.filterClause || predicate.filterClause.length <= 0)
+        if (!predicate || !predicate.filterClauses || predicate.filterClauses.length <= 0)
             throw new Error("Result of '" + conjunction + "()' must have at least one filter");
-        var clauses = predicate.filterClause;
+        var clauses = predicate.filterClauses;
         if (clauses.length > 1)
             clauses = [" " + conjunction + "("].concat(clauses, [')']);
         else
             clauses = [" " + conjunction + " "].concat(clauses);
-        return new FilterBuilder(this.filterClause.concat(clauses));
+        return new FilterBuilder(this.filterClauses.concat(clauses));
     };
     /**
      * Create an AND condition with a previous filter clause
@@ -63,14 +63,14 @@ var FilterBuilder = /** @class */ (function () {
      * @param predicate Use the same FilterBuilder that this method chain was invoked with
      */
     FilterBuilder.prototype.not = function (predicate) {
-        if (!predicate || !predicate.filterClause || predicate.filterClause.length <= 0)
+        if (!predicate || !predicate.filterClauses || predicate.filterClauses.length <= 0)
             throw new Error("Result of 'not' must have at least one filter");
-        var clauses = predicate.filterClause;
+        var clauses = predicate.filterClauses;
         if (clauses.length > 1)
             clauses = ["not("].concat(clauses, [')']);
         else
             clauses = ["not "].concat(clauses);
-        return new FilterBuilder(this.filterClause.concat(clauses));
+        return new FilterBuilder(this.filterClauses.concat(clauses));
     };
     /**
      * Returns a reference used by FilterBuilder to allow comparisons to other values within the record
@@ -104,7 +104,7 @@ var FilterBuilder = /** @class */ (function () {
      * @param value
      */
     FilterBuilder.prototype.equals = function (field, value) {
-        return new FilterBuilder(this.filterClause.concat([field + " eq " + this.transformValue(value)]));
+        return new FilterBuilder(this.filterClauses.concat([field + " eq " + this.transformValue(value)]));
     };
     /**
      * Filters based on the field not having the provided value
@@ -112,7 +112,7 @@ var FilterBuilder = /** @class */ (function () {
      * @param value
      */
     FilterBuilder.prototype.notEquals = function (field, value) {
-        return new FilterBuilder(this.filterClause.concat([field + " ne " + this.transformValue(value)]));
+        return new FilterBuilder(this.filterClauses.concat([field + " ne " + this.transformValue(value)]));
     };
     /**
      * Filters based on the field being greater than (>) the provided value
@@ -120,7 +120,7 @@ var FilterBuilder = /** @class */ (function () {
      * @param value
      */
     FilterBuilder.prototype.greaterThan = function (field, value) {
-        return new FilterBuilder(this.filterClause.concat([field + " gt " + this.transformValue(value)]));
+        return new FilterBuilder(this.filterClauses.concat([field + " gt " + this.transformValue(value)]));
     };
     /**
      * Filters based on the field being less than (<) the provided value
@@ -128,7 +128,7 @@ var FilterBuilder = /** @class */ (function () {
      * @param value
      */
     FilterBuilder.prototype.lessThan = function (field, value) {
-        return new FilterBuilder(this.filterClause.concat([field + " lt " + this.transformValue(value)]));
+        return new FilterBuilder(this.filterClauses.concat([field + " lt " + this.transformValue(value)]));
     };
     /**
      * Filters based on the field being greater than or equal to (>=) the provided value
@@ -136,7 +136,7 @@ var FilterBuilder = /** @class */ (function () {
      * @param value
      */
     FilterBuilder.prototype.greaterThanOrEqualTo = function (field, value) {
-        return new FilterBuilder(this.filterClause.concat([field + " ge " + this.transformValue(value)]));
+        return new FilterBuilder(this.filterClauses.concat([field + " ge " + this.transformValue(value)]));
     };
     /**
      * Filters based on the field being greater than or equal to (<=) the provided value
@@ -144,7 +144,7 @@ var FilterBuilder = /** @class */ (function () {
      * @param value
      */
     FilterBuilder.prototype.lessThanOrEqualTo = function (field, value) {
-        return new FilterBuilder(this.filterClause.concat([field + " le " + this.transformValue(value)]));
+        return new FilterBuilder(this.filterClauses.concat([field + " le " + this.transformValue(value)]));
     };
     /**
      * Filters based on the field containing the provided value (not case-sensitive)
@@ -152,16 +152,16 @@ var FilterBuilder = /** @class */ (function () {
      * @param value
      */
     FilterBuilder.prototype.contains = function (field, value) {
-        return new FilterBuilder(this.filterClause.concat(["contains(" + field + "," + this.transformValue(value) + ")"]));
+        return new FilterBuilder(this.filterClauses.concat(["contains(" + field + "," + this.transformValue(value) + ")"]));
     };
     FilterBuilder.prototype.startswith = function (field, value) {
-        return new FilterBuilder(this.filterClause.concat(["startswith(" + field + "," + this.transformValue(value) + ")"]));
+        return new FilterBuilder(this.filterClauses.concat(["startswith(" + field + "," + this.transformValue(value) + ")"]));
     };
     FilterBuilder.prototype.endswith = function (field, value) {
-        return new FilterBuilder(this.filterClause.concat(["endswith(" + field + "," + this.transformValue(value) + ")"]));
+        return new FilterBuilder(this.filterClauses.concat(["endswith(" + field + "," + this.transformValue(value) + ")"]));
     };
     FilterBuilder.prototype.toString = function () {
-        return this.filterClause.join('');
+        return this.filterClauses.join('');
     };
     return FilterBuilder;
 }());

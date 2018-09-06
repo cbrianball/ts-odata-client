@@ -1,4 +1,4 @@
-declare class ODataProvider {
+export declare class ODataProvider {
     private remoteInformation;
     private readonly queryClauses;
     static readonly emptyClauses: QueryClauses;
@@ -9,7 +9,17 @@ declare class ODataProvider {
     createQuery<T, U>(clauses: Partial<QueryClauses>): ODataProvider;
     executeAsync(): Promise<any>;
     private mergeQueryClauses;
-    private groupFilterClauseIfNeeded;
+    private combineFilterClauses;
     toString(): string;
 }
-declare function executeAsync(url: string, requestInit: RequestInit): Promise<any>;
+export declare function executeAsync(url: string, requestInit: RequestInit): Promise<any>;
+interface QueryClauses {
+    count: boolean;
+    key: any;
+    filter: string[];
+    orderBy: string[];
+    select: string[];
+    skip: number;
+    top: number;
+}
+export {};

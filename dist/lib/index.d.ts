@@ -1,4 +1,4 @@
-import { ODataEndpoint } from "./odata-endpoint";
+import { ODataEndpoint } from "./odataEndpoint";
 export declare class ODataContext {
     private readonly basePath;
     private readonly requestHeaders?;

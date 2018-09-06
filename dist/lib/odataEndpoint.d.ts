@@ -1,4 +1,5 @@
-import { FilterBuilder } from "./filter-builder";
+import { FilterBuilder } from "./filterBuilder";
+import { ODataProvider } from "./odataProvider";
 export declare class ODataEndpoint<T, U> {
     private readonly provider;
     constructor(provider: ODataProvider);

@@ -1,4 +1,5 @@
-import {FilterBuilder} from "./filter-builder";
+import { FilterBuilder } from "./filterBuilder";
+import { ODataProvider } from "./odataProvider";
 
 export class ODataEndpoint<T, U>{
     constructor(private readonly provider: ODataProvider) { }
@@ -48,10 +49,10 @@ export class ODataEndpoint<T, U>{
      * @param predicate Either an existing FilterBuilder, or a function that takes in an empty FilterBuilder and returns a FilterBuilder instance.
      */
     public filter(predicate: FilterBuilder<T, U> | ((builder: FilterBuilder<T, U>) => FilterBuilder<T, U>)) {
-        if (typeof predicate === "function") 
+        if (typeof predicate === "function")
             predicate = predicate(FilterBuilder.for(this));
 
-        return new ODataEndpoint<T, U>(this.provider.createQuery({ filter: predicate.toString() }));
+        return new ODataEndpoint<T, U>(this.provider.createQuery({ filter: predicate.filterClauses }));
     }
 
     /**
@@ -60,7 +61,7 @@ export class ODataEndpoint<T, U>{
      * @param predicate An unescaped URL query string fragment.
      */
     public customFilter(predicate: string) {
-        return new ODataEndpoint<T, U>(this.provider.createQuery({ filter: predicate }));
+        return new ODataEndpoint<T, U>(this.provider.createQuery({ filter: [predicate] }));
     }
 
     /**

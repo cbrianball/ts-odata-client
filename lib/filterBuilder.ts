@@ -1,9 +1,9 @@
-import { ODataEndpoint } from "./odata-endpoint";
+import { ODataEndpoint } from "./odataEndpoint";
 
 export class FilterBuilder<T, U>{
     public static for<T, U>(query: ODataEndpoint<T, U>): FilterBuilder<T, U> { return new FilterBuilder<T, U>([]); }
 
-    private constructor(private readonly filterClause: string[]) { }
+    private constructor(public readonly filterClauses: string[]) { }
 
     private transformValue(value: any) {
         switch (typeof value) {
@@ -36,19 +36,19 @@ export class FilterBuilder<T, U>{
     }
 
     private conjunctionBuilder(conjunction: 'and' | 'or', predicate: FilterBuilder<T, U>) {
-        if (this.filterClause.length === 0)
+        if (this.filterClauses.length === 0)
             throw new Error(`Cannot use '${conjunction}()' as the first call to FilterBuilder`);                
-        if (!predicate || !predicate.filterClause || predicate.filterClause.length <= 0)
+        if (!predicate || !predicate.filterClauses || predicate.filterClauses.length <= 0)
             throw new Error(`Result of '${conjunction}()' must have at least one filter`);
 
-        let clauses = predicate.filterClause;
+        let clauses = predicate.filterClauses;
 
         if (clauses.length > 1)
             clauses = [` ${conjunction}(`, ...clauses, ')'];
         else
             clauses = [` ${conjunction} `, ...clauses];
 
-        return new FilterBuilder<T, U>([...this.filterClause, ...clauses]);
+        return new FilterBuilder<T, U>([...this.filterClauses, ...clauses]);
     }
 
     /**
@@ -72,17 +72,17 @@ export class FilterBuilder<T, U>{
      * @param predicate Use the same FilterBuilder that this method chain was invoked with
      */
     public not(predicate: FilterBuilder<T, U>) {
-        if (!predicate || !predicate.filterClause || predicate.filterClause.length <= 0)
+        if (!predicate || !predicate.filterClauses || predicate.filterClauses.length <= 0)
             throw new Error(`Result of 'not' must have at least one filter`);
 
-        let clauses = predicate.filterClause;
+        let clauses = predicate.filterClauses;
 
         if (clauses.length > 1)
             clauses = [`not(`, ...clauses, ')'];
         else
             clauses = [`not `, ...clauses];
 
-        return new FilterBuilder<T, U>([...this.filterClause, ...clauses]);
+        return new FilterBuilder<T, U>([...this.filterClauses, ...clauses]);
     }
 
     /**
@@ -119,7 +119,7 @@ export class FilterBuilder<T, U>{
      * @param value
      */
     public equals<K extends keyof T>(field: K, value: T[K]) {        
-        return new FilterBuilder<T, U>([...this.filterClause, `${field} eq ${this.transformValue(value)}`]);
+        return new FilterBuilder<T, U>([...this.filterClauses, `${field} eq ${this.transformValue(value)}`]);
     }
 
     /**
@@ -128,7 +128,7 @@ export class FilterBuilder<T, U>{
      * @param value
      */
     public notEquals<K extends keyof T>(field: K, value: T[K]) {
-        return new FilterBuilder<T, U>([...this.filterClause, `${field} ne ${this.transformValue(value)}`]);
+        return new FilterBuilder<T, U>([...this.filterClauses, `${field} ne ${this.transformValue(value)}`]);
     }
 
     /**
@@ -137,7 +137,7 @@ export class FilterBuilder<T, U>{
      * @param value
      */
     public greaterThan<K extends keyof T>(field: K, value: T[K]) {
-        return new FilterBuilder<T, U>([...this.filterClause, `${field} gt ${this.transformValue(value)}`]);
+        return new FilterBuilder<T, U>([...this.filterClauses, `${field} gt ${this.transformValue(value)}`]);
     }
 
     /**
@@ -146,7 +146,7 @@ export class FilterBuilder<T, U>{
      * @param value
      */
     public lessThan<K extends keyof T>(field: K, value: T[K]) {
-        return new FilterBuilder<T, U>([...this.filterClause, `${field} lt ${this.transformValue(value)}`]);
+        return new FilterBuilder<T, U>([...this.filterClauses, `${field} lt ${this.transformValue(value)}`]);
     }
 
     /**
@@ -155,7 +155,7 @@ export class FilterBuilder<T, U>{
      * @param value
      */
     public greaterThanOrEqualTo<K extends keyof T>(field: K, value: T[K]) {
-        return new FilterBuilder<T, U>([...this.filterClause, `${field} ge ${this.transformValue(value)}`]);
+        return new FilterBuilder<T, U>([...this.filterClauses, `${field} ge ${this.transformValue(value)}`]);
     }
 
     /**
@@ -164,7 +164,7 @@ export class FilterBuilder<T, U>{
      * @param value
      */
     public lessThanOrEqualTo<K extends keyof T>(field: K, value: T[K]) {
-        return new FilterBuilder<T, U>([...this.filterClause, `${field} le ${this.transformValue(value)}`]);
+        return new FilterBuilder<T, U>([...this.filterClauses, `${field} le ${this.transformValue(value)}`]);
     }
 
     /**
@@ -173,18 +173,18 @@ export class FilterBuilder<T, U>{
      * @param value
      */
     public contains<K extends keyof SubType<T, string>>(field: K, value: string) {        
-        return new FilterBuilder<T, U>([...this.filterClause, `contains(${field},${this.transformValue(value)})`]);
+        return new FilterBuilder<T, U>([...this.filterClauses, `contains(${field},${this.transformValue(value)})`]);
     }
 
     public startswith<K extends keyof SubType<T, string>>(field: K, value: string) {
-        return new FilterBuilder<T, U>([...this.filterClause, `startswith(${field},${this.transformValue(value)})`]);
+        return new FilterBuilder<T, U>([...this.filterClauses, `startswith(${field},${this.transformValue(value)})`]);
     }
 
     public endswith<K extends keyof SubType<T, string>>(field: K, value: string) {
-        return new FilterBuilder<T, U>([...this.filterClause, `endswith(${field},${this.transformValue(value)})`]);
+        return new FilterBuilder<T, U>([...this.filterClauses, `endswith(${field},${this.transformValue(value)})`]);
     }
 
     public toString() {
-        return this.filterClause.join('');
+        return this.filterClauses.join('');
     }
 }

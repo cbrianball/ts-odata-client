@@ -1,4 +1,4 @@
-class ODataProvider {
+export class ODataProvider {
     static get emptyClauses() {
         return {
             count: false,
@@ -7,7 +7,7 @@ class ODataProvider {
             top: 0,
             skip: 0,
             orderBy: [],
-            filter: ""
+            filter: []
         } as QueryClauses;
     }
 
@@ -36,7 +36,7 @@ class ODataProvider {
         return {
             count: next.count || previous.count,
             key: next.key || previous.key,
-            filter: (previous.filter && next.filter) ? this.groupFilterClauseIfNeeded(previous.filter.trim()) + ' and ' + this.groupFilterClauseIfNeeded(next.filter.trim()) : (next.filter || previous.filter),
+            filter: this.combineFilterClauses(previous.filter, next.filter),
             orderBy: [...previous.orderBy, ...next.orderBy],
             select: next.select.length > 0 ? next.select : previous.select,
             skip: next.skip || previous.skip,
@@ -44,21 +44,36 @@ class ODataProvider {
         } as QueryClauses;
     }
 
-    private groupFilterClauseIfNeeded(filterClause: string) {
-        if (!filterClause) return;        
+    private combineFilterClauses(left: string[], right: string[]){
+        if(!left && !right) return;
 
-        //look for "and" or "or" with a space on either side to determine if this is a filter with multiple criteria
-        const result = / and | or /i.test(filterClause);
+        if(!left) return right;
+        if(!right) return left;
 
-        if (result) return `(${filterClause})`;
-        return filterClause;
-    }
+        const result: string[] = [];
+
+        if(left.length > 1){
+            result.push(`(${left.join('')})`);
+        }
+        else{
+            result.push(...left);
+        }
+
+        if(right.length > 1){
+            result.push(`(${right.join('')})`);
+        }
+        else{
+            result.push(...right);
+        }
+
+        return result;
+    }    
 
     public toString() {
         const queryString = [];
         
-        if (!this.queryClauses.key && this.queryClauses.filter)
-            queryString.push(`$filter=${this.queryClauses.filter}`);
+        if (!this.queryClauses.key && this.queryClauses.filter && this.queryClauses.filter.length > 0)
+            queryString.push(`$filter=${this.queryClauses.filter.join(' and ')}`);
 
         if (!this.queryClauses.key && this.queryClauses.orderBy.length > 0)
             queryString.push(`$orderby=${this.queryClauses.orderBy.join(',')}`);
@@ -83,11 +98,21 @@ class ODataProvider {
     }    
 }
 
-async function executeAsync(url: string, requestInit: RequestInit) {
+export async function executeAsync(url: string, requestInit: RequestInit) {
     const response = await fetch(url, requestInit);
 
     if (!response.ok)
         throw Error(`Server Error\r\n Status: ${response.status}\r\n Status Text: ${response.statusText}`);
 
     return await response.json();
+}
+
+interface QueryClauses {
+    count: boolean;
+    key: any;
+    filter: string[];
+    orderBy: string[];
+    select: string[];
+    skip: number;
+    top: number;
 }

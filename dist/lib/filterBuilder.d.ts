@@ -1,6 +1,6 @@
-import { ODataEndpoint } from "./odata-endpoint";
+import { ODataEndpoint } from "./odataEndpoint";
 export declare class FilterBuilder<T, U> {
-    private readonly filterClause;
+    readonly filterClauses: string[];
     static for<T, U>(query: ODataEndpoint<T, U>): FilterBuilder<T, U>;
     private constructor();
     private transformValue;
