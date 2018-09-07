@@ -1,6 +1,8 @@
 import { ODataEndpoint } from "./odataEndpoint";
 import { ODataProvider, executeAsync } from "./odataProvider";
 
+import { ODataQueryResponse } from "./odataResponse";
+
 export class ODataContext {
     constructor(private readonly basePath: string, private readonly requestHeaders?: () => RequestInit) { }
 

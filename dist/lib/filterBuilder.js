@@ -67,9 +67,9 @@ var FilterBuilder = /** @class */ (function () {
             throw new Error("Result of 'not' must have at least one filter");
         var clauses = predicate.filterClauses;
         if (clauses.length > 1)
-            clauses = ["not("].concat(clauses, [')']);
+            clauses = ["not(" + clauses.join(' ') + ")"];
         else
-            clauses = ["not "].concat(clauses);
+            clauses = ['not'].concat(clauses);
         return new FilterBuilder(this.filterClauses.concat(clauses));
     };
     /**
@@ -161,7 +161,7 @@ var FilterBuilder = /** @class */ (function () {
         return new FilterBuilder(this.filterClauses.concat(["endswith(" + field + "," + this.transformValue(value) + ")"]));
     };
     FilterBuilder.prototype.toString = function () {
-        return this.filterClauses.join('');
+        return this.filterClauses.join(' ');
     };
     return FilterBuilder;
 }());

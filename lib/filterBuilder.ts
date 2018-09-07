@@ -79,9 +79,9 @@ export class FilterBuilder<T, U>{
         let clauses = predicate.filterClauses;
 
         if (clauses.length > 1)
-            clauses = [`not(`, ...clauses, ')'];
+            clauses = [`not(${clauses.join(' ')})`];            
         else
-            clauses = [`not `, ...clauses];
+            clauses = ['not', ...clauses];
 
         return new FilterBuilder<T, U>([...this.filterClauses, ...clauses]);
     }
