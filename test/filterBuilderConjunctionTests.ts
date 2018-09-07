@@ -40,8 +40,6 @@ describe("combining conjunction clauses", () => {
     });
 
     it("when no initial clause has been set, should throw error", () =>{
-        //const filter = builder.and(builder.equals('firstName', 'Mike'));
-
         expect(() => builder.and(builder))
         .to.throw()
     });
