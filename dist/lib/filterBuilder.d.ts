@@ -81,3 +81,7 @@ export declare class FilterBuilder<T, U> {
     endswith<K extends keyof SubType<T, string>>(field: K, value: string): FilterBuilder<T, U>;
     toString(): string;
 }
+declare type SubType<Base, Condition> = Pick<Base, {
+    [Key in keyof Base]: Base[Key] extends Condition ? Key : never;
+}[keyof Base]>;
+export {};

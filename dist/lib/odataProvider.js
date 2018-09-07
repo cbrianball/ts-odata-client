@@ -101,31 +101,28 @@ var ODataProvider = /** @class */ (function () {
         };
     };
     ODataProvider.prototype.combineFilterClauses = function (left, right) {
-        if (!left && !right)
+        if (left.length === 0 && right.length === 0)
             return;
-        if (!left)
+        if (left.length === 0)
             return right;
-        if (!right)
+        if (right.length === 0)
             return left;
         var result = [];
-        if (left.length > 1) {
-            result.push("(" + left.join('') + ")");
-        }
-        else {
+        if (left.some(function (v) { return v === 'or'; }))
+            result.push("(" + left.join(' ') + ")");
+        else
             result.push.apply(result, left);
-        }
-        if (right.length > 1) {
-            result.push("(" + right.join('') + ")");
-        }
-        else {
+        result.push('and');
+        if (right.some(function (v) { return v === 'or'; }))
+            result.push("(" + right.join(' ') + ")");
+        else
             result.push.apply(result, right);
-        }
         return result;
     };
     ODataProvider.prototype.toString = function () {
         var queryString = [];
         if (!this.queryClauses.key && this.queryClauses.filter && this.queryClauses.filter.length > 0)
-            queryString.push("$filter=" + this.queryClauses.filter.join(' and '));
+            queryString.push("$filter=" + this.queryClauses.filter.join(' '));
         if (!this.queryClauses.key && this.queryClauses.orderBy.length > 0)
             queryString.push("$orderby=" + this.queryClauses.orderBy.join(','));
         if (this.queryClauses.select.length > 0)

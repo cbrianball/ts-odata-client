@@ -9,7 +9,8 @@ describe('combining filter clauses', () => {
     const field2Clause = "field2 gt 5";
 
     const simpleClause = [field1Clause];
-    const compoundClause = [field1Clause, "or", field2Clause];
+    const compoundAndClause = [field1Clause, "and", field2Clause];
+    const compoundOrClause = [field1Clause, "or", field2Clause];
 
     const queryClause = ODataProvider.emptyClauses;
     queryClause.filter = ["field eq 'abc'"];
@@ -20,37 +21,73 @@ describe('combining filter clauses', () => {
     })
 
     it("where an existing filter is combined with an empty filter clause", () => {
-        const base = emptyProvider.createQuery({ filter: simpleClause });
-        const query = base.createQuery({});
+        const query = emptyProvider.createQuery({ filter: simpleClause })
+            .createQuery({});
 
         expect(query.toString()).to.equal(`/?$filter=${field1Clause}`);
     });
 
     it("where an existing filter is combined with a new filter clause", () => {
-        const base = emptyProvider.createQuery({ filter: simpleClause });
-        const query = base.createQuery({ filter: simpleClause });
+        const query = emptyProvider.createQuery({ filter: simpleClause })
+            .createQuery({ filter: simpleClause });
 
         expect(query.toString()).to.equal(`/?$filter=${field1Clause} and ${field1Clause}`);
     });
 
     it("where existing simple filter has a compound clause added to it", () => {
-        const base = emptyProvider.createQuery({ filter: simpleClause });
-        const query = base.createQuery({ filter: compoundClause });
+        const query = emptyProvider.createQuery({ filter: simpleClause }).createQuery({ filter: compoundOrClause });
 
         expect(query.toString()).to.equal(`/?$filter=${field1Clause} and (${field1Clause} or ${field2Clause})`);
     });
 
-    it("where existing compound cluase has a simple filter added to it", () => {
-        const base = emptyProvider.createQuery({ filter: compoundClause });
-        const query = base.createQuery({ filter: simpleClause });
+    it("where existing compound clause has a simple filter added to it", () => {
+        const query = emptyProvider.createQuery({ filter: compoundOrClause })
+            .createQuery({ filter: simpleClause });
 
         expect(query.toString()).to.equal(`/?$filter=(${field1Clause} or ${field2Clause}) and ${field1Clause}`);
     });
 
-    it("where existing compound cluase has a compound clause added to it", () => {
-        const base = emptyProvider.createQuery({ filter: compoundClause });
-        const query = base.createQuery({ filter: compoundClause });
+    it("where existing compound clause has a compound clause added to it", () => {
+        const query = emptyProvider.createQuery({ filter: compoundOrClause })
+            .createQuery({ filter: compoundOrClause });
 
         expect(query.toString()).to.equal(`/?$filter=(${field1Clause} or ${field2Clause}) and (${field1Clause} or ${field2Clause})`);
+    });
+
+    it("where existing compound clause has a compound claused added to it with ANDs only", () => {
+        const query = emptyProvider.createQuery({ filter: compoundAndClause })
+            .createQuery({ filter: compoundAndClause });
+
+        expect(query.toString()).to.equal(`/?$filter=${field1Clause} and ${field2Clause} and ${field1Clause} and ${field2Clause}`);
+    });
+
+    it("where existing compound clause has a compound claused added to it with ORs and ANDs mixed", () => {
+        const query = emptyProvider.createQuery({ filter: compoundOrClause })
+            .createQuery({ filter: compoundAndClause });
+
+        expect(query.toString()).to.equal(`/?$filter=(${field1Clause} or ${field2Clause}) and ${field1Clause} and ${field2Clause}`);
+    });
+
+    it("where existing compound clause has a compound claused added to it with ANDs and ORs mixed", () => {
+        const query = emptyProvider.createQuery({ filter: compoundAndClause })
+            .createQuery({ filter: compoundOrClause });
+
+        expect(query.toString()).to.equal(`/?$filter=${field1Clause} and ${field2Clause} and (${field1Clause} or ${field2Clause})`);
+    });
+
+    it("where simple filter added to complex filter with another simple filter added", () => {
+        const query = emptyProvider.createQuery({ filter: simpleClause })
+            .createQuery({ filter: compoundAndClause })
+            .createQuery({ filter: simpleClause });
+
+        expect(query.toString()).to.equal(`/?$filter=${field1Clause} and ${field1Clause} and ${field2Clause} and ${field1Clause}`);
+    });
+
+    it("where simple filter added to complex filter with another simple filter added", () => {
+        const query = emptyProvider.createQuery({ filter: simpleClause })
+            .createQuery({ filter: compoundOrClause })
+            .createQuery({ filter: simpleClause });
+
+        expect(query.toString()).to.equal(`/?$filter=${field1Clause} and (${field1Clause} or ${field2Clause}) and ${field1Clause}`);
     });
 });

@@ -38,11 +38,11 @@ var FilterBuilder = /** @class */ (function () {
         if (!predicate || !predicate.filterClauses || predicate.filterClauses.length <= 0)
             throw new Error("Result of '" + conjunction + "()' must have at least one filter");
         var clauses = predicate.filterClauses;
-        if (clauses.length > 1)
-            clauses = [" " + conjunction + "("].concat(clauses, [')']);
-        else
-            clauses = [" " + conjunction + " "].concat(clauses);
-        return new FilterBuilder(this.filterClauses.concat(clauses));
+        var inverseConjunction = conjunction === 'and' ? 'or' : 'and';
+        //if predicate contains a conjunction different than the current one, it needs to be wrapped in ()'s
+        if (clauses.some(function (v) { return v === inverseConjunction; }))
+            clauses = ["(" + clauses.join(' ') + ")"];
+        return new FilterBuilder(this.filterClauses.concat([conjunction], clauses));
     };
     /**
      * Create an AND condition with a previous filter clause

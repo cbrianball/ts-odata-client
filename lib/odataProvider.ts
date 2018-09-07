@@ -45,26 +45,24 @@ export class ODataProvider {
     }
 
     private combineFilterClauses(left: string[], right: string[]) {
-        if (!left && !right) return;
+        if (left.length === 0 && right.length === 0) return;
 
-        if (!left) return right;
-        if (!right) return left;
+        if (left.length === 0) return right;
+        if (right.length === 0) return left;
 
         const result: string[] = [];
 
-        if (left.length > 1) {
-            result.push(`(${left.join(' ')})`);
-        }
-        else {
+        if (left.some(v => v === 'or'))
+            result.push(`(${left.join(' ')})`)
+        else
             result.push(...left);
-        }
 
-        if (right.length > 1) {
+        result.push('and');
+
+        if (right.some(v => v === 'or'))
             result.push(`(${right.join(' ')})`);
-        }
-        else {
+        else
             result.push(...right);
-        }
 
         return result;
     }
@@ -73,7 +71,7 @@ export class ODataProvider {
         const queryString = [];
 
         if (!this.queryClauses.key && this.queryClauses.filter && this.queryClauses.filter.length > 0)
-            queryString.push(`$filter=${this.queryClauses.filter.join(' and ')}`);
+            queryString.push(`$filter=${this.queryClauses.filter.join(' ')}`);
 
         if (!this.queryClauses.key && this.queryClauses.orderBy.length > 0)
             queryString.push(`$orderby=${this.queryClauses.orderBy.join(',')}`);

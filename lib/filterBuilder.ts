@@ -32,7 +32,7 @@ export class FilterBuilder<T, U>{
         if (value instanceof String)
             return value.toString();
 
-        throw new Error(`object type with constructor '${(value as Object).constructor.name}' not supported`);
+        throw new Error(`object type with constructor '${((value as Object).constructor as any).name}' not supported`);
     }
 
     private conjunctionBuilder(conjunction: 'and' | 'or', predicate: FilterBuilder<T, U>) {
@@ -40,15 +40,16 @@ export class FilterBuilder<T, U>{
             throw new Error(`Cannot use '${conjunction}()' as the first call to FilterBuilder`);                
         if (!predicate || !predicate.filterClauses || predicate.filterClauses.length <= 0)
             throw new Error(`Result of '${conjunction}()' must have at least one filter`);
-
+        
         let clauses = predicate.filterClauses;
 
-        if (clauses.length > 1)
-            clauses = [` ${conjunction}(`, ...clauses, ')'];
-        else
-            clauses = [` ${conjunction} `, ...clauses];
+        const inverseConjunction = conjunction === 'and' ? 'or' : 'and';
 
-        return new FilterBuilder<T, U>([...this.filterClauses, ...clauses]);
+        //if predicate contains a conjunction different than the current one, it needs to be wrapped in ()'s
+        if(clauses.some(v => v === inverseConjunction))
+            clauses = [`(${clauses.join(' ')})`];
+
+        return new FilterBuilder<T, U>([...this.filterClauses, conjunction, ...clauses]);
     }
 
     /**
@@ -185,6 +186,10 @@ export class FilterBuilder<T, U>{
     }
 
     public toString() {
-        return this.filterClauses.join('');
+        return this.filterClauses.join(' ');
     }
 }
+
+type SubType<Base, Condition> = Pick<Base, {
+    [Key in keyof Base]: Base[Key] extends Condition ? Key : never
+}[keyof Base]>;

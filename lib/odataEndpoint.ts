@@ -1,6 +1,8 @@
 import { FilterBuilder } from "./filterBuilder";
 import { ODataProvider } from "./odataProvider";
 
+import { ODataResponse, ODataQueryResponse, ODataQueryResponseWithCount } from "./odataResponse";
+
 export class ODataEndpoint<T, U>{
     constructor(private readonly provider: ODataProvider) { }
 
