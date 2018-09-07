@@ -39,6 +39,19 @@ describe("combining conjunction clauses", () => {
         expect(filter.toString()).to.equal("firstName eq 'David' and (firstName eq 'Joe' or age gt 10)");
     });
 
+    it("when clauses are nested multiple levels", () => {
+        const filter = builder.equals('firstName', 'Jack').and(builder.equals('lastName', 'Smith').or(builder.lessThanOrEqualTo('age', 20).and(builder.equals('lastName', 'Chang'))));
+
+        expect(filter.toString()).to.equal("firstName eq 'Jack' and (lastName eq 'Smith' or (age le 20 and lastName eq 'Chang'))");
+    });
+
+    it("when clauses are nested multiple levels(2)", () => {
+        const filter = builder.equals('firstName', 'Jack')
+        .and(builder.equals('lastName', 'Smith').or(builder.lessThanOrEqualTo('age', 20).or(builder.equals('lastName', 'Chang'))));
+
+        expect(filter.toString()).to.equal("firstName eq 'Jack' and (lastName eq 'Smith' or age le 20 or lastName eq 'Chang')");
+    });
+
     it("when no initial clause has been set, should throw error", () =>{
         expect(() => builder.and(builder))
         .to.throw()
