@@ -1,5 +1,5 @@
-import { ODataQuery } from "./oDataQuery";
 import { ODataResponse } from "../odataResponse";
+import { ODataQuery } from "./oDataQuery";
 
 export abstract class ODataQueryProvider {
     createQuery<T>(expression: Expression) {
@@ -10,7 +10,7 @@ export abstract class ODataQueryProvider {
 
     generateQuery(expression: Expression) {
         const query = this.buildQuery(expression, {});
-        return this.buildODataQuery(query);
+        return this.buildODataString(query);
     }
 
     protected transformExpression(expression: Expression, query: Query) {
@@ -45,23 +45,25 @@ export abstract class ODataQueryProvider {
         return query;
     }
 
-    protected buildODataQuery(query: Query) {
+    protected buildODataString(query: Query) {
         let returnValue = "";
         if ('key' in query) {
-            returnValue += `(${query.key.toString()})`;
+            returnValue += `(${this.deriveValue(query.key)})`;
             delete query.key;
         }
 
 
         let fragments: string[] = [];
-        for (let value in query) {
-            fragments.push(`$${value}=${(query as any)[value].toString()}`);
+        for (let field in query) {
+            fragments.push(`$${field}=${this.deriveValue((query as any)[field])}`);
         }
 
         if (fragments.length === 0) return returnValue;
 
         return returnValue + `?${fragments.join("&")}`;
     }
+
+    abstract deriveValue(value: any): string;
 
     private buildQuery(expression: Expression, query: Query) {
         if (!query) query = {};
