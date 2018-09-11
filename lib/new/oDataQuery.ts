@@ -1,5 +1,8 @@
-import { ODataQueryProvider, Expression, FieldReference } from "./oDataQueryProvider";
+import { ODataQueryProvider } from "./oDataQueryProvider";
+import { FieldReference } from "./fieldReference";
+import { Expression } from "./expression";
 import { ODataQueryResponse, ODataQueryResponseWithCount, ODataResponse } from "../odataResponse";
+import { PredicateBuilder } from "./expressionBuilder";
 
 type FieldsFor<T> = Extract<keyof T, string>;
 
@@ -41,7 +44,7 @@ export class ODataQuery<T> {
      * @param fields
      */
     public orderBy(...fields: Array<FieldsFor<T>>) {
-        const expression = new Expression('orderBy', fields, this.expression);
+        const expression = new Expression('orderBy', fields.map(f => new FieldReference<T>(f)), this.expression);
         return this.provider.createQuery<T>(expression);
     }
 
@@ -50,11 +53,21 @@ export class ODataQuery<T> {
      * @param fields
      */
     public orderByDescending(...fields: Array<FieldsFor<T>>) {
-        const expression = new Expression('orderByDescending', fields, this.expression);
+        const expression = new Expression('orderByDescending', fields.map(f => new FieldReference<T>(f)), this.expression);
         return this.provider.createQuery<T>(expression);
     }
 
-    //TODO: FILTER
+    /**
+     * Filters the records based on the resulting FilterBuilder; calls to filter() and customFilter() are cumulative (as well as UNIONed (AND))
+     * @param predicate Either an existing FilterBuilder, or a function that takes in an empty FilterBuilder and returns a FilterBuilder instance.
+     */
+    public filter(predicate: PredicateBuilder<T> | ((builder: PredicateBuilder<T>) => PredicateBuilder<T>)) {
+        if (typeof predicate === "function")
+            predicate = predicate(new PredicateBuilder<T>());
+
+            const expression = new Expression('filter', [predicate], this.expression);
+            return this.provider.createQuery(expression);
+    }
 
     /**
      * Returns a single record with the provided key value. Some functions (such as top, skip, filter, etc.) are ignored when this function is invoked.

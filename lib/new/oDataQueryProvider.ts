@@ -1,5 +1,6 @@
 import { ODataResponse } from "../odataResponse";
 import { ODataQuery } from "./oDataQuery";
+import { Expression } from "./expression";
 
 export abstract class ODataQueryProvider {
     createQuery<T>(expression: Expression) {
@@ -87,17 +88,3 @@ interface Query {
     filter?: any;
 }
 
-export class Expression {
-    constructor(public operator: string, public operands: any[], public previous: Expression) {
-    }
-}
-
-export class FieldReference<T> {
-    constructor(public field: Extract<keyof T, string>) { }
-
-    public toString() { return this.field; }
-}
-
-export class Literal {
-    constructor(public literalType: string, public value: any) { }
-}

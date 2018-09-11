@@ -13,23 +13,3 @@ describe("combining conjunction clauses", () => {
     const provider = new ODataProvider({ baseUrl: '/' });
     const endpoint = new ODataEndpoint<User, User>(provider);
 });
-
-
-
-interface IBar{
-name: string;
-}
-
-class Baz {
-    
-}
-
-
-class Foo<T> {
-    constructor(c: {new(): T; }){
-        new c();
-    }
-}
-
-
-let a = new Foo<IBar>(Baz);
