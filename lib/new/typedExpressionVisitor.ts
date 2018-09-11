@@ -1,13 +1,23 @@
 import { ExpressionVisitor } from "./expressionVisitor";
+import { Expression } from "./expression";
 
-export class TypedExpressionVisitor implements ExpressionVisitor {
-    visit(operator: string, operands: any[]): void {
-        const member = (this as any)[operator + "Visitor"];
+/**
+ * Evaluates Expression by calling methods on type that follow the pattern of '[operator]Visitor'.
+ * The operands are passed in as parameters.
+ */
+export abstract class TypedExpressionVisitor implements ExpressionVisitor {
+    visit(expression: Expression): void {
+        if(!expression) throw new Error(`'expression' is a required parameter.`);
+
+        if(expression.previous)
+            this.visit(expression.previous);
+
+        const member = (this as any)[expression.operator + "Visitor"];
         if (typeof member === "function") {
-            member.apply(this, operands);
+            member.apply(this, expression.operands);
         }
         else {
-            throw new Error(`No method found named '${operator}Visitor'; operator is not supported.`);
+            throw new Error(`No method found named '${expression.operator}Visitor'; operator is not supported.`);
         }
     }
 }

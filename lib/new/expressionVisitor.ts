@@ -1,5 +1,10 @@
-export abstract class ExpressionVisitor {
+import { Expression } from "./expression";
 
-    abstract visit(operator: string, operands: any[]): void;
+/**
+ * Interface used by any type that translates an Expression into DSL
+ */
+export interface ExpressionVisitor {
+
+    visit(expression: Expression): void;
 }
 
