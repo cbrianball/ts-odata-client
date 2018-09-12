@@ -1,7 +1,7 @@
 import { expect } from "chai";
-import { ODataV4ExpressionVisitor } from "../../lib/new/oDataV4ExpressionVisitor";
+import { ODataV4ExpressionVisitor } from "../../lib/new/ODataV4ExpressionVisitor";
 import { FieldReference } from "../../lib/new/FieldReference";
-import { Expression } from "../../lib/new/expression";
+import { Expression } from "../../lib/new/Expression";
 
 describe("ODataV4ExpressionVisitor", () => {
     it("should handle select", () => {

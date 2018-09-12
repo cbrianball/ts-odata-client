@@ -1,6 +1,6 @@
 import { ODataResponse } from "../odataResponse";
-import { ODataQuery } from "./oDataQuery";
-import { Expression } from "./expression";
+import { ODataQuery } from "./ODataQuery";
+import { Expression } from "./Expression";
 
 export abstract class ODataQueryProvider {
     createQuery<T>(expression: Expression) {

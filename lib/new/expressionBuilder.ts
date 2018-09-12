@@ -1,6 +1,6 @@
 import { Literal } from "./literal";
 import { FieldReference } from "./fieldReference";
-import { Expression } from "./expression";
+import { Expression } from "./Expression";
 
 export class PredicateBuilder<T> {
 

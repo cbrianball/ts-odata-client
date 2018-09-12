@@ -1,4 +1,4 @@
-import { Expression } from "./expression";
+import { Expression } from "./Expression";
 
 /**
  * Interface used by any type that translates an Expression into DSL

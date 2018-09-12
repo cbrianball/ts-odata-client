@@ -1,4 +1,4 @@
-import {TypedExpressionVisitor} from "./typedExpressionVisitor";
+import {TypedExpressionVisitor} from "./TypedExpressionVisitor";
 import { FieldReference } from "./FieldReference";
 
 type Sort = {field: string, sort?: 'desc'};

@@ -1,7 +1,7 @@
-import { ODataQueryProvider } from "./oDataQueryProvider";
-import { Literal } from "./literal";
-import { FieldReference } from "./fieldReference";
-import { Expression } from "./expression";
+import { ODataQueryProvider } from "./ODataQueryProvider";
+import { Literal } from "./Literal";
+import { FieldReference } from "./FieldReference";
+import { Expression } from "./Expression";
 import { ODataResponse } from "../odataResponse";
 
 export class ODataV4QueryProvider extends ODataQueryProvider {

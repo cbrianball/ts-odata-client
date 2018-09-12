@@ -1,5 +1,5 @@
-import { ExpressionVisitor } from "./expressionVisitor";
-import { Expression } from "./expression";
+import { ExpressionVisitor } from "./ExpressionVisitor";
+import { Expression } from "./Expression";
 
 /**
  * Evaluates Expression by calling methods on type that follow the pattern of '[operator]Visitor'.

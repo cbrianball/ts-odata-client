@@ -1,4 +1,4 @@
-import { ODataQueryProvider } from "./oDataQueryProvider";
+import { ODataQueryProvider } from "./ODataQueryProvider";
 import { FieldReference } from "./fieldReference";
 import { Expression } from "./expression";
 import { ODataQueryResponse, ODataQueryResponseWithCount, ODataResponse } from "../odataResponse";
