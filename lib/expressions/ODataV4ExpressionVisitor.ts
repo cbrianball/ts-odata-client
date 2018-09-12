@@ -41,22 +41,82 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
         this.oDataQuery.top = value;
     }
 
-    filterVisitor(predicate: BooleanPredicateBuilder<any>) {
+    predicateVisitor(predicate: BooleanPredicateBuilder<any>) {
         if (!predicate.expression) return;
         
         if (predicate.expression.previous)
             throw new Error(`Filter Expressions cannot have a value for 'previous', only operands`);
 
-        this.oDataQuery.filter = this.translatePredicateExpression(predicate.expression);
+        /*this.oDataQuery.filter =*/ this.translatePredicateExpression(predicate.expression);
     }
 
-    private translatePredicateExpression(expression: Expression) {
-        let translation = "";
+    private translatePredicateExpression(expression: Expression): string[] {
+        let translation: string[][] = [];
         for (const operand of expression.operands) {
-            if (operand instanceof Literal) { }
-            else if (operand instanceof Expression) { }
+            if (operand instanceof Literal) {
+                translation.push([this.deriveLiteral(operand)]);
+             }
+             else if (operand instanceof FieldReference){
+                translation.push([operand.toString()]);
+             }
+            else if (operand instanceof Expression) {
+                translation.push(this.translatePredicateExpression(operand));
+            }
+        }
+        
+        if(translation.length === 1) {
+            const [operand] = translation;
+            if(expression.operator === ExpressionOperator.Not) {
+                if(operand.length > 1) {
+                    return [`not(${operand.join(' ')})`];
+                }
+                else
+                    return [`not ${operand[0]}`];
+            }        
+        }
+        else if(translation.length === 2){
+
         }
 
-        return translation;
+        throw new Error('Not fully implemented');        
+    }
+
+    private deriveLiteral(literal: Literal): string {
+        const value = literal.value;
+
+        switch(literal.literalType) {
+            case ODataType.Date:
+            return new Date(value).toISOString().substring(0, 10);            
+            case ODataType.Guid:
+            return value.toString();            
+        }
+        
+        switch (typeof value) {
+            case "string":
+                return `'${value}'`;
+            case "number":
+            case "boolean":
+                return value.toString();
+            case "undefined":
+                return 'null';
+            case "function":
+                throw new Error("function not supported");
+            case "symbol":
+                throw new Error("symbol not supported");
+            case "object":
+                //objects handled below
+                break;
+            default:
+                throw new Error(`Unhandled primitive type: ${value}`);
+        }
+
+        if (value === null)
+            return "null";
+        if (value instanceof Date)
+            return value.toISOString();
+        if (value instanceof String)
+            return value.toString();
+
+        return value.toString();
     }
 }

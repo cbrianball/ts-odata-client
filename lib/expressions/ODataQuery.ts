@@ -18,7 +18,7 @@ export class ODataQuery<T> {
      * @param fields
      */
     public select<U extends FieldsFor<T>>(...fields: U[]) {
-        const expression = new Expression('select', fields.map(v => new FieldReference<T>(v)), this.expression);
+        const expression = new Expression(ExpressionOperator.Select, fields.map(v => new FieldReference<T>(v)), this.expression);
         return this.provider.createQuery<Pick<T, U>>(expression);
     }
 
@@ -27,7 +27,7 @@ export class ODataQuery<T> {
      * @param n
      */
     public top(n: number) {
-        const expression = new Expression('top', [n], this.expression);
+        const expression = new Expression(ExpressionOperator.Top, [n], this.expression);
         return this.provider.createQuery<T>(expression);
     }
 
@@ -36,7 +36,7 @@ export class ODataQuery<T> {
      * @param n
      */
     public skip(n: number) {
-        const expression = new Expression('skip', [n], this.expression);
+        const expression = new Expression(ExpressionOperator.Skip, [n], this.expression);
         return this.provider.createQuery<T>(expression);
     }
 
@@ -45,7 +45,7 @@ export class ODataQuery<T> {
      * @param fields
      */
     public orderBy(...fields: Array<FieldsFor<T>>) {
-        const expression = new Expression('orderBy', fields.map(f => new FieldReference<T>(f)), this.expression);
+        const expression = new Expression(ExpressionOperator.OrderBy, fields.map(f => new FieldReference<T>(f)), this.expression);
         return this.provider.createQuery<T>(expression);
     }
 
@@ -54,7 +54,7 @@ export class ODataQuery<T> {
      * @param fields
      */
     public orderByDescending(...fields: Array<FieldsFor<T>>) {
-        const expression = new Expression('orderByDescending', fields.map(f => new FieldReference<T>(f)), this.expression);
+        const expression = new Expression(ExpressionOperator.OrderByDescending, fields.map(f => new FieldReference<T>(f)), this.expression);
         return this.provider.createQuery<T>(expression);
     }
 
@@ -66,7 +66,7 @@ export class ODataQuery<T> {
         if (typeof predicate === "function")
             predicate = predicate(new PredicateBuilder<T>());
 
-            const expression = new Expression('filter', [predicate], this.expression);
+            const expression = new Expression(ExpressionOperator.Predicate, [predicate], this.expression);
             return this.provider.createQuery(expression);
     }
 

@@ -1,4 +1,3 @@
-import { Literal } from "./literal";
 import { FieldReference } from "./fieldReference";
 import { Expression, TypedExpression } from "./Expression";
 import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
