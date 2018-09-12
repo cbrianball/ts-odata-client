@@ -2,7 +2,8 @@ import { ODataQueryProvider } from "./ODataQueryProvider";
 import { FieldReference } from "./fieldReference";
 import { Expression } from "./expression";
 import { ODataQueryResponse, ODataQueryResponseWithCount, ODataResponse } from "../odataResponse";
-import { PredicateBuilder } from "./expressionBuilder";
+import { PredicateBuilder } from "./PredicateBuilder";
+import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 
 type FieldsFor<T> = Extract<keyof T, string>;
 
@@ -61,7 +62,7 @@ export class ODataQuery<T> {
      * Filters the records based on the resulting FilterBuilder; calls to filter() and customFilter() are cumulative (as well as UNIONed (AND))
      * @param predicate Either an existing FilterBuilder, or a function that takes in an empty FilterBuilder and returns a FilterBuilder instance.
      */
-    public filter(predicate: PredicateBuilder<T> | ((builder: PredicateBuilder<T>) => PredicateBuilder<T>)) {
+    public filter(predicate: BooleanPredicateBuilder<T> | ((builder: PredicateBuilder<T>) => BooleanPredicateBuilder<T>)) {
         if (typeof predicate === "function")
             predicate = predicate(new PredicateBuilder<T>());
 

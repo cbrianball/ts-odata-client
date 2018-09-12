@@ -13,11 +13,10 @@ export abstract class TypedExpressionVisitor implements ExpressionVisitor {
             this.visit(expression.previous);
 
         const member = (this as any)[expression.operator + "Visitor"];
-        if (typeof member === "function") {
-            member.apply(this, expression.operands);
-        }
-        else {
+
+        if(typeof member !== "function")
             throw new Error(`No method found named '${expression.operator}Visitor'; operator is not supported.`);
-        }
+            
+            member.apply(this, expression.operands);
     }
 }

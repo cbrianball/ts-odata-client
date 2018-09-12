@@ -1,7 +1,8 @@
 import { expect } from "chai";
-import { ODataV4ExpressionVisitor } from "../../lib/new/ODataV4ExpressionVisitor";
-import { FieldReference } from "../../lib/new/FieldReference";
-import { Expression } from "../../lib/new/Expression";
+import { ODataV4ExpressionVisitor } from "../../lib/expressions/ODataV4ExpressionVisitor";
+import { FieldReference } from "../../lib/expressions/FieldReference";
+import { Expression, TypedExpression } from "../../lib/expressions/Expression";
+import { PredicateBuilder } from "../../lib/expressions/PredicateBuilder";
 
 describe("ODataV4ExpressionVisitor", () => {
     it("should handle select", () => {
@@ -36,6 +37,16 @@ describe("ODataV4ExpressionVisitor", () => {
         const expression = new Expression('fake operator', []);
         expect(() => visitor.visit(expression))
             .to.throw();
+    });
+});
+
+describe("test",() =>{
+    it("tree", () =>{
+        const f = new PredicateBuilder<Person>();
+        const result = f.equals("firstName", "bob").and(f.lessThan("age", 30)).or(f.greaterThan("lastName", "tom"));
+
+        const result1 = f.equals("firstName", "bob").and(f.lessThan("age", 30).or(f.greaterThan("lastName", "tom")));
+        debugger;
     });
 });
 
