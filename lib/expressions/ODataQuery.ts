@@ -4,6 +4,7 @@ import { Expression } from "./expression";
 import { ODataQueryResponse, ODataQueryResponseWithCount, ODataResponse } from "../odataResponse";
 import { PredicateBuilder } from "./PredicateBuilder";
 import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
+import { ExpressionOperator } from "./ExpressionOperator";
 
 type FieldsFor<T> = Extract<keyof T, string>;
 
@@ -11,7 +12,7 @@ export class ODataQuery<T> {
     /**
      *
      */
-    constructor(public readonly provider: ODataQueryProvider, public readonly expression: Expression) { }
+    constructor(public readonly provider: ODataQueryProvider, public readonly expression?: Expression) { }
 
     /**
      * Limits the fields that are returned; the most recent call to select() will be used.
@@ -82,7 +83,7 @@ export class ODataQuery<T> {
     /**
      * Returns a set of records.
      */
-    public async getManyAsync() {
+    public async getManyAsync() {        
         return await this.provider.executeQueryAsync<ODataQueryResponse<T>>(this.expression);
     }
 
@@ -92,9 +93,5 @@ export class ODataQuery<T> {
     public async getManyWithCountAsync() {
         const expression = new Expression('getWithCount', [], this.expression);
         return await this.provider.executeQueryAsync<ODataQueryResponseWithCount<T>>(expression);
-    }
-
-    public toString() {
-        return this.provider.generateQuery(this.expression);
     }
 }

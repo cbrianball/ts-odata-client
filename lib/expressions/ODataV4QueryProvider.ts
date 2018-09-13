@@ -1,59 +1,54 @@
 import { ODataQueryProvider } from "./ODataQueryProvider";
-import { Literal } from "./Literal";
-import { FieldReference } from "./FieldReference";
 import { Expression } from "./Expression";
 import { ODataResponse } from "../odataResponse";
+import { ODataV4ExpressionVisitor } from "./ODataV4ExpressionVisitor";
 
 export class ODataV4QueryProvider extends ODataQueryProvider {
-    executeQueryAsync<T extends ODataResponse>(expression: Expression): T {
-        throw new Error("Method not implemented.");
+
+    constructor(private readonly basePath: string, private readonly requestInit?: () => RequestInit) {
+        super();
     }
 
-    deriveValue(queryValue: any): string {
+    async executeQueryAsync<T extends ODataResponse>(expression?: Expression) {
+        const url = this.buildQuery(expression);
+        
+        const init = this.requestInit ? this.requestInit() : {};
 
-        if(queryValue instanceof Literal) {
-            switch(queryValue.literalType) {
-                case "guid":
-                    return queryValue.value;
-                case "date":
-                    let dateValue: Date = queryValue.value;
-                    if(dateValue instanceof Date === false)
-                        dateValue = new Date(queryValue.value);
-                    return dateValue.toISOString().substring(0, 10);                
-                default: throw new Error(`Literal '${queryValue.literalType}' not supported by QueryProvider`);
-            }
+        const response = await fetch(url, init);
+
+        return await response.json() as T;
+    }
+
+    buildQuery(expression?: Expression) {
+        return expression ? this.generateUrl(expression) : this.basePath;
+    }
+
+    private generateUrl(expression: Expression) {
+        const visitor = new ODataV4ExpressionVisitor();
+        visitor.visit(expression);
+
+        const query = visitor.oDataQuery;
+
+        const queryString: string[] = [];
+
+        if (query.filter)
+            queryString.push("$filter=" + query.filter);
+
+        if (query.orderBy) {
+            queryString.push("$orderBy=" + query.orderBy.map(o => o.sort ? `${o.field} ${o.sort}` : o.field).join(','));
         }
 
-        if(queryValue instanceof FieldReference) {
-            return queryValue.toString();
-        }
+        if (query.select)
+            queryString.push("$select=" + query.select);
 
-        switch (typeof queryValue) {
-            case "string":
-                return `'${queryValue}'`;
-            case "number":
-            case "boolean":
-                return queryValue.toString();
-            case "undefined":
-                return 'null';
-            case "function":
-                throw new Error("function not supported");
-            case "symbol":
-                throw new Error("symbol not supported");
-            case "object":
-                //objects handled below
-                break;
-            default:
-                throw new Error(`Unhandled primitive type: ${queryValue}`);
-        }
+        if (query.skip)
+            queryString.push("$skip=" + query.skip);
 
-        if (queryValue === null)
-            return "null";
-        if (queryValue instanceof Date)
-            return queryValue.toISOString();
-        if (queryValue instanceof String)
-            return queryValue.toString();
+        if (query.top)
+            queryString.push("$top=" + query.top);
 
-        return queryValue.toString();
+        if(queryString.length === 0) return this.basePath;
+
+        return `${this.basePath}?${queryString.join('&')}`;
     }
 }

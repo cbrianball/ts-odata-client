@@ -3,6 +3,8 @@ import { FieldReference } from "./FieldReference";
 import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 import { Expression } from "./Expression";
 import { Literal } from "./literal";
+import { ExpressionOperator } from "./ExpressionOperator";
+import { ODataType } from "./ODataType";
 
 type Sort = { field: string, sort?: 'desc' };
 
@@ -11,12 +13,13 @@ interface ODataQuery {
     orderBy?: Sort[];
     skip?: number;
     top?: number;
-    filter?: string;
+    filter: string;
 }
 
 export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
 
-    public readonly oDataQuery: ODataQuery = {        
+    public readonly oDataQuery: ODataQuery = {
+        filter: "",
     }
 
     selectVisitor(...fields: FieldReference<any>[]) {
@@ -24,12 +27,12 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
     }
 
     orderByVisitor(...fields: FieldReference<any>[]) {
-        if(!this.oDataQuery.orderBy) this.oDataQuery.orderBy = [];
+        if (!this.oDataQuery.orderBy) this.oDataQuery.orderBy = [];
         this.oDataQuery.orderBy.push(...fields.map(f => ({ field: f.toString() })));
     }
 
     orderByDescendingVisitor(...fields: FieldReference<any>[]) {
-        if(!this.oDataQuery.orderBy) this.oDataQuery.orderBy = [];
+        if (!this.oDataQuery.orderBy) this.oDataQuery.orderBy = [];
         this.oDataQuery.orderBy.push(...fields.map<Sort>(f => ({ field: f.toString(), sort: 'desc' })));
     }
 
@@ -43,11 +46,17 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
 
     predicateVisitor(predicate: BooleanPredicateBuilder<any>) {
         if (!predicate.expression) return;
-        
+
         if (predicate.expression.previous)
             throw new Error(`Filter Expressions cannot have a value for 'previous', only operands`);
 
-        /*this.oDataQuery.filter =*/ this.translatePredicateExpression(predicate.expression);
+        let filter = this.translatePredicateExpression(predicate.expression);
+
+        if (this.oDataQuery.filter && filter.length > 1) {
+            filter = ['(', ...filter, ')'];
+        }
+
+        this.oDataQuery.filter += filter.join('');
     }
 
     private translatePredicateExpression(expression: Expression): string[] {
@@ -55,42 +64,72 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
         for (const operand of expression.operands) {
             if (operand instanceof Literal) {
                 translation.push([this.deriveLiteral(operand)]);
-             }
-             else if (operand instanceof FieldReference){
+            }
+            else if (operand instanceof FieldReference) {
                 translation.push([operand.toString()]);
-             }
+            }
             else if (operand instanceof Expression) {
                 translation.push(this.translatePredicateExpression(operand));
             }
         }
-        
-        if(translation.length === 1) {
-            const [operand] = translation;
-            if(expression.operator === ExpressionOperator.Not) {
-                if(operand.length > 1) {
-                    return [`not(${operand.join(' ')})`];
-                }
-                else
-                    return [`not ${operand[0]}`];
-            }        
-        }
-        else if(translation.length === 2){
+
+        if (translation.length === 1) {
+            switch (expression.operator) {
+                case ExpressionOperator.Not:
+                    return ['not ' + this.reduceTranslatedExpression(translation[0])];
+                default:
+                    throw new Error(`Operator '${expression.operator}' is not supported`);
+            }
 
         }
+        else if (translation.length === 2) {
+            let [left, right] = translation;
 
-        throw new Error('Not fully implemented');        
+            switch (expression.operator) {
+                case ExpressionOperator.And:
+                    return [`${this.reduceTranslatedExpression(left)} and ${this.reduceTranslatedExpression(right)}`];
+                case ExpressionOperator.Equals:
+                    return [`${this.reduceTranslatedExpression(left)} eq ${this.reduceTranslatedExpression(right)}`];
+                case ExpressionOperator.GreaterThan:
+                    return [`${this.reduceTranslatedExpression(left)} gt ${this.reduceTranslatedExpression(right)}`];
+                case ExpressionOperator.GreaterThanOrEqualTo:
+                    return [`${this.reduceTranslatedExpression(left)} ge ${this.reduceTranslatedExpression(right)}`];
+                case ExpressionOperator.LessThan:
+                    return [`${this.reduceTranslatedExpression(left)} lt ${this.reduceTranslatedExpression(right)}`];
+                case ExpressionOperator.LessThanOrEqualTo:
+                    return [`${this.reduceTranslatedExpression(left)} le ${this.reduceTranslatedExpression(right)}`];
+                case ExpressionOperator.NotEquals:
+                    return [`${this.reduceTranslatedExpression(left)} ne ${this.reduceTranslatedExpression(right)}`];
+                case ExpressionOperator.Or:
+                    return [`${this.reduceTranslatedExpression(left)} or ${this.reduceTranslatedExpression(right)}`];
+                default:
+                    throw new Error(`Operator '${expression.operator}' is not supported`);
+            }
+        }
+
+        throw new Error(`Operator '${expression.operator}' is not supported`);
+
+    }
+
+    private reduceTranslatedExpression(value: string[]) {
+        if (value.length === 0) return [];
+
+        if (value.length === 1)
+            return `${value[0]}`;
+
+        return `(${value.join(' ')})`;
     }
 
     private deriveLiteral(literal: Literal): string {
         const value = literal.value;
 
-        switch(literal.literalType) {
+        switch (literal.literalType) {
             case ODataType.Date:
-            return new Date(value).toISOString().substring(0, 10);            
+                return new Date(value).toISOString().substring(0, 10);
             case ODataType.Guid:
-            return value.toString();            
+                return value.toString();
         }
-        
+
         switch (typeof value) {
             case "string":
                 return `'${value}'`;

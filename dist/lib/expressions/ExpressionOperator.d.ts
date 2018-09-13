@@ -1,4 +1,4 @@
-export const enum ExpressionOperator {
+declare const enum ExpressionOperator {
     And = "and",
     Or = "or",
     Not = "not",
@@ -15,5 +15,5 @@ export const enum ExpressionOperator {
     OrderBy = "orderBy",
     OrderByDescending = "orderByDescending",
     Predicate = "predicate",
-    Select = "select",    
+    Select = "select"
 }
