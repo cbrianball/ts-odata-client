@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var fieldReference_1 = require("./fieldReference");
+var FieldReference_1 = require("./FieldReference");
 var Expression_1 = require("./Expression");
 var BooleanPredicateBuilder_1 = require("./BooleanPredicateBuilder");
 var PredicateBuilder = /** @class */ (function () {
@@ -21,7 +21,7 @@ var PredicateBuilder = /** @class */ (function () {
      * @param field
      */
     PredicateBuilder.prototype.fieldReference = function (field) {
-        return new Expression_1.TypedExpression('fieldReference', [new fieldReference_1.FieldReference(field)]);
+        return new Expression_1.TypedExpression('fieldReference', [new FieldReference_1.FieldReference(field)]);
     };
     /**
      * Filters based on equality of a field with the provided value
@@ -29,7 +29,7 @@ var PredicateBuilder = /** @class */ (function () {
      * @param value
      */
     PredicateBuilder.prototype.equals = function (field, value) {
-        var expression = new Expression_1.Expression('equals', [field, value], this.expression);
+        var expression = new Expression_1.Expression('equals', [new FieldReference_1.FieldReference(field), value], this.expression);
         return new BooleanPredicateBuilder_1.BooleanPredicateBuilder(expression);
     };
     /**
@@ -38,7 +38,7 @@ var PredicateBuilder = /** @class */ (function () {
      * @param value
      */
     PredicateBuilder.prototype.notEquals = function (field, value) {
-        var expression = new Expression_1.Expression('notEquals', [field, value], this.expression);
+        var expression = new Expression_1.Expression('notEquals', [new FieldReference_1.FieldReference(field), value], this.expression);
         return new BooleanPredicateBuilder_1.BooleanPredicateBuilder(expression);
     };
     /**
@@ -47,7 +47,7 @@ var PredicateBuilder = /** @class */ (function () {
      * @param value
      */
     PredicateBuilder.prototype.greaterThan = function (field, value) {
-        var expression = new Expression_1.Expression('greaterThan', [field, value], this.expression);
+        var expression = new Expression_1.Expression('greaterThan', [new FieldReference_1.FieldReference(field), value], this.expression);
         return new BooleanPredicateBuilder_1.BooleanPredicateBuilder(expression);
     };
     /**
@@ -56,7 +56,7 @@ var PredicateBuilder = /** @class */ (function () {
      * @param value
      */
     PredicateBuilder.prototype.lessThan = function (field, value) {
-        var expression = new Expression_1.Expression('lessThan', [field, value], this.expression);
+        var expression = new Expression_1.Expression('lessThan', [new FieldReference_1.FieldReference(field), value], this.expression);
         return new BooleanPredicateBuilder_1.BooleanPredicateBuilder(expression);
     };
     /**
@@ -65,7 +65,7 @@ var PredicateBuilder = /** @class */ (function () {
      * @param value
      */
     PredicateBuilder.prototype.greaterThanOrEqualTo = function (field, value) {
-        var expression = new Expression_1.Expression('greaterThanOrEqualTo', [field, value], this.expression);
+        var expression = new Expression_1.Expression('greaterThanOrEqualTo', [new FieldReference_1.FieldReference(field), value], this.expression);
         return new BooleanPredicateBuilder_1.BooleanPredicateBuilder(expression);
     };
     /**
@@ -74,7 +74,7 @@ var PredicateBuilder = /** @class */ (function () {
      * @param value
      */
     PredicateBuilder.prototype.lessThanOrEqualTo = function (field, value) {
-        var expression = new Expression_1.Expression('lessThanOrEqualTo', [field, value], this.expression);
+        var expression = new Expression_1.Expression('lessThanOrEqualTo', [new FieldReference_1.FieldReference(field), value], this.expression);
         return new BooleanPredicateBuilder_1.BooleanPredicateBuilder(expression);
     };
     /**
@@ -83,15 +83,15 @@ var PredicateBuilder = /** @class */ (function () {
      * @param value
      */
     PredicateBuilder.prototype.contains = function (field, value) {
-        var expression = new Expression_1.Expression('contains', [field, value], this.expression);
+        var expression = new Expression_1.Expression('contains', [new FieldReference_1.FieldReference(field), value], this.expression);
         return new BooleanPredicateBuilder_1.BooleanPredicateBuilder(expression);
     };
     PredicateBuilder.prototype.startswith = function (field, value) {
-        var expression = new Expression_1.Expression('startsWith', [field, value], this.expression);
+        var expression = new Expression_1.Expression('startsWith', [new FieldReference_1.FieldReference(field), value], this.expression);
         return new BooleanPredicateBuilder_1.BooleanPredicateBuilder(expression);
     };
     PredicateBuilder.prototype.endswith = function (field, value) {
-        var expression = new Expression_1.Expression('endsWith', [field, value], this.expression);
+        var expression = new Expression_1.Expression('endsWith', [new FieldReference_1.FieldReference(field), value], this.expression);
         return new BooleanPredicateBuilder_1.BooleanPredicateBuilder(expression);
     };
     return PredicateBuilder;

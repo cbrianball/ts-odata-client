@@ -83,6 +83,8 @@ var ODataV4ExpressionVisitor = /** @class */ (function (_super) {
             else if (operand instanceof Expression_1.Expression) {
                 translation.push(this.translatePredicateExpression(operand));
             }
+            else //assume this is a literal without the type specified
+                translation.push([this.deriveLiteral(new literal_1.Literal(operand))]);
         }
         if (translation.length === 1) {
             switch (expression.operator) {

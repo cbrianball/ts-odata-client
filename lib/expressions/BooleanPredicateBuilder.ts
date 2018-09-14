@@ -1,5 +1,4 @@
-import { PredicateBuilder } from "./PredicateBuilder";
-import { Expression } from "./expression";
+import { Expression } from "./Expression";
 
 export class BooleanPredicateBuilder<T> {
 

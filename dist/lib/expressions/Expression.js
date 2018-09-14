@@ -22,7 +22,7 @@ var Expression = /** @class */ (function () {
     }
     Expression.literal = function (value, literalType) {
         if (literalType === void 0) { literalType = typeof value; }
-        return new TypedExpression('literal', [new Literal_1.Literal(literalType, value)]);
+        return new TypedExpression('literal', [new Literal_1.Literal(value, literalType)]);
     };
     return Expression;
 }());

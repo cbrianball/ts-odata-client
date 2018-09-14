@@ -1,4 +1,4 @@
-declare const enum ExpressionOperator {
+export declare const enum ExpressionOperator {
     And = "and",
     Or = "or",
     Not = "not",

@@ -1,5 +1,5 @@
 export declare class Literal {
-    literalType: string;
     value: any;
-    constructor(literalType: string, value: any);
+    literalType?: string | undefined;
+    constructor(value: any, literalType?: string | undefined);
 }

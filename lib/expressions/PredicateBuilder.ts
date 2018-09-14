@@ -1,4 +1,4 @@
-import { FieldReference } from "./fieldReference";
+import { FieldReference } from "./FieldReference";
 import { Expression, TypedExpression } from "./Expression";
 import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 
@@ -30,8 +30,8 @@ export class PredicateBuilder<T> {
      * @param field
      * @param value
      */
-    public equals<K extends keyof T>(field: K, value: T[K] | TypedExpression<T[K]>) {
-        const expression = new Expression('equals', [field, value], this.expression);
+    public equals<K extends Extract<keyof T, string>>(field: K, value: T[K] | TypedExpression<T[K]>) {
+        const expression = new Expression('equals', [new FieldReference<T>(field), value], this.expression);
         return new BooleanPredicateBuilder<T>(expression);
     }
 
@@ -40,8 +40,8 @@ export class PredicateBuilder<T> {
      * @param field
      * @param value
      */
-    public notEquals<K extends keyof T>(field: K, value: T[K] | TypedExpression<T[K]>) {
-        const expression = new Expression('notEquals', [field, value], this.expression);
+    public notEquals<K extends Extract<keyof T, string>>(field: K, value: T[K] | TypedExpression<T[K]>) {
+        const expression = new Expression('notEquals', [new FieldReference<T>(field), value], this.expression);
         return new BooleanPredicateBuilder<T>(expression);
     }
 
@@ -50,8 +50,8 @@ export class PredicateBuilder<T> {
      * @param field
      * @param value
      */
-    public greaterThan<K extends keyof T>(field: K, value: T[K] | TypedExpression<T[K]>) {
-        const expression = new Expression('greaterThan', [field, value], this.expression);
+    public greaterThan<K extends Extract<keyof T, string>>(field: K, value: T[K] | TypedExpression<T[K]>) {
+        const expression = new Expression('greaterThan', [new FieldReference<T>(field), value], this.expression);
         return new BooleanPredicateBuilder<T>(expression);
     }
 
@@ -60,8 +60,8 @@ export class PredicateBuilder<T> {
      * @param field
      * @param value
      */
-    public lessThan<K extends keyof T>(field: K, value: T[K] | TypedExpression<T[K]>) {
-        const expression = new Expression('lessThan', [field, value], this.expression);
+    public lessThan<K extends Extract<keyof T, string>>(field: K, value: T[K] | TypedExpression<T[K]>) {
+        const expression = new Expression('lessThan', [new FieldReference<T>(field), value], this.expression);
         return new BooleanPredicateBuilder<T>(expression);
     }
 
@@ -70,8 +70,8 @@ export class PredicateBuilder<T> {
      * @param field
      * @param value
      */
-    public greaterThanOrEqualTo<K extends keyof T>(field: K, value: T[K] | TypedExpression<T[K]>) {
-        const expression = new Expression('greaterThanOrEqualTo', [field, value], this.expression);
+    public greaterThanOrEqualTo<K extends Extract<keyof T, string>>(field: K, value: T[K] | TypedExpression<T[K]>) {
+        const expression = new Expression('greaterThanOrEqualTo', [new FieldReference<T>(field), value], this.expression);
         return new BooleanPredicateBuilder<T>(expression);
     }
 
@@ -80,8 +80,8 @@ export class PredicateBuilder<T> {
      * @param field
      * @param value
      */
-    public lessThanOrEqualTo<K extends keyof T>(field: K, value: T[K] | TypedExpression<T[K]>) {
-        const expression = new Expression('lessThanOrEqualTo', [field, value], this.expression);
+    public lessThanOrEqualTo<K extends Extract<keyof T, string>>(field: K, value: T[K] | TypedExpression<T[K]>) {
+        const expression = new Expression('lessThanOrEqualTo', [new FieldReference<T>(field), value], this.expression);
         return new BooleanPredicateBuilder<T>(expression);
     }
 
@@ -91,17 +91,17 @@ export class PredicateBuilder<T> {
      * @param value
      */
     public contains<K extends keyof SubType<T, string>>(field: K, value: string | TypedExpression<string>) {
-        const expression = new Expression('contains', [field, value], this.expression);
+        const expression = new Expression('contains', [new FieldReference<T>(field as any), value], this.expression);
         return new BooleanPredicateBuilder<T>(expression);
     }
 
     public startswith<K extends keyof SubType<T, string>>(field: K, value: string | TypedExpression<string>) {
-        const expression = new Expression('startsWith', [field, value], this.expression);
+        const expression = new Expression('startsWith', [new FieldReference<T>(field as any), value], this.expression);
         return new BooleanPredicateBuilder<T>(expression);
     }
 
     public endswith<K extends keyof SubType<T, string>>(field: K, value: string | TypedExpression<string>) {
-        const expression = new Expression('endsWith', [field, value], this.expression);
+        const expression = new Expression('endsWith', [new FieldReference<T>(field as any), value], this.expression);
         return new BooleanPredicateBuilder<T>(expression);
     }
 }

@@ -35,7 +35,7 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
             queryString.push("$filter=" + query.filter);
 
         if (query.orderBy) {
-            queryString.push("$orderBy=" + query.orderBy.map(o => o.sort ? `${o.field} ${o.sort}` : o.field).join(','));
+            queryString.push("$orderby=" + query.orderBy.map(o => o.sort ? `${o.field} ${o.sort}` : o.field).join(','));
         }
 
         if (query.select)

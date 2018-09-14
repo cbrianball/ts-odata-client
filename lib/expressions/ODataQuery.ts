@@ -1,6 +1,6 @@
 import { ODataQueryProvider } from "./ODataQueryProvider";
-import { FieldReference } from "./fieldReference";
-import { Expression } from "./expression";
+import { FieldReference } from "./FieldReference";
+import { Expression } from "./Expression";
 import { ODataQueryResponse, ODataQueryResponseWithCount, ODataResponse } from "../odataResponse";
 import { PredicateBuilder } from "./PredicateBuilder";
 import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";

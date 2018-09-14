@@ -1,3 +1,3 @@
 export class Literal {
-    constructor(public literalType: string, public value: any) { }
+    constructor(public value: any, public literalType?: string) { }
 }

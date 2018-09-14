@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var expression_1 = require("./expression");
+var Expression_1 = require("./Expression");
 var BooleanPredicateBuilder = /** @class */ (function () {
     function BooleanPredicateBuilder(expression) {
         this.expression = expression;
@@ -14,7 +14,7 @@ var BooleanPredicateBuilder = /** @class */ (function () {
             throw new Error("'and' predicate must come after a non-empty Predicate");
         if (!predicate.expression)
             throw new Error("'and' predicate must have at least one non-empty Predicate");
-        return new BooleanPredicateBuilder(new expression_1.Expression('and', [this.expression, predicate.expression]));
+        return new BooleanPredicateBuilder(new Expression_1.Expression('and', [this.expression, predicate.expression]));
     };
     /**
      * Create an OR condition with a previous filter clause
@@ -25,7 +25,7 @@ var BooleanPredicateBuilder = /** @class */ (function () {
             throw new Error("'or' predicate must come after a non-empty Predicate");
         if (!predicate.expression)
             throw new Error("'or' predicate must have at least one non-empty Predicate");
-        return new BooleanPredicateBuilder(new expression_1.Expression('or', [this.expression, predicate.expression]));
+        return new BooleanPredicateBuilder(new Expression_1.Expression('or', [this.expression, predicate.expression]));
     };
     return BooleanPredicateBuilder;
 }());

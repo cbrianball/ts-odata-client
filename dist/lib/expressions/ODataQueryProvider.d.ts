@@ -3,24 +3,6 @@ import { ODataQuery } from "./ODataQuery";
 import { Expression } from "./Expression";
 export declare abstract class ODataQueryProvider {
     createQuery<T>(expression: Expression): ODataQuery<T>;
-    abstract executeQueryAsync<T extends ODataResponse>(expression: Expression): T;
-    generateQuery(expression: Expression): string;
-    protected transformExpression(expression: Expression, query: Query): Query;
-    protected buildODataString(query: Query): string;
-    abstract deriveValue(value: any): string;
-    private buildQuery;
+    abstract executeQueryAsync<T extends ODataResponse>(expression?: Expression): Promise<T>;
+    abstract buildQuery(expression?: Expression): any;
 }
-declare type Sort = {
-    field: string;
-    direction?: 'desc';
-};
-interface Query {
-    select?: string[];
-    top?: number | undefined;
-    skip?: number | undefined;
-    count?: string | undefined;
-    orderBy?: Sort[];
-    key?: any;
-    filter?: any;
-}
-export {};

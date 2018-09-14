@@ -35,8 +35,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var fieldReference_1 = require("./fieldReference");
-var expression_1 = require("./expression");
+var FieldReference_1 = require("./FieldReference");
+var Expression_1 = require("./Expression");
 var PredicateBuilder_1 = require("./PredicateBuilder");
 var ODataQuery = /** @class */ (function () {
     /**
@@ -55,7 +55,7 @@ var ODataQuery = /** @class */ (function () {
         for (var _i = 0; _i < arguments.length; _i++) {
             fields[_i] = arguments[_i];
         }
-        var expression = new expression_1.Expression("select" /* Select */, fields.map(function (v) { return new fieldReference_1.FieldReference(v); }), this.expression);
+        var expression = new Expression_1.Expression("select" /* Select */, fields.map(function (v) { return new FieldReference_1.FieldReference(v); }), this.expression);
         return this.provider.createQuery(expression);
     };
     /**
@@ -63,7 +63,7 @@ var ODataQuery = /** @class */ (function () {
      * @param n
      */
     ODataQuery.prototype.top = function (n) {
-        var expression = new expression_1.Expression("top" /* Top */, [n], this.expression);
+        var expression = new Expression_1.Expression("top" /* Top */, [n], this.expression);
         return this.provider.createQuery(expression);
     };
     /**
@@ -71,7 +71,7 @@ var ODataQuery = /** @class */ (function () {
      * @param n
      */
     ODataQuery.prototype.skip = function (n) {
-        var expression = new expression_1.Expression("skip" /* Skip */, [n], this.expression);
+        var expression = new Expression_1.Expression("skip" /* Skip */, [n], this.expression);
         return this.provider.createQuery(expression);
     };
     /**
@@ -83,7 +83,7 @@ var ODataQuery = /** @class */ (function () {
         for (var _i = 0; _i < arguments.length; _i++) {
             fields[_i] = arguments[_i];
         }
-        var expression = new expression_1.Expression("orderBy" /* OrderBy */, fields.map(function (f) { return new fieldReference_1.FieldReference(f); }), this.expression);
+        var expression = new Expression_1.Expression("orderBy" /* OrderBy */, fields.map(function (f) { return new FieldReference_1.FieldReference(f); }), this.expression);
         return this.provider.createQuery(expression);
     };
     /**
@@ -95,7 +95,7 @@ var ODataQuery = /** @class */ (function () {
         for (var _i = 0; _i < arguments.length; _i++) {
             fields[_i] = arguments[_i];
         }
-        var expression = new expression_1.Expression("orderByDescending" /* OrderByDescending */, fields.map(function (f) { return new fieldReference_1.FieldReference(f); }), this.expression);
+        var expression = new Expression_1.Expression("orderByDescending" /* OrderByDescending */, fields.map(function (f) { return new FieldReference_1.FieldReference(f); }), this.expression);
         return this.provider.createQuery(expression);
     };
     /**
@@ -105,7 +105,7 @@ var ODataQuery = /** @class */ (function () {
     ODataQuery.prototype.filter = function (predicate) {
         if (typeof predicate === "function")
             predicate = predicate(new PredicateBuilder_1.PredicateBuilder());
-        var expression = new expression_1.Expression("predicate" /* Predicate */, [predicate], this.expression);
+        var expression = new Expression_1.Expression("predicate" /* Predicate */, [predicate], this.expression);
         return this.provider.createQuery(expression);
     };
     /**
@@ -118,7 +118,7 @@ var ODataQuery = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        expression = new expression_1.Expression('getByKey', [key], this.expression);
+                        expression = new Expression_1.Expression('getByKey', [key], this.expression);
                         return [4 /*yield*/, this.provider.executeQueryAsync(expression)];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
@@ -147,15 +147,12 @@ var ODataQuery = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        expression = new expression_1.Expression('getWithCount', [], this.expression);
+                        expression = new Expression_1.Expression('getWithCount', [], this.expression);
                         return [4 /*yield*/, this.provider.executeQueryAsync(expression)];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });
-    };
-    ODataQuery.prototype.toString = function () {
-        return this.provider.generateQuery(this.expression);
     };
     return ODataQuery;
 }());

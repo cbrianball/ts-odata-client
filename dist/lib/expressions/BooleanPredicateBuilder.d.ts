@@ -1,4 +1,4 @@
-import { Expression } from "./expression";
+import { Expression } from "./Expression";
 export declare class BooleanPredicateBuilder<T> {
     readonly expression?: Expression | undefined;
     constructor(expression?: Expression | undefined);

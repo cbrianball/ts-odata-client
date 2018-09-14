@@ -56,12 +56,12 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
             filter = ['(', ...filter, ')'];
         }
 
-        this.oDataQuery.filter += filter.join('');
+        this.oDataQuery.filter += filter.join(' ');
     }
 
     private translatePredicateExpression(expression: Expression): string[] {
         let translation: string[][] = [];
-        for (const operand of expression.operands) {
+        for (let operand of expression.operands) {
             if (operand instanceof Literal) {
                 translation.push([this.deriveLiteral(operand)]);
             }
@@ -70,7 +70,8 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
             }
             else if (operand instanceof Expression) {
                 translation.push(this.translatePredicateExpression(operand));
-            }
+            } else //assume this is a literal without the type specified
+                translation.push([this.deriveLiteral(new Literal(operand))]);
         }
 
         if (translation.length === 1) {
@@ -87,7 +88,7 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
 
             switch (expression.operator) {
                 case ExpressionOperator.And:
-                    return [`${this.reduceTranslatedExpression(left)} and ${this.reduceTranslatedExpression(right)}`];
+                    return [this.reduceTranslatedExpression(left), 'and', this.reduceTranslatedExpression(right)];
                 case ExpressionOperator.Equals:
                     return [`${this.reduceTranslatedExpression(left)} eq ${this.reduceTranslatedExpression(right)}`];
                 case ExpressionOperator.GreaterThan:
@@ -101,7 +102,7 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
                 case ExpressionOperator.NotEquals:
                     return [`${this.reduceTranslatedExpression(left)} ne ${this.reduceTranslatedExpression(right)}`];
                 case ExpressionOperator.Or:
-                    return [`${this.reduceTranslatedExpression(left)} or ${this.reduceTranslatedExpression(right)}`];
+                    return [this.reduceTranslatedExpression(left), 'or', this.reduceTranslatedExpression(right)];
                 default:
                     throw new Error(`Operator '${expression.operator}' is not supported`);
             }
@@ -112,7 +113,7 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
     }
 
     private reduceTranslatedExpression(value: string[]) {
-        if (value.length === 0) return [];
+        if (value.length === 0) return "";
 
         if (value.length === 1)
             return `${value[0]}`;
