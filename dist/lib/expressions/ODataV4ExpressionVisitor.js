@@ -68,7 +68,7 @@ var ODataV4ExpressionVisitor = /** @class */ (function (_super) {
         if (this.oDataQuery.filter && filter.length > 1) {
             filter = ['('].concat(filter, [')']);
         }
-        this.oDataQuery.filter += filter.join('');
+        this.oDataQuery.filter += filter.join(' ');
     };
     ODataV4ExpressionVisitor.prototype.translatePredicateExpression = function (expression) {
         var translation = [];
@@ -98,7 +98,9 @@ var ODataV4ExpressionVisitor = /** @class */ (function (_super) {
             var left = translation[0], right = translation[1];
             switch (expression.operator) {
                 case "and" /* And */:
-                    return [this.reduceTranslatedExpression(left) + " and " + this.reduceTranslatedExpression(right)];
+                    return [this.reduceTranslatedExpression(left), 'and', this.reduceTranslatedExpression(right)];
+                case "or" /* Or */:
+                    return [this.reduceTranslatedExpression(left), 'or', this.reduceTranslatedExpression(right)];
                 case "equals" /* Equals */:
                     return [this.reduceTranslatedExpression(left) + " eq " + this.reduceTranslatedExpression(right)];
                 case "greaterThan" /* GreaterThan */:
@@ -111,8 +113,12 @@ var ODataV4ExpressionVisitor = /** @class */ (function (_super) {
                     return [this.reduceTranslatedExpression(left) + " le " + this.reduceTranslatedExpression(right)];
                 case "notEquals" /* NotEquals */:
                     return [this.reduceTranslatedExpression(left) + " ne " + this.reduceTranslatedExpression(right)];
-                case "or" /* Or */:
-                    return [this.reduceTranslatedExpression(left) + " or " + this.reduceTranslatedExpression(right)];
+                case "contains" /* Contains */:
+                    return ["contains(" + this.reduceTranslatedExpression(left) + "," + this.reduceTranslatedExpression(right) + ")"];
+                case "startsWith" /* StartsWith */:
+                    return ["startsWith(" + this.reduceTranslatedExpression(left) + "," + this.reduceTranslatedExpression(right) + ")"];
+                case "endsWith" /* EndsWith */:
+                    return ["endsWith(" + this.reduceTranslatedExpression(left) + "," + this.reduceTranslatedExpression(right) + ")"];
                 default:
                     throw new Error("Operator '" + expression.operator + "' is not supported");
             }
@@ -121,7 +127,7 @@ var ODataV4ExpressionVisitor = /** @class */ (function (_super) {
     };
     ODataV4ExpressionVisitor.prototype.reduceTranslatedExpression = function (value) {
         if (value.length === 0)
-            return [];
+            return "";
         if (value.length === 1)
             return "" + value[0];
         return "(" + value.join(' ') + ")";

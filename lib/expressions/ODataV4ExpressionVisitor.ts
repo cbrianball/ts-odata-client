@@ -89,6 +89,8 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
             switch (expression.operator) {
                 case ExpressionOperator.And:
                     return [this.reduceTranslatedExpression(left), 'and', this.reduceTranslatedExpression(right)];
+                case ExpressionOperator.Or:
+                    return [this.reduceTranslatedExpression(left), 'or', this.reduceTranslatedExpression(right)];
                 case ExpressionOperator.Equals:
                     return [`${this.reduceTranslatedExpression(left)} eq ${this.reduceTranslatedExpression(right)}`];
                 case ExpressionOperator.GreaterThan:
@@ -101,8 +103,12 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
                     return [`${this.reduceTranslatedExpression(left)} le ${this.reduceTranslatedExpression(right)}`];
                 case ExpressionOperator.NotEquals:
                     return [`${this.reduceTranslatedExpression(left)} ne ${this.reduceTranslatedExpression(right)}`];
-                case ExpressionOperator.Or:
-                    return [this.reduceTranslatedExpression(left), 'or', this.reduceTranslatedExpression(right)];
+                case ExpressionOperator.Contains:
+                    return [`contains(${this.reduceTranslatedExpression(left)},${this.reduceTranslatedExpression(right)})`];
+                case ExpressionOperator.StartsWith:
+                    return [`startsWith(${this.reduceTranslatedExpression(left)},${this.reduceTranslatedExpression(right)})`];
+                case ExpressionOperator.EndsWith:
+                    return [`endsWith(${this.reduceTranslatedExpression(left)},${this.reduceTranslatedExpression(right)})`];
                 default:
                     throw new Error(`Operator '${expression.operator}' is not supported`);
             }

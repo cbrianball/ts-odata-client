@@ -86,11 +86,11 @@ var PredicateBuilder = /** @class */ (function () {
         var expression = new Expression_1.Expression('contains', [new FieldReference_1.FieldReference(field), value], this.expression);
         return new BooleanPredicateBuilder_1.BooleanPredicateBuilder(expression);
     };
-    PredicateBuilder.prototype.startswith = function (field, value) {
+    PredicateBuilder.prototype.startsWith = function (field, value) {
         var expression = new Expression_1.Expression('startsWith', [new FieldReference_1.FieldReference(field), value], this.expression);
         return new BooleanPredicateBuilder_1.BooleanPredicateBuilder(expression);
     };
-    PredicateBuilder.prototype.endswith = function (field, value) {
+    PredicateBuilder.prototype.endsWith = function (field, value) {
         var expression = new Expression_1.Expression('endsWith', [new FieldReference_1.FieldReference(field), value], this.expression);
         return new BooleanPredicateBuilder_1.BooleanPredicateBuilder(expression);
     };

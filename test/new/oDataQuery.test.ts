@@ -119,9 +119,55 @@ describe("ODataQuery", () => {
 
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=(firstName eq 'john' and age ge 30) or (lastName ne 'Jones' and email eq '.com')`);
     });
+
+    it("should handle contains", () =>{
+        const query = baseQuery.filter(p => p.contains("firstName", "jac"));
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=contains(firstName,'jac')`);
+    });
+
+    it("should handle startsWith", () =>{
+        const query = baseQuery.filter(p => p.startsWith("firstName", "jac"));
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=startsWith(firstName,'jac')`);
+    });
+
+    it("should handle endsWith", () =>{
+        const query = baseQuery.filter(p => p.endsWith("firstName", "jac"));
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=endsWith(firstName,'jac')`);
+    });
+
+    it("should handle equals and notEquals", () =>{
+        const query = baseQuery.filter(p => p.equals("firstName", "jac").and(p.notEquals("age", 50)));
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName eq 'jac' and age ne 50`);
+    });
+
+    it("should handle greaterThan and greaterThanEqualTo", () =>{
+        const query = baseQuery.filter(p => p.greaterThan("firstName", "jac").and(p.greaterThanOrEqualTo("age", 50)));
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName gt 'jac' and age ge 50`);
+    });
+
+    it("should handle lessThan and lessThanEqualTo", () =>{
+        const query = baseQuery.filter(p => p.lessThan("firstName", "jac").and(p.lessThanOrEqualTo("age", 50)));
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName lt 'jac' and age le 50`);
+    });
+
+    it("should handle null comparisons", () => {        
+        const query = baseQuery.filter(p => p.equals("firstName", null));
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName eq null`);
+    });
+
+    it("should handle undefined comparisons", () => {        
+        const query = baseQuery.filter(p => p.equals("firstName", undefined));
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName eq null`);
+    });
 });
-
-
 
 interface Person{
     firstName: string;

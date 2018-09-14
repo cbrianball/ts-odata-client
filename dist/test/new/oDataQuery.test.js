@@ -66,16 +66,53 @@ describe("ODataQuery", function () {
         var query = baseQuery.top(10).top(5);
         chai_1.expect(query.provider.buildQuery(query.expression)).to.be.eql(endpoint + "?$top=5");
     });
-    // it("should set simple filter", () => {
-    //     const query = baseQuery.filter(p => p.equals("firstName", "john"));
-    //     expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName eq 'john'`);
-    // });
-    // it("should set compound filter", () => {
-    //     const query = baseQuery.filter(p => p.equals("firstName", "john").and(p.greaterThanOrEqualTo("age", 30)));
-    //     expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName eq 'john' and age ge 30`);
-    // });
+    it("should set simple filter", function () {
+        var query = baseQuery.filter(function (p) { return p.equals("firstName", "john"); });
+        chai_1.expect(query.provider.buildQuery(query.expression)).to.be.eql(endpoint + "?$filter=firstName eq 'john'");
+    });
+    it("should set compound filter", function () {
+        var query = baseQuery.filter(function (p) { return p.equals("firstName", "john").and(p.greaterThanOrEqualTo("age", 30)); });
+        chai_1.expect(query.provider.buildQuery(query.expression)).to.be.eql(endpoint + "?$filter=firstName eq 'john' and age ge 30");
+    });
     it("should set complex filter", function () {
         var query = baseQuery.filter(function (p) { return p.equals("firstName", "john").and(p.greaterThanOrEqualTo("age", 30).or(p.notEquals("lastName", "Jones"))); });
-        chai_1.expect(query.provider.buildQuery(query.expression)).to.be.eql(endpoint + "?$filter=firstName eq 'john' and (age ge 30 and lastName ne 'Jones')");
+        chai_1.expect(query.provider.buildQuery(query.expression)).to.be.eql(endpoint + "?$filter=firstName eq 'john' and (age ge 30 or lastName ne 'Jones')");
+    });
+    it("should set complex filter", function () {
+        var query = baseQuery.filter(function (p) { return p.equals("firstName", "john").and(p.greaterThanOrEqualTo("age", 30))
+            .or(p.notEquals("lastName", "Jones").and(p.equals("email", ".com"))); });
+        chai_1.expect(query.provider.buildQuery(query.expression)).to.be.eql(endpoint + "?$filter=(firstName eq 'john' and age ge 30) or (lastName ne 'Jones' and email eq '.com')");
+    });
+    it("should handle contains", function () {
+        var query = baseQuery.filter(function (p) { return p.contains("firstName", "jac"); });
+        chai_1.expect(query.provider.buildQuery(query.expression)).to.be.eql(endpoint + "?$filter=contains(firstName,'jac')");
+    });
+    it("should handle startsWith", function () {
+        var query = baseQuery.filter(function (p) { return p.startsWith("firstName", "jac"); });
+        chai_1.expect(query.provider.buildQuery(query.expression)).to.be.eql(endpoint + "?$filter=startsWith(firstName,'jac')");
+    });
+    it("should handle endsWith", function () {
+        var query = baseQuery.filter(function (p) { return p.endsWith("firstName", "jac"); });
+        chai_1.expect(query.provider.buildQuery(query.expression)).to.be.eql(endpoint + "?$filter=endsWith(firstName,'jac')");
+    });
+    it("should handle equals and notEquals", function () {
+        var query = baseQuery.filter(function (p) { return p.equals("firstName", "jac").and(p.notEquals("age", 50)); });
+        chai_1.expect(query.provider.buildQuery(query.expression)).to.be.eql(endpoint + "?$filter=firstName eq 'jac' and age ne 50");
+    });
+    it("should handle greaterThan and greaterThanEqualTo", function () {
+        var query = baseQuery.filter(function (p) { return p.greaterThan("firstName", "jac").and(p.greaterThanOrEqualTo("age", 50)); });
+        chai_1.expect(query.provider.buildQuery(query.expression)).to.be.eql(endpoint + "?$filter=firstName gt 'jac' and age ge 50");
+    });
+    it("should handle lessThan and lessThanEqualTo", function () {
+        var query = baseQuery.filter(function (p) { return p.lessThan("firstName", "jac").and(p.lessThanOrEqualTo("age", 50)); });
+        chai_1.expect(query.provider.buildQuery(query.expression)).to.be.eql(endpoint + "?$filter=firstName lt 'jac' and age le 50");
+    });
+    it("should handle null comparisons", function () {
+        var query = baseQuery.filter(function (p) { return p.equals("firstName", null); });
+        chai_1.expect(query.provider.buildQuery(query.expression)).to.be.eql(endpoint + "?$filter=firstName eq null");
+    });
+    it("should handle undefined comparisons", function () {
+        var query = baseQuery.filter(function (p) { return p.equals("firstName", undefined); });
+        chai_1.expect(query.provider.buildQuery(query.expression)).to.be.eql(endpoint + "?$filter=firstName eq null");
     });
 });
