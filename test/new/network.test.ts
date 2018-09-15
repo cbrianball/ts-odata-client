@@ -12,13 +12,14 @@ interface Subject {
     Abbreviation: string;
 }
 
-// describe("abc", () => {
+xdescribe("executing getManyAsync", () => {
 
-//     const endpoint = "http://api.purdue.io/odata/Subjects";
-//     const baseQuery = new ODataQuery<Subject>(new ODataV4QueryProvider(endpoint));
+    const endpoint = "http://api.purdue.io/odata/Subjects";
+    const baseQuery = new ODataQuery<Subject>(new ODataV4QueryProvider(endpoint));
 
-//     it("def", async () => {
-//         const query = baseQuery.filter(p => p.equals("SubjectClusterId", 25));
-//         const results = await query.getManyAsync();
-//     });
-// });
+    it("should not error", () => {
+        const query = baseQuery.filter(p => p.contains("Name", "vet"));
+        
+        expect(async () => await query.getManyAsync()).to.not.throw;        
+    });
+});

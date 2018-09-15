@@ -16,7 +16,9 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
 
         const response = await fetch(url, init);
 
-        return await response.json() as T;
+        if(response.ok) return await response.json() as T;
+
+        throw new Error(JSON.stringify(await response.json()));
     }
 
     buildQuery(expression?: Expression) {
