@@ -1,10 +1,11 @@
 {
   "name": "ts-odata-client",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "description": "OData TypeScript Client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "build": "tsc",
     "test": "mocha -r ts-node/register test/**/*.ts"
   },
   "repository": {
