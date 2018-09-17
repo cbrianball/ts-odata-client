@@ -2,7 +2,8 @@ import { expect } from "chai";
 import { ODataV4ExpressionVisitor } from "../lib/ODataV4ExpressionVisitor";
 import { FieldReference } from "../lib/FieldReference";
 import { Expression } from "../lib/Expression";
-import {ExpressionOperator} from "../lib/ExpressionOperator";
+import { ExpressionOperator } from "../lib/ExpressionOperator";
+import { ODataType } from "../lib/ODataType";
 
 
 describe("ODataV4ExpressionVisitor", () => {
@@ -11,12 +12,7 @@ describe("ODataV4ExpressionVisitor", () => {
         const expression = new Expression(ExpressionOperator.Select, [new FieldReference<Person>("firstName"), new FieldReference<Person>("age")]);
         visitor.visit(expression);
 
-        expect(visitor.oDataQuery.filter).to.be.empty;
-        expect(visitor.oDataQuery.orderBy).to.be.undefined;        
-        expect(visitor.oDataQuery.skip).to.be.undefined;
-        expect(visitor.oDataQuery.top).to.be.undefined;
-
-        expect(visitor.oDataQuery.select).to.eql(["firstName", "age"]);
+        expect(visitor.oDataQuery).to.eql({ select: ["firstName", "age"] });
     });
 
     it("should handle compound select", () => {
@@ -24,24 +20,14 @@ describe("ODataV4ExpressionVisitor", () => {
         const expression = new Expression(ExpressionOperator.Select, [new FieldReference<Person>("firstName"), new FieldReference<Person>("age")]);
         visitor.visit(new Expression(ExpressionOperator.Select, [new FieldReference<Person>("lastName")], expression));
 
-        expect(visitor.oDataQuery.filter).to.be.empty;
-        expect(visitor.oDataQuery.orderBy).to.be.undefined;        
-        expect(visitor.oDataQuery.skip).to.be.undefined;
-        expect(visitor.oDataQuery.top).to.be.undefined;
-        
-        expect(visitor.oDataQuery.select).to.eql(["lastName"]);
+        expect(visitor.oDataQuery).to.eql({ select: ["lastName"] });
     });
 
     it("should handle orderBy", () => {
-        const visitor = new ODataV4ExpressionVisitor();        
+        const visitor = new ODataV4ExpressionVisitor();
         visitor.visit(new Expression(ExpressionOperator.OrderBy, [new FieldReference<Person>("firstName")]));
 
-        expect(visitor.oDataQuery.filter).to.be.empty;        
-        expect(visitor.oDataQuery.select).to.be.undefined;
-        expect(visitor.oDataQuery.skip).to.be.undefined;
-        expect(visitor.oDataQuery.top).to.be.undefined;        
-
-        expect(visitor.oDataQuery.orderBy).to.eql([{ field: "firstName" }]);
+        expect(visitor.oDataQuery).to.eql({ orderBy: [{ field: "firstName" }] });
     });
 
     it("should handle compound orderBy", () => {
@@ -49,24 +35,14 @@ describe("ODataV4ExpressionVisitor", () => {
         const expression = new Expression(ExpressionOperator.OrderBy, [new FieldReference<Person>("firstName")]);
         visitor.visit(new Expression(ExpressionOperator.OrderBy, [new FieldReference<Person>("age")], expression));
 
-        expect(visitor.oDataQuery.filter).to.be.empty;        
-        expect(visitor.oDataQuery.select).to.be.undefined;
-        expect(visitor.oDataQuery.skip).to.be.undefined;
-        expect(visitor.oDataQuery.top).to.be.undefined;        
-
-        expect(visitor.oDataQuery.orderBy).to.eql([{ field: "firstName" }, { field: "age" }]);
+        expect(visitor.oDataQuery).to.eql({ orderBy: [{ field: "firstName" }, { field: "age" }] });
     });
 
     it("should handle orderByDescending", () => {
-        const visitor = new ODataV4ExpressionVisitor();        
+        const visitor = new ODataV4ExpressionVisitor();
         visitor.visit(new Expression(ExpressionOperator.OrderByDescending, [new FieldReference<Person>("age")]));
 
-        expect(visitor.oDataQuery.filter).to.be.empty;        
-        expect(visitor.oDataQuery.select).to.be.undefined;
-        expect(visitor.oDataQuery.skip).to.be.undefined;
-        expect(visitor.oDataQuery.top).to.be.undefined;        
-
-        expect(visitor.oDataQuery.orderBy).to.eql([{ field: "age", sort: 'desc' }]);
+        expect(visitor.oDataQuery).to.eql({ orderBy: [{ field: "age", sort: 'desc' }] });
     });
 
     it("should handle compound orderByDescending", () => {
@@ -74,12 +50,7 @@ describe("ODataV4ExpressionVisitor", () => {
         const expression = new Expression(ExpressionOperator.OrderByDescending, [new FieldReference<Person>("firstName")]);
         visitor.visit(new Expression(ExpressionOperator.OrderByDescending, [new FieldReference<Person>("age")], expression));
 
-        expect(visitor.oDataQuery.filter).to.be.empty;        
-        expect(visitor.oDataQuery.select).to.be.undefined;
-        expect(visitor.oDataQuery.skip).to.be.undefined;
-        expect(visitor.oDataQuery.top).to.be.undefined;        
-
-        expect(visitor.oDataQuery.orderBy).to.eql([{ field: "firstName", sort: 'desc' }, { field: "age", sort: 'desc' }]);
+        expect(visitor.oDataQuery).to.eql({ orderBy: [{ field: "firstName", sort: 'desc' }, { field: "age", sort: 'desc' }] });
     });
 
     it("should handle single skip", () => {
@@ -87,12 +58,7 @@ describe("ODataV4ExpressionVisitor", () => {
         const expression = new Expression(ExpressionOperator.Skip, [3]);
         visitor.visit(expression);
 
-        expect(visitor.oDataQuery.filter).to.be.empty;
-        expect(visitor.oDataQuery.orderBy).to.be.undefined;        
-        expect(visitor.oDataQuery.select).to.be.undefined;
-        expect(visitor.oDataQuery.top).to.be.undefined;
-
-        expect(visitor.oDataQuery.skip).to.eql(3);
+        expect(visitor.oDataQuery).to.eql({ skip: 3 });
     });
 
     it("should handle compound skip", () => {
@@ -100,12 +66,7 @@ describe("ODataV4ExpressionVisitor", () => {
         const expression = new Expression(ExpressionOperator.Skip, [2]);
         visitor.visit(new Expression(ExpressionOperator.Skip, [5], expression));
 
-        expect(visitor.oDataQuery.filter).to.be.empty;
-        expect(visitor.oDataQuery.orderBy).to.be.undefined;        
-        expect(visitor.oDataQuery.select).to.be.undefined;
-        expect(visitor.oDataQuery.top).to.be.undefined;
-        
-        expect(visitor.oDataQuery.skip).to.eql(5);
+        expect(visitor.oDataQuery).to.eql({ skip: 5 });
     });
 
     it("should handle single top", () => {
@@ -113,12 +74,7 @@ describe("ODataV4ExpressionVisitor", () => {
         const expression = new Expression(ExpressionOperator.Top, [3]);
         visitor.visit(expression);
 
-        expect(visitor.oDataQuery.filter).to.be.empty;
-        expect(visitor.oDataQuery.orderBy).to.be.undefined;        
-        expect(visitor.oDataQuery.select).to.be.undefined;
-        expect(visitor.oDataQuery.skip).to.be.undefined;
-
-        expect(visitor.oDataQuery.top).to.eql(3);
+        expect(visitor.oDataQuery).to.eql({ top: 3 });
     });
 
     it("should handle compound top", () => {
@@ -126,12 +82,42 @@ describe("ODataV4ExpressionVisitor", () => {
         const expression = new Expression(ExpressionOperator.Top, [2]);
         visitor.visit(new Expression(ExpressionOperator.Top, [5], expression));
 
-        expect(visitor.oDataQuery.filter).to.be.empty;
-        expect(visitor.oDataQuery.orderBy).to.be.undefined;        
-        expect(visitor.oDataQuery.select).to.be.undefined;
-        expect(visitor.oDataQuery.skip).to.be.undefined;
-        
-        expect(visitor.oDataQuery.top).to.eql(5);
+        expect(visitor.oDataQuery).to.eql({ top: 5 });
+    });
+
+    it("should handle count", () => {
+        const visitor = new ODataV4ExpressionVisitor();
+        visitor.visit(new Expression(ExpressionOperator.GetWithCount, []));
+
+        expect(visitor.oDataQuery).to.eql({ count: true });
+    });
+
+    it("should handle getByKey with number", () => {
+        const visitor = new ODataV4ExpressionVisitor();
+        visitor.visit(new Expression(ExpressionOperator.GetByKey, [5]));
+
+        expect(visitor.oDataQuery).to.eql({ key: "5" });
+    });
+
+    it("should handle getByKey with string", () => {
+        const visitor = new ODataV4ExpressionVisitor();
+        visitor.visit(new Expression(ExpressionOperator.GetByKey, ["1a"]));
+
+        expect(visitor.oDataQuery).to.eql({ key: "'1a'" });
+    });
+
+    it("should handle getByKey with date", () => {
+        const visitor = new ODataV4ExpressionVisitor();
+        visitor.visit(new Expression(ExpressionOperator.GetByKey, [Expression.literal(new Date(0), ODataType.Date)]));
+
+        expect(visitor.oDataQuery).to.eql({ key: "1970-01-01" });
+    });
+
+    it("should handle getByKey with guid", () => {
+        const visitor = new ODataV4ExpressionVisitor();
+        visitor.visit(new Expression(ExpressionOperator.GetByKey, [Expression.literal("00000000-0000-0000-000000000000", ODataType.Guid)]));
+
+        expect(visitor.oDataQuery).to.eql({ key: "00000000-0000-0000-000000000000" });
     });
 
     it("should error on unknown expression", () => {

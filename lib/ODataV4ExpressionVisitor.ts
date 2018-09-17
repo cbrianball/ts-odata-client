@@ -2,7 +2,7 @@ import { TypedExpressionVisitor } from "./TypedExpressionVisitor";
 import { FieldReference } from "./FieldReference";
 import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 import { Expression } from "./Expression";
-import { Literal } from "./literal";
+import { Literal } from "./Literal";
 import { ExpressionOperator } from "./ExpressionOperator";
 import { ODataType } from "./ODataType";
 
@@ -13,16 +13,14 @@ export interface ODataV4QuerySegments {
     orderBy?: Sort[];
     skip?: number;
     top?: number;
-    filter: string;
+    filter?: string;
     key?: any;
     count?: boolean;
 }
 
 export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
 
-    public readonly oDataQuery: ODataV4QuerySegments = {
-        filter: "",
-    }
+    public readonly oDataQuery: ODataV4QuerySegments = {}
 
     selectVisitor(...fields: FieldReference<any>[]) {
         this.oDataQuery.select = fields.map(f => f.toString());
@@ -51,8 +49,14 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
     }
 
     getByKeyVisitor(key: any) {
+        if(key instanceof Expression) {
+            if(key.operator !== ExpressionOperator.Literal)
+                throw new Error(`Only literal expressions allowed for ${ExpressionOperator.Literal} expession types`);
+            
+            key = key.operands[0];
+        }
 
-        if(!(key instanceof Literal))
+        if (!(key instanceof Literal))
             key = new Literal(key);
 
         this.oDataQuery.key = this.deriveLiteral(key);
@@ -69,6 +73,9 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
         if (this.oDataQuery.filter && filter.length > 1) {
             filter = ['(', ...filter, ')'];
         }
+
+        if (!this.oDataQuery.filter)
+            this.oDataQuery.filter = "";
 
         this.oDataQuery.filter += filter.join(' ');
     }
