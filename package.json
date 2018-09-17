@@ -1,5 +1,5 @@
 {
-  "name": "odata-typescript-client",
+  "name": "ts-odata-client",
   "version": "0.0.5",
   "description": "OData TypeScript Client",
   "main": "dist/index.js",
@@ -9,18 +9,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cbrianball/odata-typescript-client.git"
+    "url": "git+https://github.com/cbrianball/ts-odata-client.git"
   },
   "keywords": [
-    "odata-client",
+    "odata",
     "typescript"
   ],
   "author": "Brian Ball",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/cbrianball/odata-typescript-client/issues"
+    "url": "https://github.com/cbrianball/ts-odata-client/issues"
   },
-  "homepage": "https://github.com/cbrianball/odata-typescript-client#readme",
+  "homepage": "https://github.com/cbrianball/ts-odata-client#readme",
   "devDependencies": {
     "@types/chai": "^4.1.4",
     "@types/mocha": "^5.2.5",
