@@ -68,7 +68,7 @@ export class ODataQuery<T> {
             predicate = predicate(new PredicateBuilder<T>());
 
             const expression = new Expression(ExpressionOperator.Predicate, [predicate], this.expression);
-            return this.provider.createQuery(expression);
+            return this.provider.createQuery<T>(expression);
     }
 
     /**

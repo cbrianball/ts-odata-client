@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { ODataQuery } from "../../lib/expressions/ODataQuery";
 import { ODataV4QueryProvider } from "../../lib/expressions/ODataV4QueryProvider";
 import fetch from "node-fetch";
+import { ODataQueryResponse } from "../../lib/odataResponse";
 
 (global as any).fetch = fetch;
 
@@ -12,14 +13,19 @@ interface Subject {
     Abbreviation: string;
 }
 
+//do not run this test by default
 xdescribe("executing getManyAsync", () => {
 
     const endpoint = "http://api.purdue.io/odata/Subjects";
     const baseQuery = new ODataQuery<Subject>(new ODataV4QueryProvider(endpoint));
 
-    it("should not error", () => {
+    it("should not error", async () => {
         const query = baseQuery.filter(p => p.contains("Name", "vet"));
-        
-        expect(async () => await query.getManyAsync()).to.not.throw;        
+
+        let results = await query.getManyAsync();
+
+        expect(results).to.not.be.undefined;
+        expect(results.value).to.not.be.undefined;
+        results.value.forEach(v => expect(v.Name).to.match(/vet/i));
     });
 });
