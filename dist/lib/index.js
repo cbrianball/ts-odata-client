@@ -36,14 +36,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var odataEndpoint_1 = require("./odataEndpoint");
-var odataProvider_1 = require("./odataProvider");
+var ODataProvider_1 = require("./ODataProvider");
 var ODataContext = /** @class */ (function () {
     function ODataContext(basePath, requestHeaders) {
         this.basePath = basePath;
         this.requestHeaders = requestHeaders;
     }
     ODataContext.prototype.createProvider = function (endpointFragment) {
-        return new odataProvider_1.ODataProvider({ baseUrl: this.basePath + endpointFragment, headersCallback: this.requestHeaders });
+        return new ODataProvider_1.ODataProvider({ baseUrl: this.basePath + endpointFragment, headersCallback: this.requestHeaders });
     };
     /**
      * Create and ODataEndpoint by combining the basePath with the provided path.
@@ -63,7 +63,7 @@ var ODataContext = /** @class */ (function () {
                     case 0:
                         if (!results["@odata.nextLink"])
                             return [2 /*return*/, undefined];
-                        return [4 /*yield*/, odataProvider_1.executeAsync(results["@odata.nextLink"], this.requestHeaders ? this.requestHeaders() : {})];
+                        return [4 /*yield*/, ODataProvider_1.executeAsync(results["@odata.nextLink"], this.requestHeaders ? this.requestHeaders() : {})];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });

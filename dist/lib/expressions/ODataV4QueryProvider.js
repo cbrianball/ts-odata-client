@@ -60,17 +60,23 @@ var ODataV4QueryProvider = /** @class */ (function (_super) {
     }
     ODataV4QueryProvider.prototype.executeQueryAsync = function (expression) {
         return __awaiter(this, void 0, void 0, function () {
-            var url, init, response;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var url, init, response, _a, _b, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0:
                         url = this.buildQuery(expression);
                         init = this.requestInit ? this.requestInit() : {};
                         return [4 /*yield*/, fetch(url, init)];
                     case 1:
-                        response = _a.sent();
+                        response = _d.sent();
+                        if (!response.ok) return [3 /*break*/, 3];
                         return [4 /*yield*/, response.json()];
-                    case 2: return [2 /*return*/, _a.sent()];
+                    case 2: return [2 /*return*/, _d.sent()];
+                    case 3:
+                        _a = Error.bind;
+                        _c = (_b = JSON).stringify;
+                        return [4 /*yield*/, response.json()];
+                    case 4: throw new (_a.apply(Error, [void 0, _c.apply(_b, [_d.sent()])]))();
                 }
             });
         });

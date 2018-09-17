@@ -1,8 +1,8 @@
 import { expect } from "chai";
-import { ODataV4ExpressionVisitor } from "../../lib/expressions/ODataV4ExpressionVisitor";
-import { FieldReference } from "../../lib/expressions/FieldReference";
-import { Expression } from "../../lib/expressions/Expression";
-import {ExpressionOperator} from "../../lib/expressions/ExpressionOperator";
+import { ODataV4ExpressionVisitor } from "../lib/ODataV4ExpressionVisitor";
+import { FieldReference } from "../lib/FieldReference";
+import { Expression } from "../lib/Expression";
+import {ExpressionOperator} from "../lib/ExpressionOperator";
 
 
 describe("ODataV4ExpressionVisitor", () => {

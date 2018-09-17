@@ -1,4 +1,4 @@
-import { ODataResponse } from "../odataResponse";
+import { ODataResponse } from "./ODataResponse";
 import { ODataQuery } from "./ODataQuery";
 import { Expression } from "./Expression";
 

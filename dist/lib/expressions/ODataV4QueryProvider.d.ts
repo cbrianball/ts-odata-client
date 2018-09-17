@@ -1,6 +1,6 @@
 import { ODataQueryProvider } from "./ODataQueryProvider";
 import { Expression } from "./Expression";
-import { ODataResponse } from "../odataResponse";
+import { ODataResponse } from "./ODataResponse";
 export declare class ODataV4QueryProvider extends ODataQueryProvider {
     private readonly basePath;
     private readonly requestInit?;

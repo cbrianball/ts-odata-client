@@ -1,12 +1,14 @@
 import { ODataQueryProvider } from "./ODataQueryProvider";
 import { FieldReference } from "./FieldReference";
 import { Expression } from "./Expression";
-import { ODataQueryResponse, ODataQueryResponseWithCount, ODataResponse } from "../odataResponse";
+import { ODataQueryResponse, ODataQueryResponseWithCount, ODataResponse } from "./ODataResponse";
 import { PredicateBuilder } from "./PredicateBuilder";
 import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 import { ExpressionOperator } from "./ExpressionOperator";
 
 type FieldsFor<T> = Extract<keyof T, string>;
+
+export const resolveQuery = Symbol();
 
 export class ODataQuery<T> {
     /**
@@ -93,5 +95,9 @@ export class ODataQuery<T> {
     public async getManyWithCountAsync() {
         const expression = new Expression('getWithCount', [], this.expression);
         return await this.provider.executeQueryAsync<ODataQueryResponseWithCount<T>>(expression);
+    }
+
+    [resolveQuery]() {
+        return this.provider.buildQuery(this.expression);
     }
 }

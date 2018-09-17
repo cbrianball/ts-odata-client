@@ -1,7 +1,7 @@
 import { ODataQueryProvider } from "./ODataQueryProvider";
 import { Expression } from "./Expression";
-import { ODataResponse } from "../odataResponse";
-import { ODataV4ExpressionVisitor } from "./ODataV4ExpressionVisitor";
+import { ODataResponse } from "./ODataResponse";
+import { ODataV4ExpressionVisitor, ODataV4QuerySegments } from "./ODataV4ExpressionVisitor";
 
 export class ODataV4QueryProvider extends ODataQueryProvider {
 
@@ -11,12 +11,12 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
 
     async executeQueryAsync<T extends ODataResponse>(expression?: Expression) {
         const url = this.buildQuery(expression);
-        
+
         const init = this.requestInit ? this.requestInit() : {};
 
         const response = await fetch(url, init);
 
-        if(response.ok) return await response.json() as T;
+        if (response.ok) return await response.json() as T;
 
         throw new Error(JSON.stringify(await response.json()));
     }
@@ -29,8 +29,17 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
         const visitor = new ODataV4ExpressionVisitor();
         visitor.visit(expression);
 
-        const query = visitor.oDataQuery;
+        let path = this.basePath;
 
+        if (visitor.oDataQuery.key)
+            path += `(${visitor.oDataQuery.key})`;
+
+        const queryString = this.buildQueryString(visitor.oDataQuery);
+
+        return path + queryString;
+    }
+
+    private buildQueryString(query: ODataV4QuerySegments) {
         const queryString: string[] = [];
 
         if (query.filter)
@@ -49,8 +58,10 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
         if (query.top)
             queryString.push("$top=" + query.top);
 
-        if(queryString.length === 0) return this.basePath;
+        if (query.count)
+            queryString.push("$count=true");
 
-        return `${this.basePath}?${queryString.join('&')}`;
+        if (queryString.length > 0) return '?' + queryString.join("&");
+        return "";
     }
 }

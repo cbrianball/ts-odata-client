@@ -1,8 +1,7 @@
 import { expect } from "chai";
-import { ODataQuery } from "../../lib/expressions/ODataQuery";
-import { ODataV4QueryProvider } from "../../lib/expressions/ODataV4QueryProvider";
+import { ODataQuery } from "../lib/ODataQuery";
+import { ODataV4QueryProvider } from "../lib/ODataV4QueryProvider";
 import fetch from "node-fetch";
-import { ODataQueryResponse } from "../../lib/odataResponse";
 
 (global as any).fetch = fetch;
 

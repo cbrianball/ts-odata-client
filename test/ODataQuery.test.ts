@@ -1,6 +1,6 @@
 import { expect } from "chai";
-import { ODataQuery } from "../../lib/expressions/ODataQuery";
-import { ODataV4QueryProvider } from "../../lib/expressions/ODataV4QueryProvider";
+import { ODataQuery } from "../lib/ODataQuery";
+import { ODataV4QueryProvider } from "../lib/ODataV4QueryProvider";
 
 describe("ODataQuery", () => {
     const endpoint = "/odata/users";

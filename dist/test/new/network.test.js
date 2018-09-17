@@ -36,22 +36,27 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
+var chai_1 = require("chai");
 var ODataQuery_1 = require("../../lib/expressions/ODataQuery");
 var ODataV4QueryProvider_1 = require("../../lib/expressions/ODataV4QueryProvider");
 var node_fetch_1 = require("node-fetch");
 global.fetch = node_fetch_1.default;
-describe("abc", function () {
+//do not run this test by default
+xdescribe("executing getManyAsync", function () {
     var endpoint = "http://api.purdue.io/odata/Subjects";
     var baseQuery = new ODataQuery_1.ODataQuery(new ODataV4QueryProvider_1.ODataV4QueryProvider(endpoint));
-    it("def", function () { return __awaiter(_this, void 0, void 0, function () {
+    it("should not error", function () { return __awaiter(_this, void 0, void 0, function () {
         var query, results;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    query = baseQuery.filter(function (p) { return p.equals("SubjectClusterId", 25); });
+                    query = baseQuery.filter(function (p) { return p.contains("Name", "vet"); });
                     return [4 /*yield*/, query.getManyAsync()];
                 case 1:
                     results = _a.sent();
+                    chai_1.expect(results).to.not.be.undefined;
+                    chai_1.expect(results.value).to.not.be.undefined;
+                    results.value.forEach(function (v) { return chai_1.expect(v.Name).to.match(/vet/i); });
                     return [2 /*return*/];
             }
         });

@@ -8,17 +8,19 @@ import { ODataType } from "./ODataType";
 
 type Sort = { field: string, sort?: 'desc' };
 
-interface ODataQuery {
+export interface ODataV4QuerySegments {
     select?: string[];
     orderBy?: Sort[];
     skip?: number;
     top?: number;
     filter: string;
+    key?: any;
+    count?: boolean;
 }
 
 export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
 
-    public readonly oDataQuery: ODataQuery = {
+    public readonly oDataQuery: ODataV4QuerySegments = {
         filter: "",
     }
 
@@ -42,6 +44,18 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
 
     topVisitor(value: number) {
         this.oDataQuery.top = value;
+    }
+
+    getWithCountVisitor() {
+        this.oDataQuery.count = true;
+    }
+
+    getByKeyVisitor(key: any) {
+
+        if(!(key instanceof Literal))
+            key = new Literal(key);
+
+        this.oDataQuery.key = this.deriveLiteral(key);
     }
 
     predicateVisitor(predicate: BooleanPredicateBuilder<any>) {
