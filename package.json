@@ -2,7 +2,8 @@
   "name": "odata-typescript-client",
   "version": "0.0.5",
   "description": "OData TypeScript Client",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "mocha -r ts-node/register test/**/*.ts"
   },
