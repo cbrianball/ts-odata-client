@@ -1,6 +1,6 @@
 import { expect } from "chai";
-import { ODataV4Context } from "../lib";
-import { resolveQuery } from "../lib/ODataQuery";
+import { resolveQuery } from "../src/lib/ODataQuery";
+import { ODataV4Context } from "../src/v4";
 
 class MyContext extends ODataV4Context {
     constructor() {

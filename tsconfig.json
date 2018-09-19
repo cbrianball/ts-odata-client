@@ -10,5 +10,5 @@
     "outDir": "./dist",
     "strict": true
   },
-  "include": ["./lib/**/*.ts"]
+  "include": ["./src/**/*.ts"]
 }

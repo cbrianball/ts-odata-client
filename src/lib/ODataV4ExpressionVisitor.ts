@@ -181,8 +181,6 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
             return "null";
         if (value instanceof Date)
             return value.toISOString();
-        if (value instanceof String)
-            return value.toString();
 
         return value.toString();
     }
