@@ -8,12 +8,17 @@ import { ExpressionOperator } from "./ExpressionOperator";
 
 type FieldsFor<T> = Extract<keyof T, string>;
 
+/**
+ * A symbol used to retrieve the resulting query from the @type {ODataQueryProvider}.
+ */
 export const resolveQuery = Symbol();
 
+/**
+ * Represents a query against an OData source.
+ * This query is agnostic of the version of OData supported by the server (the provided @type {ODataQueryProvider} is responsible for translating the query into the correct syntax for the desired OData version supported by the endpoint).
+ */
 export class ODataQuery<T> {
-    /**
-     *
-     */
+    
     constructor(public readonly provider: ODataQueryProvider, public readonly expression?: Expression) { }
 
     /**

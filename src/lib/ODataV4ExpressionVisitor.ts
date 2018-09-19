@@ -18,6 +18,9 @@ export interface ODataV4QuerySegments {
     count?: boolean;
 }
 
+/**
+ * Converts a version-agnistic @type {Expression} into an object that holds information that adheres to ODataV4 speifications.
+ */
 export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
 
     public readonly oDataQuery: ODataV4QuerySegments = {}

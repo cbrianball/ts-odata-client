@@ -1,3 +1,6 @@
+/**
+ * The supported @type {Expression} operators.
+ */
 export const enum ExpressionOperator {
     And = "and",
     Contains = "contains",
