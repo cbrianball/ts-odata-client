@@ -2,28 +2,28 @@ import { FieldReference } from "./FieldReference";
 import { Expression, TypedExpression } from "./Expression";
 import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 
-type KeyExpressionOrUnkonwn<T> = T[keyof T] | TypedExpression<T[keyof T]> | undefined | null;
+type KeyExpressionOrUnkonwn<T, K extends keyof T> = T[K] | TypedExpression<T[K]> | undefined | null;
 
 export class PredicateBuilder<T> {
-    
+
     constructor(public readonly expression?: Expression) { }
 
     /**
      * Negates the result of the predicate provided
      * @param predicate Use the same FilterBuilder that this method chain was invoked with
      */
-    public not(predicate: BooleanPredicateBuilder<T>) {        
+    public not(predicate: BooleanPredicateBuilder<T>) {
         if (!predicate.expression)
             throw new Error(`'and' predicate must have at least one non-empty Predicate`);
 
-        return new BooleanPredicateBuilder<T>(new Expression('not', [this.expression], predicate.expression));        
+        return new BooleanPredicateBuilder<T>(new Expression('not', [this.expression], predicate.expression));
     }
 
     /**
      * Returns a reference used by FilterBuilder to allow comparisons to other values within the record
      * @param field
      */
-    public fieldReference<K extends Extract<keyof T, string>>(field: K) {        
+    public fieldReference<K extends Extract<keyof T, string>>(field: K) {
         return new TypedExpression<T[K]>('fieldReference', [new FieldReference<T>(field)]);
     }
 
@@ -32,7 +32,7 @@ export class PredicateBuilder<T> {
      * @param field
      * @param value
      */
-    public equals<K extends Extract<keyof T, string>>(field: K, value: KeyExpressionOrUnkonwn<T>) {
+    public equals<K extends Extract<keyof T, string>>(field: K, value: KeyExpressionOrUnkonwn<T, K>) {
         const expression = new Expression('equals', [new FieldReference<T>(field), value], this.expression);
         return new BooleanPredicateBuilder<T>(expression);
     }
@@ -42,7 +42,7 @@ export class PredicateBuilder<T> {
      * @param field
      * @param value
      */
-    public notEquals<K extends Extract<keyof T, string>>(field: K, value: KeyExpressionOrUnkonwn<T>) {
+    public notEquals<K extends Extract<keyof T, string>>(field: K, value: KeyExpressionOrUnkonwn<T, K>) {
         const expression = new Expression('notEquals', [new FieldReference<T>(field), value], this.expression);
         return new BooleanPredicateBuilder<T>(expression);
     }
@@ -52,7 +52,7 @@ export class PredicateBuilder<T> {
      * @param field
      * @param value
      */
-    public greaterThan<K extends Extract<keyof T, string>>(field: K, value: KeyExpressionOrUnkonwn<T>) {
+    public greaterThan<K extends Extract<keyof T, string>>(field: K, value: KeyExpressionOrUnkonwn<T, K>) {
         const expression = new Expression('greaterThan', [new FieldReference<T>(field), value], this.expression);
         return new BooleanPredicateBuilder<T>(expression);
     }
@@ -62,7 +62,7 @@ export class PredicateBuilder<T> {
      * @param field
      * @param value
      */
-    public lessThan<K extends Extract<keyof T, string>>(field: K, value: KeyExpressionOrUnkonwn<T>) {
+    public lessThan<K extends Extract<keyof T, string>>(field: K, value: KeyExpressionOrUnkonwn<T, K>) {
         const expression = new Expression('lessThan', [new FieldReference<T>(field), value], this.expression);
         return new BooleanPredicateBuilder<T>(expression);
     }
@@ -72,7 +72,7 @@ export class PredicateBuilder<T> {
      * @param field
      * @param value
      */
-    public greaterThanOrEqualTo<K extends Extract<keyof T, string>>(field: K, value: KeyExpressionOrUnkonwn<T>) {
+    public greaterThanOrEqualTo<K extends Extract<keyof T, string>>(field: K, value: KeyExpressionOrUnkonwn<T, K>) {
         const expression = new Expression('greaterThanOrEqualTo', [new FieldReference<T>(field), value], this.expression);
         return new BooleanPredicateBuilder<T>(expression);
     }
@@ -82,7 +82,7 @@ export class PredicateBuilder<T> {
      * @param field
      * @param value
      */
-    public lessThanOrEqualTo<K extends Extract<keyof T, string>>(field: K, value: KeyExpressionOrUnkonwn<T>) {
+    public lessThanOrEqualTo<K extends Extract<keyof T, string>>(field: K, value: KeyExpressionOrUnkonwn<T, K>) {
         const expression = new Expression('lessThanOrEqualTo', [new FieldReference<T>(field), value], this.expression);
         return new BooleanPredicateBuilder<T>(expression);
     }

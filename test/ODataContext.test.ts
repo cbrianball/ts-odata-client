@@ -13,7 +13,7 @@ class MyContext extends ODataV4Context {
 describe("ODataConext", () => {
     const context = new MyContext();
     
-    it("should create query", () => {
+    it("should create query", async () => {
         const query = context.subjects.filter(p => p.contains("Name", "vet"));
 
         expect(query[resolveQuery]().toString()).to.be.eql("http://api.purdue.io/odata/Subjects?$filter=contains(Name,'vet')");
