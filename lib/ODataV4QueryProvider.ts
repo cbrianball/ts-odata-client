@@ -3,6 +3,9 @@ import { Expression } from "./Expression";
 import { ODataResponse } from "./ODataResponse";
 import { ODataV4ExpressionVisitor, ODataV4QuerySegments } from "./ODataV4ExpressionVisitor";
 
+/**
+ * Consumed by ODataContext classes; can also be used directly in lieu of creating an ODataContext class
+ */
 export class ODataV4QueryProvider extends ODataQueryProvider {
 
     constructor(private readonly basePath: string, private readonly requestInit?: () => RequestInit) {

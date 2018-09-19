@@ -3,7 +3,7 @@ import { ODataQuery } from "./ODataQuery";
 import { Expression } from "./Expression";
 
 export abstract class ODataQueryProvider {
-    createQuery<T>(expression: Expression) {
+    createQuery<T>(expression?: Expression) {
         return new ODataQuery<T>(this, expression);
     }
 
