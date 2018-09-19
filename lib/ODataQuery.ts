@@ -78,7 +78,7 @@ export class ODataQuery<T> {
      * @param key
      */
     public async getAsync(key: any) {
-        const expression = new Expression('getByKey', [key], this.expression);
+        const expression = new Expression(ExpressionOperator.GetByKey, [key], this.expression);
         return await this.provider.executeQueryAsync<ODataResponse & T>(expression);
     }
 
@@ -93,7 +93,7 @@ export class ODataQuery<T> {
      * Returns a set of records, including the total count of records, which may not be the same as the number of records return if the results are paginated.
      */
     public async getManyWithCountAsync() {
-        const expression = new Expression('getWithCount', [], this.expression);
+        const expression = new Expression(ExpressionOperator.GetWithCount, [], this.expression);
         return await this.provider.executeQueryAsync<ODataQueryResponseWithCount<T>>(expression);
     }
 
