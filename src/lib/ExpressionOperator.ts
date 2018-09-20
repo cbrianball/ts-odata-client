@@ -6,6 +6,7 @@ export const enum ExpressionOperator {
     Contains = "contains",
     EndsWith = "endsWith",
     Equals = "equals",
+    Expand = "expand",
     FieldReference = "fieldReference",
     GetByKey = "getByKey",
     GetWithCount = "getWithCount",

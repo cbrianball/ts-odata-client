@@ -2,6 +2,8 @@ import { FieldReference } from "./FieldReference";
 import { Expression, TypedExpression } from "./Expression";
 import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 import { ExpressionOperator } from "./ExpressionOperator";
+import { ODataQuery } from "./ODataQuery";
+import { SubType } from "./SubType";
 
 type KeyExpressionOrUnkonwn<T, K extends keyof T> = T[K] | TypedExpression<T[K]> | undefined | null;
 
@@ -118,7 +120,3 @@ export class PredicateBuilder<T> {
         return new BooleanPredicateBuilder<T>(expression);
     }
 }
-
-type SubType<Base, Condition> = Pick<Base, {
-    [Key in keyof Base]: Base[Key] extends Condition ? Key : never
-}[keyof Base]>;
