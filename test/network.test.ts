@@ -1,5 +1,4 @@
 import { expect } from "chai";
-import { ODataQuery } from "../src";
 import { ODataV4QueryProvider } from "../src/v4";
 import fetch from "node-fetch";
 
@@ -16,7 +15,7 @@ interface Subject {
 xdescribe("executing getManyAsync", () => {
 
     const endpoint = "http://api.purdue.io/odata/Subjects";
-    const baseQuery = new ODataQuery<Subject>(new ODataV4QueryProvider(endpoint));
+    const baseQuery = ODataV4QueryProvider.createQuery<Subject>(endpoint);
 
     it("should not error", async () => {
         const query = baseQuery.filter(p => p.contains("Name", "vet"));
