@@ -60,4 +60,6 @@ typings/
 # next.js build output
 .next
 
+#ts-odata-client custom
 dist/
+test-results.xml
