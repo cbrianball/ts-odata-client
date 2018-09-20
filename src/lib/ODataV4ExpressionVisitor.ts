@@ -50,9 +50,12 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
 
     expandVisitor(...fields: FieldReference<any>[]) {
         if (!this.oDataQuery.expand)
-            this.oDataQuery.expand = [];
+            this.oDataQuery.expand = [];        
 
         this.oDataQuery.expand.push(...fields.map(f => f.toString()));
+        
+        //ensure unique values
+        this.oDataQuery.expand = Array.from(new Set(this.oDataQuery.expand));
     }
 
     getWithCountVisitor() {

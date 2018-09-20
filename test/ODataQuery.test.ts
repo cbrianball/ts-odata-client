@@ -169,8 +169,26 @@ describe("ODataQuery", () => {
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName eq null`);
     });
 
-    it("should handle expand", () => {
-        const query = baseQuery.expand("children").expand("pets");        
+    it("should handle cumulative expand", () => {
+        const query = baseQuery.expand("children");
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=children`);
+    });
+
+    it("should handle cumulative expands", () => {
+        const query = baseQuery.expand("children").expand("pets");
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=children,pets`);
+    });
+
+    it("should handle mulitple expands in one call", () => {
+        const query = baseQuery.expand("children", "pets");
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=children,pets`);
+    });
+
+    it("should handle not repeat expands", () => {
+        const query = baseQuery.expand("children", "pets").expand("pets");
 
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=children,pets`);
     });

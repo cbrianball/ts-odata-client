@@ -2,6 +2,7 @@ import { ODataQueryProvider } from "./ODataQueryProvider";
 import { Expression } from "./Expression";
 import { ODataResponse } from "./ODataResponse";
 import { ODataV4ExpressionVisitor, ODataV4QuerySegments } from "./ODataV4ExpressionVisitor";
+import { ExcludeProperties } from "./ExcludeProperties";
 
 /**
  * A class used to generate queries that will ultimately be translated into ODataV4 queries.
@@ -9,8 +10,13 @@ import { ODataV4ExpressionVisitor, ODataV4QuerySegments } from "./ODataV4Express
  */
 export class ODataV4QueryProvider extends ODataQueryProvider {
 
-    constructor(private readonly basePath: string, private readonly requestInit?: () => RequestInit) {
+    constructor(private readonly path: string, private readonly requestInit?: () => RequestInit) {
         super();
+    }
+
+    static createQuery<T>(path: string, requestInit?: () => RequestInit) {
+        return new ODataV4QueryProvider(path, requestInit)
+            .createQuery<T, ExcludeProperties<T, any[]>>();
     }
 
     async executeQueryAsync<T extends ODataResponse>(expression?: Expression) {
@@ -26,14 +32,14 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
     }
 
     buildQuery(expression?: Expression) {
-        return expression ? this.generateUrl(expression) : this.basePath;
+        return expression ? this.generateUrl(expression) : this.path;
     }
 
     private generateUrl(expression: Expression) {
         const visitor = new ODataV4ExpressionVisitor();
         visitor.visit(expression);
 
-        let path = this.basePath;
+        let path = this.path;
 
         if (visitor.oDataQuery.key)
             path += `(${visitor.oDataQuery.key})`;
@@ -65,7 +71,7 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
         if (query.count)
             queryString.push("$count=true");
 
-        if(query.expand)
+        if (query.expand)
             queryString.push("$expand=" + query.expand)
 
         if (queryString.length > 0) return '?' + queryString.join("&");
