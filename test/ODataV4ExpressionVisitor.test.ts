@@ -120,9 +120,16 @@ describe("ODataV4ExpressionVisitor", () => {
         expect(visitor.oDataQuery).to.eql({ key: "00000000-0000-0000-000000000000" });
     });
 
+    it("should handle expand", () => {
+        const visitor = new ODataV4ExpressionVisitor();
+        visitor.visit(new Expression(ExpressionOperator.Expand, [new FieldReference<Person>("children")]));
+
+        expect(visitor.oDataQuery).to.eql({ expand: ["children"] });
+    });
+
     it("should error on unknown expression", () => {
         const visitor = new ODataV4ExpressionVisitor();
-        const expression = new Expression('fake operator', []);
+        const expression = new Expression('fake operator' as ExpressionOperator, []);
 
         expect(() => visitor.visit(expression)).to.throw();
     });
@@ -132,4 +139,5 @@ interface Person {
     firstName: string;
     lastName: string;
     age: number;
+    children: string[];
 }

@@ -1,10 +1,11 @@
 import { expect } from "chai";
 import { ODataQuery } from "../src";
 import { ODataV4QueryProvider } from "../src/v4";
+import { ExcludeProperties } from "../src/lib/ExcludeProperties";
 
 describe("ODataQuery", () => {
     const endpoint = "/odata/users";
-    const baseQuery = new ODataQuery<Person>(new ODataV4QueryProvider(endpoint));
+    const baseQuery = new ODataQuery<Person, ExcludeProperties<Person, any[]>>(new ODataV4QueryProvider(endpoint));
 
     it("should produce base URL with no query", () => {
         expect(baseQuery.provider.buildQuery(baseQuery.expression)).to.be.eql(endpoint);
@@ -16,15 +17,15 @@ describe("ODataQuery", () => {
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$select=firstName`);
     });
 
-    it("should set select filter with mulitple fields", () => {        
+    it("should set select filter with mulitple fields", () => {
         const query = baseQuery.select("firstName", "lastName");
 
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$select=firstName,lastName`);
     });
 
-    it("should set combination select filter", () => {        
+    it("should set combination select filter", () => {
         const query = baseQuery.select("firstName", "lastName")
-        .select("lastName");
+            .select("lastName");
 
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$select=lastName`);
     });
@@ -112,66 +113,74 @@ describe("ODataQuery", () => {
 
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName eq 'john' and (age ge 30 or lastName ne 'Jones')`);
     });
-    
+
     it("should set complex filter", () => {
         const query = baseQuery.filter(p => p.equals("firstName", "john").and(p.greaterThanOrEqualTo("age", 30))
-        .or(p.notEquals("lastName", "Jones").and(p.equals("email", ".com"))));
+            .or(p.notEquals("lastName", "Jones").and(p.equals("email", ".com"))));
 
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=(firstName eq 'john' and age ge 30) or (lastName ne 'Jones' and email eq '.com')`);
     });
 
-    it("should handle contains", () =>{
+    it("should handle contains", () => {
         const query = baseQuery.filter(p => p.contains("firstName", "jac"));
 
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=contains(firstName,'jac')`);
     });
 
-    it("should handle startsWith", () =>{
+    it("should handle startsWith", () => {
         const query = baseQuery.filter(p => p.startsWith("firstName", "jac"));
 
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=startsWith(firstName,'jac')`);
     });
 
-    it("should handle endsWith", () =>{
+    it("should handle endsWith", () => {
         const query = baseQuery.filter(p => p.endsWith("firstName", "jac"));
 
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=endsWith(firstName,'jac')`);
     });
 
-    it("should handle equals and notEquals", () =>{
+    it("should handle equals and notEquals", () => {
         const query = baseQuery.filter(p => p.equals("firstName", "jac").and(p.notEquals("age", 50)));
 
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName eq 'jac' and age ne 50`);
     });
 
-    it("should handle greaterThan and greaterThanEqualTo", () =>{
+    it("should handle greaterThan and greaterThanEqualTo", () => {
         const query = baseQuery.filter(p => p.greaterThan("firstName", "jac").and(p.greaterThanOrEqualTo("age", 50)));
 
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName gt 'jac' and age ge 50`);
     });
 
-    it("should handle lessThan and lessThanEqualTo", () =>{
+    it("should handle lessThan and lessThanEqualTo", () => {
         const query = baseQuery.filter(p => p.lessThan("firstName", "jac").and(p.lessThanOrEqualTo("age", 50)));
 
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName lt 'jac' and age le 50`);
     });
 
-    it("should handle null comparisons", () => {        
+    it("should handle null comparisons", () => {
         const query = baseQuery.filter(p => p.equals("firstName", null));
 
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName eq null`);
     });
 
-    it("should handle undefined comparisons", () => {        
+    it("should handle undefined comparisons", () => {
         const query = baseQuery.filter(p => p.equals("firstName", undefined));
 
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName eq null`);
     });
+
+    it("should handle expand", () => {
+        const query = baseQuery.expand("children").expand("pets");        
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=children,pets`);
+    });
 });
 
-interface Person{
+interface Person {
     firstName: string;
     lastName: string;
     age: number;
     email: string;
+    children: string[];
+    pets: string[];
 }

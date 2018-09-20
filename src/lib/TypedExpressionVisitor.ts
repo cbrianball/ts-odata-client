@@ -15,7 +15,7 @@ export abstract class TypedExpressionVisitor implements ExpressionVisitor {
         const member = (this as any)[expression.operator + "Visitor"];
 
         if(typeof member !== "function")
-            throw new Error(`No method found named '${expression.operator}Visitor'; operator is not supported.`);
+            throw new Error(`No method found named '${expression.operator}Visitor'; '${expression.operator}' operator is not supported.`);
             
             member.apply(this, expression.operands);
     }

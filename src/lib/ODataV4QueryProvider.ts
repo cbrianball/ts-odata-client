@@ -65,6 +65,9 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
         if (query.count)
             queryString.push("$count=true");
 
+        if(query.expand)
+            queryString.push("$expand=" + query.expand)
+
         if (queryString.length > 0) return '?' + queryString.join("&");
         return "";
     }

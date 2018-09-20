@@ -16,6 +16,7 @@ export interface ODataV4QuerySegments {
     filter?: string;
     key?: any;
     count?: boolean;
+    expand?: string[];
 }
 
 /**
@@ -47,15 +48,22 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
         this.oDataQuery.top = value;
     }
 
+    expandVisitor(...fields: FieldReference<any>[]) {
+        if (!this.oDataQuery.expand)
+            this.oDataQuery.expand = [];
+
+        this.oDataQuery.expand.push(...fields.map(f => f.toString()));
+    }
+
     getWithCountVisitor() {
         this.oDataQuery.count = true;
     }
 
     getByKeyVisitor(key: any) {
-        if(key instanceof Expression) {
-            if(key.operator !== ExpressionOperator.Literal)
+        if (key instanceof Expression) {
+            if (key.operator !== ExpressionOperator.Literal)
                 throw new Error(`Only literal expressions allowed for ${ExpressionOperator.Literal} expession types`);
-            
+
             key = key.operands[0];
         }
 
