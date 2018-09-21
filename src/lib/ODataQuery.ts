@@ -79,9 +79,22 @@ export class ODataQuery<T,U> {
             return this.provider.createQuery<T, U>(expression);
     }
 
+    /**
+     * Includes the indicated arrays are to be returned as part of the query results.
+     * @param fields 
+     */
     public expand<K extends keyof SubType<T, any[]>>(...fields: K[]) {
         const expression = new Expression(ExpressionOperator.Expand, fields.map(f => new FieldReference<T>(<any>f)), this.expression);
         return this.provider.createQuery<T, U & Pick<T, K>>(expression);
+    }
+
+    /**
+     * Includes all arrays as part of the query results.
+     * @param fields 
+     */
+    public expandAll() {
+        const expression = new Expression(ExpressionOperator.ExpandAll, [], this.expression);
+        return this.provider.createQuery<T, U>(expression);
     }
 
     /**

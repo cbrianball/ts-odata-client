@@ -6,7 +6,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "mocha -r ts-node/register test/**/*.ts --reporter mocha-junit-reporter"
+    "test": "mocha -r ts-node/register test/**/*.ts",
+    "test-ci": "mocha -r ts-node/register test/**/*.ts --reporter mocha-junit-reporter"
   },
   "repository": {
     "type": "git",

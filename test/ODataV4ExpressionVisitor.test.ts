@@ -133,6 +133,34 @@ describe("ODataV4ExpressionVisitor", () => {
 
         expect(() => visitor.visit(expression)).to.throw();
     });
+
+    it("should handle expandAll", () => {
+        const visitor = new ODataV4ExpressionVisitor();
+        visitor.visit(new Expression(ExpressionOperator.ExpandAll, []));
+
+        expect(visitor.oDataQuery).to.eql({ expand: ["*"] });
+    });
+
+    it("should handle multiple expandAll", () => {
+        const visitor = new ODataV4ExpressionVisitor();
+        visitor.visit(new Expression(ExpressionOperator.ExpandAll, [], new Expression(ExpressionOperator.ExpandAll, [])));
+
+        expect(visitor.oDataQuery).to.eql({ expand: ["*"] });
+    });
+
+    it("should handle expandAll then expand", () => {
+        const visitor = new ODataV4ExpressionVisitor();
+        visitor.visit(new Expression(ExpressionOperator.Expand, [new FieldReference<Person>("children")], new Expression(ExpressionOperator.ExpandAll, [])));
+
+        expect(visitor.oDataQuery).to.eql({ expand: ["children"] });
+    });
+
+    it("should handle expand then expandAll", () => {
+        const visitor = new ODataV4ExpressionVisitor();
+        visitor.visit(new Expression(ExpressionOperator.ExpandAll, [], new Expression(ExpressionOperator.Expand, [new FieldReference<Person>("children")])));
+
+        expect(visitor.oDataQuery).to.eql({ expand: ["*"] });
+    });
 });
 
 interface Person {
