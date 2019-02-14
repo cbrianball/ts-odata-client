@@ -2,15 +2,14 @@
   "name": "ts-odata-client",
   "version": "0.1.0",
   "description": "OData TypeScript Client",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "/dist"
-  ],
+  "main": "/index.js",
+  "types": "/index.d.ts",  
   "scripts": {
-    "build": "tsc",
+    "build": "rimraf dist && tsc",
     "test": "mocha -r ts-node/register test/**/*.ts",
-    "test-ci": "mocha -r ts-node/register test/**/*.ts --reporter mocha-junit-reporter"
+    "test-ci": "mocha -r ts-node/register test/**/*.ts --reporter mocha-junit-reporter",
+    "pack": "npm run build && cpx {package.json,README.md} dist && npm pack ./dist --dry-run",
+    "publish": "npm run build && cpx {package.json,README.md} dist && npm publish ./dist"
   },
   "repository": {
     "type": "git",
@@ -31,9 +30,11 @@
     "@types/mocha": "^5.2.5",
     "@types/node-fetch": "^2.1.2",
     "chai": "^4.1.2",
+    "cpx": "^1.5.0",
     "mocha": "^5.2.0",
     "mocha-junit-reporter": "^1.18.0",
     "node-fetch": "^2.2.0",
+    "rimraf": "^2.6.3",
     "ts-node": "^7.0.1",
     "typescript": "^3.0.3"
   }
