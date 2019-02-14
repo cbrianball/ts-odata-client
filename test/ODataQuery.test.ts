@@ -78,6 +78,12 @@ describe("ODataQuery", () => {
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$skip=10`);
     });
 
+    it("should ignore skip if set to 0", () => {
+        const query = baseQuery.skip(0);
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}`);
+    });
+
     it("should set last skip value provided", () => {
         const query = baseQuery.skip(10).skip(5);
 
@@ -88,6 +94,12 @@ describe("ODataQuery", () => {
         const query = baseQuery.top(10);
 
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$top=10`);
+    });
+
+    it("should set top to 0", () => {
+        const query = baseQuery.top(0);
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$top=0`);
     });
 
     it("should set last skip value provided", () => {

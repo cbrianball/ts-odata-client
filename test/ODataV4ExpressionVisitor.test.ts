@@ -85,6 +85,14 @@ describe("ODataV4ExpressionVisitor", () => {
         expect(visitor.oDataQuery).to.eql({ top: 5 });
     });
 
+    it("should handle 0 top", () => {
+        const visitor = new ODataV4ExpressionVisitor();
+        const expression = new Expression(ExpressionOperator.Top, [0]);
+        visitor.visit(expression);
+
+        expect(visitor.oDataQuery).to.eql({ top: 0 });
+    })
+
     it("should handle count", () => {
         const visitor = new ODataV4ExpressionVisitor();
         visitor.visit(new Expression(ExpressionOperator.GetWithCount, []));

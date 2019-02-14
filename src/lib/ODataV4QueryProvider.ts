@@ -63,10 +63,10 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
             queryString.push("$select=" + query.select);
 
         if (query.skip)
-            queryString.push("$skip=" + query.skip);
+            queryString.push("$skip=" + Math.floor(query.skip));
 
-        if (query.top)
-            queryString.push("$top=" + query.top);
+        if (typeof query.top === "number" && query.top >= 0)
+            queryString.push("$top=" + Math.floor(query.top));
 
         if (query.count)
             queryString.push("$count=true");
