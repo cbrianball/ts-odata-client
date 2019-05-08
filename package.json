@@ -1,6 +1,6 @@
 {
   "name": "ts-odata-client",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "OData TypeScript Client",
   "main": "/index.js",
   "types": "/index.d.ts",  
@@ -9,7 +9,7 @@
     "test": "mocha -r ts-node/register test/**/*.ts",
     "test-ci": "mocha -r ts-node/register test/**/*.ts --reporter mocha-junit-reporter",
     "pack": "npm run build && cpx {package.json,README.md} dist && npm pack ./dist --dry-run",
-    "publish": "npm run build && cpx {package.json,README.md} dist && npm publish ./dist"
+    "publish-npm": "npm run build && cpx {package.json,README.md} dist && npm publish ./dist"
   },
   "repository": {
     "type": "git",
