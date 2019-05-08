@@ -20,7 +20,7 @@ describe("ODataQuery", () => {
     it("should set select filter with mulitple fields", () => {
         const query = baseQuery.select("firstName", "lastName");
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$select=firstName,lastName`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$select=${encodeURIComponent("firstName,lastName")}`);
     });
 
     it("should set combination select filter", () => {
@@ -39,37 +39,37 @@ describe("ODataQuery", () => {
     it("should set orderBy with multiple fields", () => {
         const query = baseQuery.orderBy("firstName", "lastName");
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$orderby=firstName,lastName`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$orderby=${encodeURIComponent("firstName,lastName")}`);
     });
 
     it("should set orderBy multiple times", () => {
         const query = baseQuery.orderBy("firstName", "lastName").orderBy("age");
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$orderby=firstName,lastName,age`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$orderby=${encodeURIComponent("firstName,lastName,age")}`);
     });
 
     it("should set orderByDescending", () => {
         const query = baseQuery.orderByDescending("firstName");
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$orderby=firstName desc`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$orderby=${encodeURIComponent("firstName desc")}`);
     });
 
     it("should set orderByDescending with multiple fields", () => {
         const query = baseQuery.orderByDescending("firstName", "lastName");
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$orderby=firstName desc,lastName desc`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$orderby=${encodeURIComponent("firstName desc,lastName desc")}`);
     });
 
     it("should set orderByDescending multiple times", () => {
         const query = baseQuery.orderByDescending("firstName", "lastName").orderByDescending("age");
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$orderby=firstName desc,lastName desc,age desc`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$orderby=${encodeURIComponent("firstName desc,lastName desc,age desc")}`);
     });
 
     it("should set orderBy and orderByDescending multiple times", () => {
         const query = baseQuery.orderByDescending("firstName").orderBy("age").orderByDescending("lastName");
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$orderby=firstName desc,age,lastName desc`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$orderby=${encodeURIComponent("firstName desc,age,lastName desc")}`);
     });
 
     it("should set skip", () => {
@@ -111,74 +111,74 @@ describe("ODataQuery", () => {
     it("should set simple filter", () => {
         const query = baseQuery.filter(p => p.equals("firstName", "john"));
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName eq 'john'`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("firstName eq 'john'")}`);
     });
 
     it("should set compound filter", () => {
         const query = baseQuery.filter(p => p.equals("firstName", "john").and(p.greaterThanOrEqualTo("age", 30)));
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName eq 'john' and age ge 30`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("firstName eq 'john' and age ge 30")}`);
     });
 
     it("should set complex filter", () => {
         const query = baseQuery.filter(p => p.equals("firstName", "john").and(p.greaterThanOrEqualTo("age", 30).or(p.notEquals("lastName", "Jones"))));
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName eq 'john' and (age ge 30 or lastName ne 'Jones')`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("firstName eq 'john' and (age ge 30 or lastName ne 'Jones')")}`);
     });
 
     it("should set complex filter", () => {
         const query = baseQuery.filter(p => p.equals("firstName", "john").and(p.greaterThanOrEqualTo("age", 30))
             .or(p.notEquals("lastName", "Jones").and(p.equals("email", ".com"))));
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=(firstName eq 'john' and age ge 30) or (lastName ne 'Jones' and email eq '.com')`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("(firstName eq 'john' and age ge 30) or (lastName ne 'Jones' and email eq '.com')")}`);
     });
 
     it("should handle contains", () => {
         const query = baseQuery.filter(p => p.contains("firstName", "jac"));
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=contains(firstName,'jac')`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("contains(firstName,'jac')")}`);
     });
 
     it("should handle startsWith", () => {
         const query = baseQuery.filter(p => p.startsWith("firstName", "jac"));
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=startsWith(firstName,'jac')`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("startsWith(firstName,'jac')")}`);
     });
 
     it("should handle endsWith", () => {
         const query = baseQuery.filter(p => p.endsWith("firstName", "jac"));
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=endsWith(firstName,'jac')`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("endsWith(firstName,'jac')")}`);
     });
 
     it("should handle equals and notEquals", () => {
         const query = baseQuery.filter(p => p.equals("firstName", "jac").and(p.notEquals("age", 50)));
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName eq 'jac' and age ne 50`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("firstName eq 'jac' and age ne 50")}`);
     });
 
     it("should handle greaterThan and greaterThanEqualTo", () => {
         const query = baseQuery.filter(p => p.greaterThan("firstName", "jac").and(p.greaterThanOrEqualTo("age", 50)));
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName gt 'jac' and age ge 50`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("firstName gt 'jac' and age ge 50")}`);
     });
 
     it("should handle lessThan and lessThanEqualTo", () => {
         const query = baseQuery.filter(p => p.lessThan("firstName", "jac").and(p.lessThanOrEqualTo("age", 50)));
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName lt 'jac' and age le 50`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("firstName lt 'jac' and age le 50")}`);
     });
 
     it("should handle null comparisons", () => {
         const query = baseQuery.filter(p => p.equals("firstName", null));
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName eq null`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("firstName eq null")}`);
     });
 
     it("should handle undefined comparisons", () => {
         const query = baseQuery.filter(p => p.equals("firstName", undefined));
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=firstName eq null`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("firstName eq null")}`);
     });
 
     it("should handle cumulative expand", () => {
@@ -190,19 +190,25 @@ describe("ODataQuery", () => {
     it("should handle cumulative expands", () => {
         const query = baseQuery.expand("children").expand("pets");
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=children,pets`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=${encodeURIComponent("children,pets")}`);
     });
 
     it("should handle mulitple expands in one call", () => {
         const query = baseQuery.expand("children", "pets");
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=children,pets`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=${encodeURIComponent("children,pets")}`);
     });
 
-    it("should handle not repeat expands", () => {
+    it("should not repeat expands", () => {
         const query = baseQuery.expand("children", "pets").expand("pets");
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=children,pets`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=${encodeURIComponent("children,pets")}`);
+    });
+
+    it("should handle any", () => {
+        const query = baseQuery.filter(p => p.any("lastName", ["Jones", "Smith", "Ng"]));
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("lastName in ('Jones','Smith','Ng')")}`);
     });
 });
 

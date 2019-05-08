@@ -119,4 +119,14 @@ export class PredicateBuilder<T> {
         const expression = new Expression(ExpressionOperator.EndsWith, [new FieldReference<T>(field as any), value], this.expression);
         return new BooleanPredicateBuilder<T>(expression);
     }
+
+    /**
+     * Filters based on the field being any one of the provided values.
+     * @param field 
+     * @param values 
+     */
+    public any<K extends Extract<keyof T, string>>(field: K, values: ArrayLike<KeyExpressionOrUnkonwn<T, K>> | Iterable<KeyExpressionOrUnkonwn<T, K>>){
+        const expression = new Expression(ExpressionOperator.In, [new FieldReference<T>(field), Array.from(values)], this.expression);
+        return new BooleanPredicateBuilder<T>(expression);
+    }
 }

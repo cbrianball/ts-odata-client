@@ -53,14 +53,14 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
         const queryString: string[] = [];
 
         if (query.filter)
-            queryString.push("$filter=" + query.filter);
+            queryString.push("$filter=" + encodeURIComponent(query.filter));
 
         if (query.orderBy) {
-            queryString.push("$orderby=" + query.orderBy.map(o => o.sort ? `${o.field} ${o.sort}` : o.field).join(','));
+            queryString.push("$orderby=" + encodeURIComponent(query.orderBy.map(o => o.sort ? `${o.field} ${o.sort}` : o.field).join(',')));
         }
 
         if (query.select)
-            queryString.push("$select=" + query.select);
+            queryString.push("$select=" + encodeURIComponent(query.select.join(',')));
 
         if (query.skip)
             queryString.push("$skip=" + Math.floor(query.skip));
@@ -72,7 +72,7 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
             queryString.push("$count=true");
 
         if (query.expand)
-            queryString.push("$expand=" + query.expand)
+            queryString.push("$expand=" + encodeURIComponent(query.expand.join(',')));
 
         if (queryString.length > 0) return '?' + queryString.join("&");
         return "";

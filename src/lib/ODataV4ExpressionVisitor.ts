@@ -110,7 +110,11 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
             }
             else if (operand instanceof Expression) {
                 translation.push(this.translatePredicateExpression(operand));
-            } else //assume this is a literal without the type specified
+            }
+            else if (operand instanceof Array) {
+                translation.push([operand.map(i => this.deriveLiteral(new Literal(i))).join(',')]);
+            }
+            else //assume this is a literal without the type specified
                 translation.push([this.deriveLiteral(new Literal(operand))]);
         }
 
@@ -149,6 +153,8 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
                     return [`startsWith(${this.reduceTranslatedExpression(left)},${this.reduceTranslatedExpression(right)})`];
                 case ExpressionOperator.EndsWith:
                     return [`endsWith(${this.reduceTranslatedExpression(left)},${this.reduceTranslatedExpression(right)})`];
+                case ExpressionOperator.In:
+                    return [`${this.reduceTranslatedExpression(left)} in (${this.reduceTranslatedExpression(right)})`];
                 default:
                     throw new Error(`Operator '${expression.operator}' is not supported`);
             }

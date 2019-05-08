@@ -16,7 +16,7 @@ describe("ODataConext", () => {
     it("should create query", async () => {
         const query = context.subjects.filter(p => p.contains("Name", "vet"));
 
-        expect(query[resolveQuery]().toString()).to.be.eql("http://api.purdue.io/odata/Subjects?$filter=contains(Name,'vet')");
+        expect(query[resolveQuery]().toString()).to.be.eql("http://api.purdue.io/odata/Subjects?$filter=contains(Name%2C'vet')");
         
     });
 });

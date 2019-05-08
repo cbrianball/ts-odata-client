@@ -13,6 +13,7 @@ export const enum ExpressionOperator {
     GetWithCount = "getWithCount",
     GreaterThan = "greaterThan",
     GreaterThanOrEqualTo = "greaterThanOrEqualTo",
+    In = "in",
     LessThan = "lessThan",
     LessThanOrEqualTo = "lessThanOrEqualTo",
     Literal = "literal",
