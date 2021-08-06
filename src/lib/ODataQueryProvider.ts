@@ -10,8 +10,8 @@ export abstract class ODataQueryProvider {
      * Creates a new @type {ODataQuery} using the current provider.
      * @param expression The @type {Expression} the query will be based on.
      */
-    createQuery<T,U>(expression?: Expression) {
-        return new ODataQuery<T,U>(this, expression);
+    createQuery<T, U>(expression?: Expression) {
+        return new ODataQuery<T, U>(this, expression);
     }
 
     /**
@@ -24,5 +24,5 @@ export abstract class ODataQueryProvider {
      * Returns the value that represents the query that will be executed.
      * @param expression 
      */
-    abstract buildQuery(expression? : Expression): any;
+    abstract buildQuery(expression?: Expression): any;
 }

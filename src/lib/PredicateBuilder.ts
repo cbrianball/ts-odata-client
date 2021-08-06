@@ -2,7 +2,6 @@ import { FieldReference } from "./FieldReference";
 import { Expression, TypedExpression } from "./Expression";
 import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 import { ExpressionOperator } from "./ExpressionOperator";
-import { ODataQuery } from "./ODataQuery";
 import { SubType } from "./SubType";
 
 type KeyExpressionOrUnkonwn<T, K extends keyof T> = T[K] | TypedExpression<T[K]> | undefined | null;
@@ -125,7 +124,7 @@ export class PredicateBuilder<T> {
      * @param field 
      * @param values 
      */
-    public any<K extends Extract<keyof T, string>>(field: K, values: ArrayLike<KeyExpressionOrUnkonwn<T, K>> | Iterable<KeyExpressionOrUnkonwn<T, K>>){
+    public any<K extends Extract<keyof T, string>>(field: K, values: ArrayLike<KeyExpressionOrUnkonwn<T, K>> | Iterable<KeyExpressionOrUnkonwn<T, K>>) {
         const expression = new Expression(ExpressionOperator.In, [new FieldReference<T>(field), Array.from(values)], this.expression);
         return new BooleanPredicateBuilder<T>(expression);
     }

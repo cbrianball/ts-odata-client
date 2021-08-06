@@ -6,6 +6,8 @@ import { PredicateBuilder } from "./PredicateBuilder";
 import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 import { ExpressionOperator } from "./ExpressionOperator";
 import { SubType } from "./SubType";
+import { ExcludeProperties } from "./ExcludeProperties";
+import { ODataV4QueryProvider } from "./ODataV4QueryProvider";
 
 type FieldsFor<T> = Extract<keyof T, string>;
 
@@ -18,8 +20,12 @@ export const resolveQuery = Symbol();
  * Represents a query against an OData source.
  * This query is agnostic of the version of OData supported by the server (the provided @type {ODataQueryProvider} is responsible for translating the query into the correct syntax for the desired OData version supported by the endpoint).
  */
-export class ODataQuery<T,U> {
-    
+export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
+
+    static forV4<T>(endpoint: string, requestInit?: () => RequestInit | Promise<RequestInit>) {
+        return new ODataQuery<T>(new ODataV4QueryProvider(endpoint, requestInit));
+    }
+
     constructor(public readonly provider: ODataQueryProvider, public readonly expression?: Expression) { }
 
     /**
@@ -75,8 +81,8 @@ export class ODataQuery<T,U> {
         if (typeof predicate === "function")
             predicate = predicate(new PredicateBuilder<T>());
 
-            const expression = new Expression(ExpressionOperator.Predicate, [predicate], this.expression);
-            return this.provider.createQuery<T, U>(expression);
+        const expression = new Expression(ExpressionOperator.Predicate, [predicate], this.expression);
+        return this.provider.createQuery<T, U>(expression);
     }
 
     /**
@@ -109,7 +115,7 @@ export class ODataQuery<T,U> {
     /**
      * Returns a set of records.
      */
-    public async getManyAsync() {        
+    public async getManyAsync() {
         return await this.provider.executeQueryAsync<ODataQueryResponse<U>>(this.expression);
     }
 

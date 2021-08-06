@@ -1,11 +1,10 @@
 import { expect } from "chai";
 import { ODataQuery } from "../src";
 import { ODataV4QueryProvider } from "../src/v4";
-import { ExcludeProperties } from "../src/lib/ExcludeProperties";
 
 describe("ODataQuery", () => {
     const endpoint = "/odata/users";
-    const baseQuery = new ODataQuery<Person, ExcludeProperties<Person, any[]>>(new ODataV4QueryProvider(endpoint));
+    const baseQuery = ODataQuery.forV4<Person>(endpoint);
 
     it("should produce base URL with no query", () => {
         expect(baseQuery.provider.buildQuery(baseQuery.expression)).to.be.eql(endpoint);

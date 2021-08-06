@@ -21,9 +21,9 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
 
     async executeQueryAsync<T extends ODataResponse>(expression?: Expression) {
         const url = this.buildQuery(expression);
-        
+
         let init = this.requestInit?.() ?? {};
-        if(init instanceof Promise) init = await init;
+        if (init instanceof Promise) init = await init;
 
         const response = await fetch(url, init);
 
