@@ -24,7 +24,7 @@ export interface ODataQueryResponse<T> extends ODataResponse {
 }
 
 /**
- * Represnets an OData response with 0 or more results that shoudl also include the total number of items in the results.
+ * Represnets an OData response with 0 or more results that should also include the total number of items in the results.
  * This value will be different than the number of items in @member {value} if server-side paging is implemented.
  */
 export interface ODataQueryResponseWithCount<T> extends ODataQueryResponse<T> {
