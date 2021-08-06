@@ -10,19 +10,20 @@ import { ExcludeProperties } from "./ExcludeProperties";
  */
 export class ODataV4QueryProvider extends ODataQueryProvider {
 
-    constructor(private readonly path: string, private readonly requestInit?: () => RequestInit) {
+    constructor(private readonly path: string, private readonly requestInit?: () => RequestInit | Promise<RequestInit>) {
         super();
     }
 
-    static createQuery<T>(path: string, requestInit?: () => RequestInit) {
+    static createQuery<T>(path: string, requestInit?: () => RequestInit | Promise<RequestInit>) {
         return new ODataV4QueryProvider(path, requestInit)
             .createQuery<T, ExcludeProperties<T, any[]>>();
     }
 
     async executeQueryAsync<T extends ODataResponse>(expression?: Expression) {
         const url = this.buildQuery(expression);
-
-        const init = this.requestInit ? this.requestInit() : {};
+        
+        let init = this.requestInit?.() ?? {};
+        if(init instanceof Promise) init = await init;
 
         const response = await fetch(url, init);
 
@@ -53,26 +54,26 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
         const queryString: string[] = [];
 
         if (query.filter)
-            queryString.push("$filter=" + encodeURIComponent(query.filter));
+            queryString.push(`$filter=${encodeURIComponent(query.filter)}`);
 
         if (query.orderBy) {
-            queryString.push("$orderby=" + encodeURIComponent(query.orderBy.map(o => o.sort ? `${o.field} ${o.sort}` : o.field).join(',')));
+            queryString.push(`$orderby=${encodeURIComponent(query.orderBy.map(o => o.sort ? `${o.field} ${o.sort}` : o.field).join(','))}`);
         }
 
         if (query.select)
-            queryString.push("$select=" + encodeURIComponent(query.select.join(',')));
+            queryString.push(`$select=${encodeURIComponent(query.select.join(','))}`);
 
         if (query.skip)
-            queryString.push("$skip=" + Math.floor(query.skip));
+            queryString.push(`$skip=${Math.floor(query.skip)}`);
 
         if (typeof query.top === "number" && query.top >= 0)
-            queryString.push("$top=" + Math.floor(query.top));
+            queryString.push(`$top=${Math.floor(query.top)}`);
 
         if (query.count)
             queryString.push("$count=true");
 
         if (query.expand)
-            queryString.push("$expand=" + encodeURIComponent(query.expand.join(',')));
+            queryString.push(`$expand=${encodeURIComponent(query.expand.join(','))}`);
 
         if (queryString.length > 0) return '?' + queryString.join("&");
         return "";
