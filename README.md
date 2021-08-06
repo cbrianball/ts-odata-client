@@ -49,7 +49,7 @@ const result = await context.users
   .getManyAsync();
 ```
 
-# Executing OData functions
+# Executing OData Functions
 An OData function that returns a collection from an entity set can be treated just like any other endpoint, but it has the advantage that it can take parameter values
 
 ```typescript
