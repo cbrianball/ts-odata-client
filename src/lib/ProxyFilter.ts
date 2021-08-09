@@ -32,7 +32,18 @@ interface User {
 //     lessThan(value: number): any;
 // }
 
+const propertyPathSymbol = Symbol();
+
 type FieldsFor<T> = Extract<keyof T, string>;
+
+type EntityProxy<T> = {
+    [P in FieldsFor<T>]: PropertyProxy<T[P]>
+};
+
+type PropertyProxy<T> = EntityProxy<T> & {
+    $is: T extends string ? StringProxyFieldReference : ProxyFieldReference<T>;
+    [propertyPathSymbol]: string[];
+}
 
 type ProxyPredicateBuilder<T> = {
     [P in FieldsFor<SubType<T, number>>]: ProxyFieldReference<number>; 
@@ -42,61 +53,70 @@ type ProxyPredicateBuilder<T> = {
 };
 
 export class ProxyFieldReference<P> {
-    constructor(private readonly fieldReference: FieldReference<P>) { }
+    private readonly fieldReference: FieldReference<P>;
+    constructor(private readonly propertyProxy: PropertyProxy<P>) {
+        this.fieldReference = this.getFieldReference(propertyProxy);
+     }
 
-    equals(value: P | ProxyFieldReference<P>) {
+    equalTo(value: P | PropertyProxy<P>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.Equals);
     }
 
-    lessThan(value: P | ProxyFieldReference<P>) {
+    lessThan(value: P | PropertyProxy<P>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.LessThan);
     }
 
-    lessThanOrEqualTo(value: P | ProxyFieldReference<P>) {
+    lessThanOrEqualTo(value: P | PropertyProxy<P>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.LessThanOrEqualTo);
     }
 
-    greaterThan(value: P | ProxyFieldReference<P>) {
+    greaterThan(value: P | PropertyProxy<P>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.GreaterThan);
     }
 
-    greaterThanOrEqualTo(value: P | ProxyFieldReference<P>) {
+    greaterThanOrEqualTo(value: P | PropertyProxy<P>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.GreaterThanOrEqualTo);
     }
 
-    notEquals(value: P | ProxyFieldReference<P>) {
+    notEqualTo(value: P | PropertyProxy<P>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.NotEquals);
     }
 
-    protected buildPredicateBuilder(value: P | ProxyFieldReference<P>, operator: ExpressionOperator) {
-        const operand: any = value instanceof ProxyFieldReference ? value.fieldReference : value;
+    protected buildPredicateBuilder(value: P | PropertyProxy<P>, operator: ExpressionOperator) {        
+        let operand: any = value;
+        const propertyPath = (value as any)[propertyPathSymbol] as string[] | undefined;
+        if(propertyPath != null) {
+            operand = this.getFieldReference(value as PropertyProxy<P>)
+        }        
         const expression = new Expression(operator, [this.fieldReference, operand]);
         return new BooleanPredicateBuilder<P>(expression);
-    }    
+    }
+
+    private getFieldReference(propertyProxy: PropertyProxy<P>) {
+        const propertyPath = propertyProxy[propertyPathSymbol];
+        // TODO: Better handle typing here
+        return new FieldReference(propertyPath.join('/')) as unknown as FieldReference<P>;
+    }
 }
 
 export class StringProxyFieldReference extends ProxyFieldReference<string> {
-    contains(value: string | ProxyFieldReference<string>) {
+    containing(value: string | PropertyProxy<string>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.Contains);
     }
 
-    startsWith(value: string | ProxyFieldReference<string>) {
+    startingWith(value: string | PropertyProxy<string>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.StartsWith);
     }
 
-    endsWith(value: string | ProxyFieldReference<string>) {
+    endingWith(value: string | PropertyProxy<string>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.EndsWith);
     }
 }
 
-function filter(entity: ProxyPredicateBuilder<User>) : BooleanPredicateBuilder<User> {
-    return entity.firstName.greaterThan(entity.lastName).and(entity.id.lessThan(100));
-}
-
-function usingProxy<T>(entity: ((entity: ProxyPredicateBuilder<T>, compound: ProxyBooleanPredicates<T>) => BooleanPredicateBuilder<T>)): BooleanPredicateBuilder<T> {
-    const test = {} as unknown as ProxyPredicateBuilder<T>;
-    const baz = {} as unknown as ProxyBooleanPredicates<T>;
-    return entity(test, baz);
+function usingProxy<T>(entity: ((entity: EntityProxy<T>/*, compound: ProxyBooleanPredicates<T>*/) => BooleanPredicateBuilder<T>)): BooleanPredicateBuilder<T> {
+    const test = {} as unknown as EntityProxy<T>;
+    // const baz = {} as unknown as ProxyBooleanPredicates<T>;
+    return entity(test/*, baz*/);
 }
 
 interface ProxyBooleanPredicates<T> {
@@ -109,4 +129,23 @@ const foo = {} as unknown as ODataQuery<User>;
 
 //options for filter:
 foo.filter(u => u.equals('id', 10).and(u.lessThan('lastName', u.fieldReference('firstName'))));
-foo.filter(usingProxy(u => u.id.equals(10).and(u.lastName.lessThan(u.firstName))));
+foo.filter(usingProxy(u => u.id.$is.equalTo(10).and(u.lastName.$is.lessThan(u.firstName))));
+
+
+function getEntityProxy<T>(): EntityProxy<T> {    
+    return new Proxy({},{
+        get(target: any, property: string) {
+            return getPropertyProxy([property]);
+        }
+    });
+}
+
+function getPropertyProxy<T>(navigationPath: string[]): PropertyProxy<T>  {    
+    if(navigationPath.length === 0) throw new Error('PropertyProxy must be initialized with at least one proprety path');
+    return new Proxy({[propertyPathSymbol]: navigationPath},{
+        get(target: any, property: string) {
+            if(property === "$is") return new ProxyFieldReference<T>(target as PropertyProxy<T>);
+            return getPropertyProxy([...navigationPath, property]);
+        }
+    });
+}
