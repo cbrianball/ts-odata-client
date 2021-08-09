@@ -1,9 +1,8 @@
 import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
-import { Expression, TypedExpression } from "./Expression";
+import { Expression } from "./Expression";
 import { ExpressionOperator } from "./ExpressionOperator";
 import { FieldReference } from "./FieldReference";
 import { ODataQuery } from "./ODataQuery";
-import { SubType } from "./SubType";
 
 interface User extends Object {
     id: number;
@@ -13,39 +12,35 @@ interface User extends Object {
     dob: Date;
 }
 
-const propertyPathSymbol = Symbol();
-
-type FieldsFor<T> = Extract<keyof T, string>;
-
-type FooFieldsFor<T> = Extract<
-    T extends number ? Exclude<keyof T, keyof number> :
-    T extends string ? Exclude<keyof T, keyof string> :
-    T extends Date ? Exclude<keyof T, keyof Date> :
-    T extends Array<any> ? Exclude<keyof T, keyof Array<any>> :
-    T extends Object ? Exclude<keyof T, keyof Object> :
-    keyof T, string>;
+type QueryableFieldsFor<T> = 
+T extends number ? Exclude<keyof T, keyof number> :
+T extends string ? Exclude<keyof T, keyof string> :
+T extends Date ? Exclude<keyof T, keyof Date> :
+T extends Array<any> ? Exclude<keyof T, keyof Array<any>> :
+T extends Object ? Exclude<keyof T, keyof Object> :
+keyof T & string;
 
 type EntityProxy<T> = {
-    [P in FooFieldsFor<T>]: PropertyProxy<T[P]>
+    [P in QueryableFieldsFor<T>]: PropertyProxy<T[P]>
 };
 
-type PropertyProxy<T> = EntityProxy<T> & {
-    $is: T extends boolean ? BooleanProxyFieldPredicate :
+type PrefixMembers<T, Prefix extends string> = {
+    [P in string & keyof T as `${Prefix}${P}`]: T[P];
+}
+
+const propertyPathSymbol = Symbol();
+type PropertyProxy<T> = EntityProxy<T> &
+    PrefixMembers<
+    T extends boolean ? BooleanProxyFieldPredicate :
     T extends number ? NumberProxyFieldPredicate :
     T extends string ? StringProxyFieldPredicate :
-    // TODO: Date, Array
-    never;
+    T extends Date ? DateProxyFieldPredicate :
+    // TODO: Array
+    unknown, '$'> & {    
     [propertyPathSymbol]: string[];
 }
 
-// type ProxyPredicateBuilder<T> = {
-//     [P in FieldsFor<SubType<T, number>>]: ProxyFieldReference<number>; 
-// } &
-// {
-//     [P in FieldsFor<SubType<T, string>>]: StringProxyFieldReference; 
-// };
-
-export class ProxyFieldPredicate<T> implements
+class ProxyFieldPredicate<T> implements
     EqualityProxyFieldPredicate<T>,
     InequalityProxyFieldPredicate<T>,
     StringProxyFieldPredicateInterface {
@@ -54,7 +49,7 @@ export class ProxyFieldPredicate<T> implements
         this.fieldReference = this.getFieldReference(propertyProxy);
     }
 
-    equalTo(value: T | PropertyProxy<T>) {
+    equals(value: T | PropertyProxy<T>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.Equals);
     }
 
@@ -78,15 +73,15 @@ export class ProxyFieldPredicate<T> implements
         return this.buildPredicateBuilder(value, ExpressionOperator.NotEquals);
     }
 
-    containing(value: string | PropertyProxy<string>) {
+    contains(value: string | PropertyProxy<string>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.Contains);
     }
 
-    startingWith(value: string | PropertyProxy<string>) {
+    startsWith(value: string | PropertyProxy<string>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.StartsWith);
     }
 
-    endingWith(value: string | PropertyProxy<string>) {
+    endsWith(value: string | PropertyProxy<string>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.EndsWith);
     }
 
@@ -109,7 +104,7 @@ export class ProxyFieldPredicate<T> implements
 
 
 interface EqualityProxyFieldPredicate<T> {
-    equalTo(value: T | PropertyProxy<T>): BooleanPredicateBuilder<T>;
+    equals(value: T | PropertyProxy<T>): BooleanPredicateBuilder<T>;
     notEqualTo(value: T | PropertyProxy<T>): BooleanPredicateBuilder<T>;
 }
 
@@ -122,33 +117,34 @@ interface InequalityProxyFieldPredicate<T> {
 
 interface BooleanProxyFieldPredicate extends EqualityProxyFieldPredicate<boolean> { };
 interface NumberProxyFieldPredicate extends EqualityProxyFieldPredicate<number>, InequalityProxyFieldPredicate<number> { };
+interface DateProxyFieldPredicate extends EqualityProxyFieldPredicate<Date>, InequalityProxyFieldPredicate<Date> { };
 
 /**
  * This only exists as something for the @type {ProxyFieldPredicate} to implement.
  * If it tried to implement @type {StringProxyFieldReference} directly, then TypeScript complains.
  */
 interface StringProxyFieldPredicateInterface {
-    containing(value: string | PropertyProxy<string>): BooleanPredicateBuilder<string>;
-    startingWith(value: string | PropertyProxy<string>): BooleanPredicateBuilder<string>;
-    endingWith(value: string | PropertyProxy<string>): BooleanPredicateBuilder<string>;
+    contains(value: string | PropertyProxy<string>): BooleanPredicateBuilder<string>;
+    startsWith(value: string | PropertyProxy<string>): BooleanPredicateBuilder<string>;
+    endsWith(value: string | PropertyProxy<string>): BooleanPredicateBuilder<string>;
 }
 
 interface StringProxyFieldPredicate extends EqualityProxyFieldPredicate<string>, InequalityProxyFieldPredicate<string>, StringProxyFieldPredicateInterface { }
 
 
 
-function usingProxy<T>(entity: ((entity: EntityProxy<T>, compound: ProxyBooleanFunctions<T>) => BooleanPredicateBuilder<T>)): BooleanPredicateBuilder<T> {
+export function usingProxy<T>(entity: ((entity: EntityProxy<T>, compound: ProxyBooleanFunctions<T>) => BooleanPredicateBuilder<T>)): BooleanPredicateBuilder<T> {
     const proxy = getEntityProxy<T>();
     const proxyFunctions = new ProxyBooleanFunctions<T>();
     return entity(proxy, proxyFunctions);
 }
 
-const foo = {} as unknown as ODataQuery<User>;
+// const foo = {} as unknown as ODataQuery<User>;
 
-//options for filter:
-foo.filter(u => u.equals('id', 10).and(u.lessThan('lastName', u.fieldReference('firstName'))));
-foo.filter(usingProxy(u => u.id.$is.equalTo(10).and(u.lastName.$is.lessThan(u.firstName))));
-foo.filter(usingProxy((u, {not}) => not(u.id.$is.greaterThanOrEqualTo(12))));
+// //options for filter:
+// foo.filter(u => u.equals('id', 10).and(u.lessThan('lastName', u.fieldReference('firstName'))));
+// foo.filter(usingProxy(u => u.id.equals(10).and(u.lastName.lessThan(u.firstName))));
+// foo.filter(usingProxy((u, {not}) => not(u.id.$is.greaterThanOrEqualTo(12))));
 
 function getEntityProxy<T>(): EntityProxy<T> {
     return new Proxy({}, {
@@ -162,8 +158,11 @@ function getPropertyProxy<T>(navigationPath: string[]): PropertyProxy<T> {
     if (navigationPath.length === 0) throw new Error('PropertyProxy must be initialized with at least one proprety path');
     return new Proxy({ [propertyPathSymbol]: navigationPath }, {
         get(target: any, property: string) {
-            if (property === "$is") return new ProxyFieldPredicate<T>(target as PropertyProxy<T>);
-            return getPropertyProxy([...navigationPath, property]);
+            if (property.startsWith("$")){
+                const predicate = new ProxyFieldPredicate<T>(target as PropertyProxy<T>);
+                return ((predicate as unknown as any)[property.slice(1)] as Function).bind(predicate);
+            }
+            return getPropertyProxy([...navigationPath, property]);        
         }
     });
 }
@@ -198,4 +197,13 @@ class ProxyBooleanFunctions<T> {
                 return new BooleanPredicateBuilder<T>(new Expression(operator, [acc.expression, predicate.expression]))
             });
     }
+}
+
+interface Person {
+    $firstName: string;
+    $lastName: string;
+    $age: number;
+    $email: string;
+    $children: string[];
+    $pets: string[];
 }

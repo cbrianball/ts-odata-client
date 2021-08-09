@@ -1,6 +1,5 @@
 import { expect } from "chai";
 import { ODataQuery } from "../src";
-import { ODataV4QueryProvider } from "../src/v4";
 
 describe("ODataQuery", () => {
     const endpoint = "/odata/users";
