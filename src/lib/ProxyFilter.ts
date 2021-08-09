@@ -49,45 +49,45 @@ class ProxyFieldPredicate<T> implements
         this.fieldReference = this.getFieldReference(propertyProxy);
     }
 
-    equals(value: T | PropertyProxy<T>) {
+    equals(value: PredicateArgument<T>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.Equals);
     }
 
-    lessThan(value: T | PropertyProxy<T>) {
+    lessThan(value: PredicateArgument<T>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.LessThan);
     }
 
-    lessThanOrEqualTo(value: T | PropertyProxy<T>) {
+    lessThanOrEqualTo(value: PredicateArgument<T>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.LessThanOrEqualTo);
     }
 
-    greaterThan(value: T | PropertyProxy<T>) {
+    greaterThan(value: PredicateArgument<T>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.GreaterThan);
     }
 
-    greaterThanOrEqualTo(value: T | PropertyProxy<T>) {
+    greaterThanOrEqualTo(value: PredicateArgument<T>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.GreaterThanOrEqualTo);
     }
 
-    notEqualTo(value: T | PropertyProxy<T>) {
+    notEquals(value: PredicateArgument<T>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.NotEquals);
     }
 
-    contains(value: string | PropertyProxy<string>) {
+    contains(value: PredicateArgument<string>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.Contains);
     }
 
-    startsWith(value: string | PropertyProxy<string>) {
+    startsWith(value: PredicateArgument<string>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.StartsWith);
     }
 
-    endsWith(value: string | PropertyProxy<string>) {
+    endsWith(value: PredicateArgument<string>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.EndsWith);
     }
 
     protected buildPredicateBuilder<P>(value: P | PropertyProxy<P>, operator: ExpressionOperator) {
         let operand: any = value;
-        const propertyPath = (value as any)[propertyPathSymbol] as string[] | undefined;
+        const propertyPath = value == null ? null : (value as any)[propertyPathSymbol] as string[] | undefined;
         if (propertyPath != null) {
             operand = this.getFieldReference(value as unknown as PropertyProxy<T>)
         }
@@ -102,17 +102,18 @@ class ProxyFieldPredicate<T> implements
     }
 }
 
+type PredicateArgument<T> = T | PropertyProxy<T> | null | undefined;
 
 interface EqualityProxyFieldPredicate<T> {
-    equals(value: T | PropertyProxy<T>): BooleanPredicateBuilder<T>;
-    notEqualTo(value: T | PropertyProxy<T>): BooleanPredicateBuilder<T>;
+    equals(value: PredicateArgument<T>): BooleanPredicateBuilder<T>;
+    notEquals(value: PredicateArgument<T>): BooleanPredicateBuilder<T>;
 }
 
 interface InequalityProxyFieldPredicate<T> {
-    lessThan(value: T | PropertyProxy<T>): BooleanPredicateBuilder<T>;
-    lessThanOrEqualTo(value: T | PropertyProxy<T>): BooleanPredicateBuilder<T>;
-    greaterThan(value: T | PropertyProxy<T>): BooleanPredicateBuilder<T>;
-    greaterThanOrEqualTo(value: T | PropertyProxy<T>): BooleanPredicateBuilder<T>;
+    lessThan(value: PredicateArgument<T>): BooleanPredicateBuilder<T>;
+    lessThanOrEqualTo(value: PredicateArgument<T>): BooleanPredicateBuilder<T>;
+    greaterThan(value: PredicateArgument<T>): BooleanPredicateBuilder<T>;
+    greaterThanOrEqualTo(value: PredicateArgument<T>): BooleanPredicateBuilder<T>;
 }
 
 interface BooleanProxyFieldPredicate extends EqualityProxyFieldPredicate<boolean> { };
@@ -124,9 +125,9 @@ interface DateProxyFieldPredicate extends EqualityProxyFieldPredicate<Date>, Ine
  * If it tried to implement @type {StringProxyFieldReference} directly, then TypeScript complains.
  */
 interface StringProxyFieldPredicateInterface {
-    contains(value: string | PropertyProxy<string>): BooleanPredicateBuilder<string>;
-    startsWith(value: string | PropertyProxy<string>): BooleanPredicateBuilder<string>;
-    endsWith(value: string | PropertyProxy<string>): BooleanPredicateBuilder<string>;
+    contains(value: PredicateArgument<string>): BooleanPredicateBuilder<string>;
+    startsWith(value: PredicateArgument<string>): BooleanPredicateBuilder<string>;
+    endsWith(value: PredicateArgument<string>): BooleanPredicateBuilder<string>;
 }
 
 interface StringProxyFieldPredicate extends EqualityProxyFieldPredicate<string>, InequalityProxyFieldPredicate<string>, StringProxyFieldPredicateInterface { }
@@ -191,7 +192,7 @@ class ProxyBooleanFunctions<T> {
     private combinePredicates(operator: ExpressionOperator, ...predicates: BooleanPredicateBuilder<T>[]) {
         if (predicates.length === 0) throw new Error('At least one predicate must be provided');
 
-        return [...predicates].reverse()
+        return predicates
             .reduce((acc, predicate, index) => {
                 if (index === 0) return predicate;
                 return new BooleanPredicateBuilder<T>(new Expression(operator, [acc.expression, predicate.expression]))
