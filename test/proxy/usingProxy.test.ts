@@ -93,7 +93,17 @@ describe("useProxy", () => {
     it("should work with non-filter operators", () => {
         const query = baseQuery.orderBy('age').filter(usingProxy(p => p.lastName.$in(["Jones", "Smith", "Ng"]))).select('firstName', 'lastName');
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("lastName in ('Jones','Smith','Ng')")}&$orderby=age&$select=${encodeURIComponent('firstName,lastName')}`);
-    })
+    });
+
+    it("should handle 'any' entity collection query", () => {
+        const query = baseQuery.filter(usingProxy(p => p.children.$any(c => c.age.$equals(4))));        
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("children/any(x: x/age eq 4)")}`);
+    });
+
+    it("should handle 'all' entity collection query", () => {
+        const query = baseQuery.filter(usingProxy(p => p.children.$all(c => c.age.$equals(4))));        
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("children/all(x: x/age eq 4)")}`);
+    });
 });
 
 interface Person {
@@ -101,7 +111,7 @@ interface Person {
     lastName: string;
     age: number;
     email: string;
-    children: string[];
+    children: Person[];
     pets: string[];
     mother: Person;
     father: Person;

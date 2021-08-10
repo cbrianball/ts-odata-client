@@ -155,7 +155,11 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
                     return [`endsWith(${this.reduceTranslatedExpression(left)},${this.reduceTranslatedExpression(right)})`];
                 case ExpressionOperator.In:
                     return [`${this.reduceTranslatedExpression(left)} in (${this.reduceTranslatedExpression(right)})`];
-                default:
+                case ExpressionOperator.Any:
+                    return [`${this.reduceTranslatedExpression(left)}/any(x: x/${this.reduceTranslatedExpression(right)})`];
+                case ExpressionOperator.All:
+                    return [`${this.reduceTranslatedExpression(left)}/all(x: x/${this.reduceTranslatedExpression(right)})`];
+                    default:
                     throw new Error(`Operator '${expression.operator}' is not supported`);
             }
         }

@@ -35,6 +35,7 @@ type PropertyProxy<T> = EntityProxy<T> &
         T extends number ? NumberProxyFieldPredicate :
         T extends string ? StringProxyFieldPredicate :
         T extends Date ? DateProxyFieldPredicate :
+        T extends Array<any> ? ArrayProxyFieldPredicate<T> :
         // TODO: Array
         unknown, '$'> & {
             [propertyPathSymbol]: string[];
@@ -43,9 +44,10 @@ type PropertyProxy<T> = EntityProxy<T> &
 class ProxyFieldPredicate<T> implements
     EqualityProxyFieldPredicate<T>,
     InequalityProxyFieldPredicate<T>,
-    StringProxyFieldPredicateInterface {
+    StringProxyFieldPredicateInterface,
+    ArrayProxyFieldPredicateInterface {
     private readonly fieldReference: FieldReference<T>;
-    constructor(private readonly propertyProxy: PropertyProxy<T>) {
+    constructor(propertyProxy: PropertyProxy<T>) {
         this.fieldReference = this.getFieldReference(propertyProxy);
     }
 
@@ -87,6 +89,20 @@ class ProxyFieldPredicate<T> implements
 
     endsWith(value: PredicateArgument<string>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.EndsWith);
+    }
+
+    any<U>(value: BooleanPredicateBuilder<U[]> | ((entity: EntityProxy<U>, compound: ProxyBooleanFunctions<U>) => BooleanPredicateBuilder<U[]>)) {
+        if(typeof value === "function") {
+            value = value(getEntityProxy<U>(), new ProxyBooleanFunctions<U>());
+        }
+        return this.buildPredicateBuilder(value.expression, ExpressionOperator.Any);
+    }
+
+    all<U>(value: BooleanPredicateBuilder<U[]> | ((entity: EntityProxy<U>, compound: ProxyBooleanFunctions<U>) => BooleanPredicateBuilder<U[]>)) {
+        if(typeof value === "function") {
+            value = value(getEntityProxy<U>(), new ProxyBooleanFunctions<U>());
+        }
+        return this.buildPredicateBuilder(value.expression, ExpressionOperator.All);
     }
 
     protected buildPredicateBuilder<P>(value: P | PropertyProxy<P>, operator: ExpressionOperator) {
@@ -133,6 +149,16 @@ interface StringProxyFieldPredicateInterface {
     contains(value: PredicateArgument<string>): BooleanPredicateBuilder<string>;
     startsWith(value: PredicateArgument<string>): BooleanPredicateBuilder<string>;
     endsWith(value: PredicateArgument<string>): BooleanPredicateBuilder<string>;
+}
+
+interface ArrayProxyFieldPredicateInterface {
+    any(value: BooleanPredicateBuilder<any[]> | ((entity: EntityProxy<any>, compound: ProxyBooleanFunctions<any>) => BooleanPredicateBuilder<any[]>)): BooleanPredicateBuilder<any>;
+    all(value: BooleanPredicateBuilder<any[]> | ((entity: EntityProxy<any>, compound: ProxyBooleanFunctions<any>) => BooleanPredicateBuilder<any[]>)): BooleanPredicateBuilder<any>;
+}
+
+interface ArrayProxyFieldPredicate<T extends Array<any>> {
+    any(value: BooleanPredicateBuilder<T> | ((entity: EntityProxy<T[number]>, compound: ProxyBooleanFunctions<T>) => BooleanPredicateBuilder<T>)): BooleanPredicateBuilder<T>;
+    all(value: BooleanPredicateBuilder<T> | ((entity: EntityProxy<T[number]>, compound: ProxyBooleanFunctions<T>) => BooleanPredicateBuilder<T>)): BooleanPredicateBuilder<T>;
 }
 
 interface StringProxyFieldPredicate extends EqualityProxyFieldPredicate<string>, InequalityProxyFieldPredicate<string>, StringProxyFieldPredicateInterface { }
