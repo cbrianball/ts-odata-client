@@ -1,6 +1,10 @@
 import { ODataResponse } from "./ODataResponse";
 import { ODataQuery } from "./ODataQuery";
 import { Expression } from "./Expression";
+import { EntityProxy, lambdaSymbol, propertyPathSymbol, PropertyProxy, ProxyFieldPredicate } from "./ProxyFilter";
+import { FieldReference } from "./FieldReference";
+
+export const createProxiedEntity = Symbol();
 
 /**
  * Base type used by all @type {ODataQueryProvider} implementations.
@@ -25,4 +29,40 @@ export abstract class ODataQueryProvider {
      * @param expression 
      */
     abstract buildQuery(expression?: Expression): any;
+
+    private lambdaProxyCounter = 0;
+    [createProxiedEntity]<T>(isLambdaProxy = false): EntityProxy<T> {
+        const lambdaVariable = isLambdaProxy ? `p${this.lambdaProxyCounter++}` : '';
+        return new Proxy({ [lambdaSymbol]: lambdaVariable }, {
+            get: (instance: any, property: string | Symbol) => {
+                if (typeof property === "symbol") return instance[lambdaSymbol];
+
+                const path = [property as string];
+                if (isLambdaProxy) {
+                    path.unshift(lambdaVariable);
+                }
+                return this.createPropertyProxy(path);
+            }
+        });
+    }
+
+    private createPropertyProxy<T>(navigationPath: string[]): PropertyProxy<T> {
+        if (navigationPath.length === 0) throw new Error('PropertyProxy must be initialized with at least one proprety path');
+        const target = { [propertyPathSymbol]: navigationPath };
+        const predicate = new ProxyFieldPredicate<T>(target as PropertyProxy<T>);
+        return new Proxy(target, {
+            get: (target: any, property: string | Symbol) => {
+                if(typeof property === "symbol") {
+                    return target[property];
+                }
+                //Typescript can't "sniff out" that we've already tested for symbol, so the following line is really just for the Typescript compiler.
+                if(typeof property !== "string") throw new Error("Proprety is not a string");
+                
+                if ((property).startsWith("$")) {                    
+                    return ((predicate as unknown as any)[property.slice(1)] as Function).bind(predicate);
+                }
+                return this.createPropertyProxy([...navigationPath, property]);
+            }
+        });
+    }
 }

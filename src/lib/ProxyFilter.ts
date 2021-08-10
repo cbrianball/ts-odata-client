@@ -22,7 +22,7 @@ type QueryableFieldsFor<T> =
     
 
 export const lambdaSymbol = Symbol();
-type EntityProxy<T> = {
+export type EntityProxy<T> = {
     [P in QueryableFieldsFor<T>]: PropertyProxy<T[P]>;
 } & {
     [lambdaSymbol]: string;
@@ -32,8 +32,9 @@ type PrefixMembers<T, Prefix extends string> = {
     [P in string & keyof T as `${Prefix}${P}`]: T[P];
 }
 
-const propertyPathSymbol = Symbol();
-type PropertyProxy<T> = EntityProxy<T> &
+export const propertyPathSymbol = Symbol();
+
+export type PropertyProxy<T> = EntityProxy<T> &
     PrefixMembers<
         T extends boolean ? BooleanProxyFieldPredicate :
         T extends number ? NumberProxyFieldPredicate :
@@ -41,11 +42,10 @@ type PropertyProxy<T> = EntityProxy<T> &
         T extends Date ? DateProxyFieldPredicate :
         T extends Array<any> ? ArrayProxyFieldPredicate<T> :
         // TODO: Array
-        unknown, '$'> & {
-            [propertyPathSymbol]: string[];
-        }
+        unknown, '$'>
+        & {[propertyPathSymbol]: string[];};
 
-class ProxyFieldPredicate<T> implements
+export class ProxyFieldPredicate<T> implements
     EqualityProxyFieldPredicate<T>,
     InequalityProxyFieldPredicate<T>,
     StringProxyFieldPredicateInterface,
@@ -225,7 +225,7 @@ function getPropertyProxy<T>(navigationPath: string[]): PropertyProxy<T> {
     });
 }
 
-class ProxyBooleanFunctions<T> {
+export class ProxyBooleanFunctions<T> {
     constructor() {
         // Ensure the methods are bound to this object;
         // Even if they become detatched (e.g., destructuring)

@@ -1,4 +1,4 @@
-import { ODataQueryProvider } from "./ODataQueryProvider";
+import { createProxiedEntity, ODataQueryProvider } from "./ODataQueryProvider";
 import { FieldReference } from "./FieldReference";
 import { Expression } from "./Expression";
 import { ODataQueryResponse, ODataQueryResponseWithCount, ODataResponse } from "./ODataResponse";
@@ -8,6 +8,7 @@ import { ExpressionOperator } from "./ExpressionOperator";
 import { SubType } from "./SubType";
 import { ExcludeProperties } from "./ExcludeProperties";
 import { ODataV4QueryProvider } from "./ODataV4QueryProvider";
+import { EntityProxy, propertyPathSymbol, PropertyProxy, ProxyBooleanFunctions } from "./ProxyFilter";
 
 type FieldsFor<T> = Extract<keyof T, string>;
 
@@ -64,6 +65,13 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
         return this.provider.createQuery<T, U>(expression);
     }
 
+    public orderByWithProxy(fields: (entity: EntityProxy<T>) => Array<PropertyProxy<unknown>>) {
+        const proxy = this.provider[createProxiedEntity]<T>();
+        const expression = new Expression(ExpressionOperator.OrderBy,
+            fields(proxy).map((f => new FieldReference(f[propertyPathSymbol].join('/'))), this.expression));
+        return this.provider.createQuery<T, U>(expression);
+    }
+
     /**
      * Determines the sort order (descending) of the records; calls to orderBy() and orderByDescending() are cumulative.
      * @param fields
@@ -80,6 +88,14 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
     public filter(predicate: BooleanPredicateBuilder<T> | ((builder: PredicateBuilder<T>) => BooleanPredicateBuilder<T>)) {
         if (typeof predicate === "function")
             predicate = predicate(new PredicateBuilder<T>());
+
+        const expression = new Expression(ExpressionOperator.Predicate, [predicate], this.expression);
+        return this.provider.createQuery<T, U>(expression);
+    }
+
+    public filterByProxy(predicate: BooleanPredicateBuilder<T> | ((builder: EntityProxy<T>, functions: ProxyBooleanFunctions<T>) => BooleanPredicateBuilder<T>)) {
+        if (typeof predicate === "function")
+            predicate = predicate(this.provider[createProxiedEntity](), new ProxyBooleanFunctions<T>());
 
         const expression = new Expression(ExpressionOperator.Predicate, [predicate], this.expression);
         return this.provider.createQuery<T, U>(expression);

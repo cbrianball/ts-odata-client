@@ -23,8 +23,9 @@ describe("useProxy", () => {
     });
 
     it("should set complex filter", () => {
-        const query = baseQuery.filter(usingProxy(p => p.firstName.$equals("john").and(p.age.$greaterThanOrEqualTo(30))
-        .or(p.lastName.$notEquals("Jones").and(p.email.$equals(".com")))));        
+        //const query = baseQuery.filter(usingProxy(p => p.firstName.$equals("john").and(p.age.$greaterThanOrEqualTo(30))
+        const query = baseQuery.filterByProxy(p => p.firstName.$equals("john").and(p.age.$greaterThanOrEqualTo(30))
+        .or(p.lastName.$notEquals("Jones").and(p.email.$equals(".com"))));
 
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("(firstName eq 'john' and age ge 30) or (lastName ne 'Jones' and email eq '.com')")}`);
     });
@@ -81,7 +82,8 @@ describe("useProxy", () => {
     });
 
     it("should handle navigation properties", () => {
-        const query = baseQuery.filter(usingProxy((p, {not}) => not(p.mother.firstName.$equals("Jane"))));
+        // const query = baseQuery.filter(usingProxy((p, {not}) => not(p.mother.firstName.$equals("Jane"))));
+        const query = baseQuery.filterByProxy((p, {not}) => not(p.mother.firstName.$equals("Jane")));
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("not mother/firstName eq 'Jane'")}`);
     });
 
@@ -91,16 +93,17 @@ describe("useProxy", () => {
     });
 
     it("should work with non-filter operators", () => {
-        const query = baseQuery.orderBy('age').filter(usingProxy(p => p.lastName.$in(["Jones", "Smith", "Ng"]))).select('firstName', 'lastName');
+        const query = baseQuery.orderByWithProxy(p => [p.age]).filter(usingProxy(p => p.lastName.$in(["Jones", "Smith", "Ng"]))).select('firstName', 'lastName');
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("lastName in ('Jones','Smith','Ng')")}&$orderby=age&$select=${encodeURIComponent('firstName,lastName')}`);
     });
 
     it("should handle 'any' entity collection query", () => {
         let variable = '';
-        const query = baseQuery.filter(usingProxy(p => p.children.$any(c => {
+        // const query = baseQuery.filter(usingProxy(p => p.children.$any(c => {
+            const query = baseQuery.filterByProxy(p => p.children.$any(c => {
             variable = c[lambdaSymbol];
             return c.age.$equals(4);
-        })));
+        }));
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent(`children/any(${variable}: ${variable}/age eq 4)`)}`);
     });
 
