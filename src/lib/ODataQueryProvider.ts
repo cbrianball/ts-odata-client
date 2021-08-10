@@ -1,10 +1,10 @@
 import { ODataResponse } from "./ODataResponse";
 import { ODataQuery } from "./ODataQuery";
 import { Expression } from "./Expression";
-import { EntityProxy, lambdaSymbol, propertyPathSymbol, PropertyProxy, ProxyFieldPredicate } from "./ProxyFilter";
-import { FieldReference } from "./FieldReference";
+import { ProxyPropertyPredicate } from "./ProxyPropertyPredicate";
+import { createProxiedEntity, lambdaVariable, propertyPath, EntityProxy, PropertyProxy } from "./types";
 
-export const createProxiedEntity = Symbol();
+
 
 /**
  * Base type used by all @type {ODataQueryProvider} implementations.
@@ -32,14 +32,14 @@ export abstract class ODataQueryProvider {
 
     private lambdaProxyCounter = 0;
     [createProxiedEntity]<T>(isLambdaProxy = false): EntityProxy<T> {
-        const lambdaVariable = isLambdaProxy ? `p${this.lambdaProxyCounter++}` : '';
-        return new Proxy({ [lambdaSymbol]: lambdaVariable }, {
+        const lambdaVariableName = isLambdaProxy ? `p${this.lambdaProxyCounter++}` : '';
+        return new Proxy({ [lambdaVariable]: lambdaVariableName }, {
             get: (instance: any, property: string | Symbol) => {
-                if (typeof property === "symbol") return instance[lambdaSymbol];
+                if (typeof property === "symbol") return instance[lambdaVariable];
 
                 const path = [property as string];
                 if (isLambdaProxy) {
-                    path.unshift(lambdaVariable);
+                    path.unshift(lambdaVariableName);
                 }
                 return this.createPropertyProxy(path);
             }
@@ -48,8 +48,8 @@ export abstract class ODataQueryProvider {
 
     private createPropertyProxy<T>(navigationPath: string[]): PropertyProxy<T> {
         if (navigationPath.length === 0) throw new Error('PropertyProxy must be initialized with at least one proprety path');
-        const target = { [propertyPathSymbol]: navigationPath };
-        const predicate = new ProxyFieldPredicate<T>(target as PropertyProxy<T>);
+        const target = { [propertyPath]: navigationPath };
+        const predicate = new ProxyPropertyPredicate<T>(target as unknown as PropertyProxy<T>, this);
         return new Proxy(target, {
             get: (target: any, property: string | symbol) => {
                 if(typeof property === "symbol") {

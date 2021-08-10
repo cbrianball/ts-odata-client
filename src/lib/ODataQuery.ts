@@ -1,21 +1,18 @@
-import { createProxiedEntity, ODataQueryProvider } from "./ODataQueryProvider";
+import { ODataQueryProvider } from "./ODataQueryProvider";
 import { FieldReference } from "./FieldReference";
 import { Expression } from "./Expression";
 import { ODataQueryResponse, ODataQueryResponseWithCount, ODataResponse } from "./ODataResponse";
-import { PredicateBuilder } from "./PredicateBuilder";
 import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 import { ExpressionOperator } from "./ExpressionOperator";
 import { SubType } from "./SubType";
 import { ExcludeProperties } from "./ExcludeProperties";
 import { ODataV4QueryProvider } from "./ODataV4QueryProvider";
-import { EntityProxy, propertyPathSymbol, PropertyProxy, ProxyBooleanFunctions } from "./ProxyFilter";
+import { FilterAccessoryFunctions } from "./FilterAccessoryFunctions";
+import { createProxiedEntity, EntityProxy, PropertyProxy, resolveQuery, propertyPath } from "./types";
 
 type FieldsFor<T> = Extract<keyof T, string>;
 
-/**
- * A symbol used to retrieve the resulting query from the @type {ODataQueryProvider}.
- */
-export const resolveQuery = Symbol();
+
 
 /**
  * Represents a query against an OData source.
@@ -64,7 +61,7 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
         const proxy = this.provider[createProxiedEntity]<T>();
         const properties = [fields(proxy)].flat()
         const expression = new Expression(ExpressionOperator.OrderBy,
-            properties.map((f => new FieldReference(f[propertyPathSymbol].join('/'))), this.expression),
+            properties.map(f => new FieldReference(f[propertyPath].join('/'))),
             this.expression);
         return this.provider.createQuery<T, U>(expression);
     }
@@ -77,7 +74,7 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
         const proxy = this.provider[createProxiedEntity]<T>();
         const properties = [fields(proxy)].flat()
         const expression = new Expression(ExpressionOperator.OrderByDescending,
-            properties.map((f => new FieldReference(f[propertyPathSymbol].join('/'))), this.expression),
+            properties.map((f => new FieldReference(f[propertyPath].join('/')))),
             this.expression);
         return this.provider.createQuery<T, U>(expression);
     }
@@ -85,10 +82,10 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
     /**
      * Filters the records based on the provided expression; multiple calls to filter() are cumulative (as well as UNIONed (AND))
      * @param predicate A function that takes in an entity proxy and returns a BooleanPredicateBuilder.
-     */    
-    public filter(predicate: BooleanPredicateBuilder<T> | ((builder: EntityProxy<T>, functions: ProxyBooleanFunctions<T>) => BooleanPredicateBuilder<T>)) {
+     */
+    public filter(predicate: BooleanPredicateBuilder<T> | ((builder: EntityProxy<T>, functions: FilterAccessoryFunctions<T>) => BooleanPredicateBuilder<T>)) {
         if (typeof predicate === "function")
-            predicate = predicate(this.provider[createProxiedEntity](), new ProxyBooleanFunctions<T>());
+            predicate = predicate(this.provider[createProxiedEntity](), new FilterAccessoryFunctions<T>());
 
         const expression = new Expression(ExpressionOperator.Predicate, [predicate], this.expression);
         return this.provider.createQuery<T, U>(expression);
