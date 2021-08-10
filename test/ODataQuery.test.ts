@@ -208,6 +208,12 @@ describe("ODataQuery", () => {
 
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("lastName in ('Jones','Smith','Ng')")}`);
     });
+
+    it("should handle not", () => {
+        const query = baseQuery.filter(p => p.not(p.equals("firstName", "John")));
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("not firstName eq 'John'")}`);
+    });
 });
 
 interface Person {

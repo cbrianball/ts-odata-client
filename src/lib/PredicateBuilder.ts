@@ -18,7 +18,7 @@ export class PredicateBuilder<T> {
         if (!predicate.expression)
             throw new Error(`'not' predicate must have at least one non-empty Predicate`);
 
-        return new BooleanPredicateBuilder<T>(new Expression(ExpressionOperator.Not, [this.expression], predicate.expression));
+        return new BooleanPredicateBuilder<T>(new Expression(ExpressionOperator.Not, [predicate.expression], this.expression));
     }
 
     /**

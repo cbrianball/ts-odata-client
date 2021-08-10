@@ -73,6 +73,27 @@ describe("useProxy", () => {
 
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("firstName eq null")}`);
     });
+
+    it("should handle not", () => {
+        const query = baseQuery.filter(usingProxy((p, {not}) => not(p.firstName.$equals("John"))));
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("not firstName eq 'John'")}`);
+    });
+
+    it("should handle navigation properties", () => {
+        const query = baseQuery.filter(usingProxy((p, {not}) => not(p.mother.firstName.$equals("Jane"))));
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("not mother/firstName eq 'Jane'")}`);
+    });
+
+    it("should handle any", () => {
+        const query = baseQuery.filter(usingProxy(p => p.lastName.$in(["Jones", "Smith", "Ng"])));
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("lastName in ('Jones','Smith','Ng')")}`);
+    });
+
+    it("should work with non-filter operators", () => {
+        const query = baseQuery.orderBy('age').filter(usingProxy(p => p.lastName.$in(["Jones", "Smith", "Ng"]))).select('firstName', 'lastName');
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("lastName in ('Jones','Smith','Ng')")}&$orderby=age&$select=${encodeURIComponent('firstName,lastName')}`);
+    })
 });
 
 interface Person {
@@ -82,4 +103,6 @@ interface Person {
     email: string;
     children: string[];
     pets: string[];
+    mother: Person;
+    father: Person;
 }

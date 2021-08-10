@@ -12,13 +12,13 @@ interface User extends Object {
     dob: Date;
 }
 
-type QueryableFieldsFor<T> = 
-T extends number ? Exclude<keyof T, keyof number> :
-T extends string ? Exclude<keyof T, keyof string> :
-T extends Date ? Exclude<keyof T, keyof Date> :
-T extends Array<any> ? Exclude<keyof T, keyof Array<any>> :
-T extends Object ? Exclude<keyof T, keyof Object> :
-keyof T & string;
+type QueryableFieldsFor<T> =
+    T extends number ? Exclude<keyof T, keyof number> :
+    T extends string ? Exclude<keyof T, keyof string> :
+    T extends Date ? Exclude<keyof T, keyof Date> :
+    T extends Array<any> ? Exclude<keyof T, keyof Array<any>> :
+    T extends Object ? Exclude<keyof T, keyof Object> :
+    keyof T & string;
 
 type EntityProxy<T> = {
     [P in QueryableFieldsFor<T>]: PropertyProxy<T[P]>
@@ -31,14 +31,14 @@ type PrefixMembers<T, Prefix extends string> = {
 const propertyPathSymbol = Symbol();
 type PropertyProxy<T> = EntityProxy<T> &
     PrefixMembers<
-    T extends boolean ? BooleanProxyFieldPredicate :
-    T extends number ? NumberProxyFieldPredicate :
-    T extends string ? StringProxyFieldPredicate :
-    T extends Date ? DateProxyFieldPredicate :
-    // TODO: Array
-    unknown, '$'> & {    
-    [propertyPathSymbol]: string[];
-}
+        T extends boolean ? BooleanProxyFieldPredicate :
+        T extends number ? NumberProxyFieldPredicate :
+        T extends string ? StringProxyFieldPredicate :
+        T extends Date ? DateProxyFieldPredicate :
+        // TODO: Array
+        unknown, '$'> & {
+            [propertyPathSymbol]: string[];
+        }
 
 class ProxyFieldPredicate<T> implements
     EqualityProxyFieldPredicate<T>,
@@ -51,6 +51,14 @@ class ProxyFieldPredicate<T> implements
 
     equals(value: PredicateArgument<T>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.Equals);
+    }
+
+    notEquals(value: PredicateArgument<T>) {
+        return this.buildPredicateBuilder(value, ExpressionOperator.NotEquals);
+    }
+
+    in(value: ArrayLike<PredicateArgument<T>> | Iterable<PredicateArgument<T>>) {
+        return this.buildPredicateBuilder(Array.from(value), ExpressionOperator.In);
     }
 
     lessThan(value: PredicateArgument<T>) {
@@ -67,10 +75,6 @@ class ProxyFieldPredicate<T> implements
 
     greaterThanOrEqualTo(value: PredicateArgument<T>) {
         return this.buildPredicateBuilder(value, ExpressionOperator.GreaterThanOrEqualTo);
-    }
-
-    notEquals(value: PredicateArgument<T>) {
-        return this.buildPredicateBuilder(value, ExpressionOperator.NotEquals);
     }
 
     contains(value: PredicateArgument<string>) {
@@ -107,6 +111,7 @@ type PredicateArgument<T> = T | PropertyProxy<T> | null | undefined;
 interface EqualityProxyFieldPredicate<T> {
     equals(value: PredicateArgument<T>): BooleanPredicateBuilder<T>;
     notEquals(value: PredicateArgument<T>): BooleanPredicateBuilder<T>;
+    in(value: ArrayLike<PredicateArgument<T>> | Iterable<PredicateArgument<T>>): BooleanPredicateBuilder<T>;
 }
 
 interface InequalityProxyFieldPredicate<T> {
@@ -159,11 +164,11 @@ function getPropertyProxy<T>(navigationPath: string[]): PropertyProxy<T> {
     if (navigationPath.length === 0) throw new Error('PropertyProxy must be initialized with at least one proprety path');
     return new Proxy({ [propertyPathSymbol]: navigationPath }, {
         get(target: any, property: string) {
-            if (property.startsWith("$")){
+            if (property.startsWith("$")) {
                 const predicate = new ProxyFieldPredicate<T>(target as PropertyProxy<T>);
                 return ((predicate as unknown as any)[property.slice(1)] as Function).bind(predicate);
             }
-            return getPropertyProxy([...navigationPath, property]);        
+            return getPropertyProxy([...navigationPath, property]);
         }
     });
 }
@@ -186,7 +191,7 @@ class ProxyBooleanFunctions<T> {
     }
 
     not(predicate: BooleanPredicateBuilder<T>) {
-        return new BooleanPredicateBuilder<T>(new Expression(ExpressionOperator.Not, [], predicate.expression));
+        return new BooleanPredicateBuilder<T>(new Expression(ExpressionOperator.Not, [predicate.expression]));
     }
 
     private combinePredicates(operator: ExpressionOperator, ...predicates: BooleanPredicateBuilder<T>[]) {
