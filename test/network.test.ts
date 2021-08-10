@@ -18,7 +18,7 @@ xdescribe("executing getManyAsync", () => {
     const baseQuery = ODataV4QueryProvider.createQuery<Subject>(endpoint);
 
     it("should not error", async () => {
-        const query = baseQuery.filter(p => p.contains("Name", "vet"));
+        const query = baseQuery.filter(p => p.Name.$contains("vet"));
 
         let results = await query.getManyAsync();
 

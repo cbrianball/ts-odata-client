@@ -25,21 +25,21 @@ describe("requestInit", () => {
     })
     
     it("should not error if not provided", async () => {        
-        const query = ODataV4QueryProvider.createQuery<Subject>(endpoint).filter(p => p.contains("Name", "vet"));
+        const query = ODataV4QueryProvider.createQuery<Subject>(endpoint).filter(p => p.Name.$contains("vet"));
         await query.getManyAsync();        
         expect(currentFetch.lastInit).to.be.empty;
     });
 
     it("should use provided object in fetch", async () => {
         const requestInit: RequestInit = {method: 'POST'};
-        const query = ODataV4QueryProvider.createQuery<Subject>(endpoint, () => requestInit).filter(p => p.contains("Name", "vet"));
+        const query = ODataV4QueryProvider.createQuery<Subject>(endpoint, () => requestInit).filter(p => p.Name.$contains("vet"));
         await query.getManyAsync();        
         expect(currentFetch.lastInit).to.equal(requestInit);
     });
 
     it("should use provided object via Promise in fetch", async () => {
         const requestInit: RequestInit = {method: 'POST'};
-        const query = ODataV4QueryProvider.createQuery<Subject>(endpoint, () => Promise.resolve(requestInit)).filter(p => p.contains("Name", "vet"));
+        const query = ODataV4QueryProvider.createQuery<Subject>(endpoint, () => Promise.resolve(requestInit)).filter(p => p.Name.$contains("vet"));
         await query.getManyAsync();        
         expect(currentFetch.lastInit).to.equal(requestInit);
     });

@@ -51,12 +51,10 @@ export abstract class ODataQueryProvider {
         const target = { [propertyPathSymbol]: navigationPath };
         const predicate = new ProxyFieldPredicate<T>(target as PropertyProxy<T>);
         return new Proxy(target, {
-            get: (target: any, property: string | Symbol) => {
+            get: (target: any, property: string | symbol) => {
                 if(typeof property === "symbol") {
                     return target[property];
                 }
-                //Typescript can't "sniff out" that we've already tested for symbol, so the following line is really just for the Typescript compiler.
-                if(typeof property !== "string") throw new Error("Proprety is not a string");
                 
                 if ((property).startsWith("$")) {                    
                     return ((predicate as unknown as any)[property.slice(1)] as Function).bind(predicate);

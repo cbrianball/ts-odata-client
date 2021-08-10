@@ -60,15 +60,12 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
      * Determines the sort order (ascending) of the records; calls or orderBy() and orderByDescending() are cumulative.
      * @param fields
      */
-    public orderBy(...fields: Array<FieldsFor<T>>) {
-        const expression = new Expression(ExpressionOperator.OrderBy, fields.map(f => new FieldReference<T>(f)), this.expression);
-        return this.provider.createQuery<T, U>(expression);
-    }
-
-    public orderByWithProxy(fields: (entity: EntityProxy<T>) => Array<PropertyProxy<unknown>>) {
+    public orderBy(fields: (entity: EntityProxy<T>) => PropertyProxy<unknown> | Array<PropertyProxy<unknown>>) {
         const proxy = this.provider[createProxiedEntity]<T>();
+        const properties = [fields(proxy)].flat()
         const expression = new Expression(ExpressionOperator.OrderBy,
-            fields(proxy).map((f => new FieldReference(f[propertyPathSymbol].join('/'))), this.expression));
+            properties.map((f => new FieldReference(f[propertyPathSymbol].join('/'))), this.expression),
+            this.expression);
         return this.provider.createQuery<T, U>(expression);
     }
 
@@ -76,24 +73,20 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
      * Determines the sort order (descending) of the records; calls to orderBy() and orderByDescending() are cumulative.
      * @param fields
      */
-    public orderByDescending(...fields: Array<FieldsFor<T>>) {
-        const expression = new Expression(ExpressionOperator.OrderByDescending, fields.map(f => new FieldReference<T>(f)), this.expression);
+    public orderByDescending(fields: (entity: EntityProxy<T>) => PropertyProxy<unknown> | Array<PropertyProxy<unknown>>) {
+        const proxy = this.provider[createProxiedEntity]<T>();
+        const properties = [fields(proxy)].flat()
+        const expression = new Expression(ExpressionOperator.OrderByDescending,
+            properties.map((f => new FieldReference(f[propertyPathSymbol].join('/'))), this.expression),
+            this.expression);
         return this.provider.createQuery<T, U>(expression);
     }
 
     /**
-     * Filters the records based on the resulting FilterBuilder; calls to filter() and customFilter() are cumulative (as well as UNIONed (AND))
-     * @param predicate Either an existing FilterBuilder, or a function that takes in an empty FilterBuilder and returns a FilterBuilder instance.
-     */
-    public filter(predicate: BooleanPredicateBuilder<T> | ((builder: PredicateBuilder<T>) => BooleanPredicateBuilder<T>)) {
-        if (typeof predicate === "function")
-            predicate = predicate(new PredicateBuilder<T>());
-
-        const expression = new Expression(ExpressionOperator.Predicate, [predicate], this.expression);
-        return this.provider.createQuery<T, U>(expression);
-    }
-
-    public filterByProxy(predicate: BooleanPredicateBuilder<T> | ((builder: EntityProxy<T>, functions: ProxyBooleanFunctions<T>) => BooleanPredicateBuilder<T>)) {
+     * Filters the records based on the provided expression; multiple calls to filter() are cumulative (as well as UNIONed (AND))
+     * @param predicate A function that takes in an entity proxy and returns a BooleanPredicateBuilder.
+     */    
+    public filter(predicate: BooleanPredicateBuilder<T> | ((builder: EntityProxy<T>, functions: ProxyBooleanFunctions<T>) => BooleanPredicateBuilder<T>)) {
         if (typeof predicate === "function")
             predicate = predicate(this.provider[createProxiedEntity](), new ProxyBooleanFunctions<T>());
 
