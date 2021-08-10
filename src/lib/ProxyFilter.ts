@@ -19,9 +19,13 @@ type QueryableFieldsFor<T> =
     T extends Array<any> ? Exclude<keyof T, keyof Array<any>> :
     T extends Object ? Exclude<keyof T, keyof Object> :
     keyof T & string;
+    
 
+export const lambdaSymbol = Symbol();
 type EntityProxy<T> = {
-    [P in QueryableFieldsFor<T>]: PropertyProxy<T[P]>
+    [P in QueryableFieldsFor<T>]: PropertyProxy<T[P]>;
+} & {
+    [lambdaSymbol]: string;
 };
 
 type PrefixMembers<T, Prefix extends string> = {
@@ -91,18 +95,28 @@ class ProxyFieldPredicate<T> implements
         return this.buildPredicateBuilder(value, ExpressionOperator.EndsWith);
     }
 
-    any<U>(value: BooleanPredicateBuilder<U[]> | ((entity: EntityProxy<U>, compound: ProxyBooleanFunctions<U>) => BooleanPredicateBuilder<U[]>)) {
-        if(typeof value === "function") {
-            value = value(getEntityProxy<U>(), new ProxyBooleanFunctions<U>());
-        }
-        return this.buildPredicateBuilder(value.expression, ExpressionOperator.Any);
+    any<U>(value: (entity: EntityProxy<U>, compound: ProxyBooleanFunctions<U>) => BooleanPredicateBuilder<U[]>) {
+        const proxy = getEntityProxy<U>(true);
+        const expression = value(proxy, new ProxyBooleanFunctions<U>()).expression;
+        
+        return this.buildCollectionFilterPredicateBuilder(expression!, ExpressionOperator.Any, proxy);
     }
 
-    all<U>(value: BooleanPredicateBuilder<U[]> | ((entity: EntityProxy<U>, compound: ProxyBooleanFunctions<U>) => BooleanPredicateBuilder<U[]>)) {
-        if(typeof value === "function") {
-            value = value(getEntityProxy<U>(), new ProxyBooleanFunctions<U>());
+    all<U>(value: (entity: EntityProxy<U>, compound: ProxyBooleanFunctions<U>) => BooleanPredicateBuilder<U[]>) {
+        const proxy = getEntityProxy<U>(true);
+        const expression = value(proxy, new ProxyBooleanFunctions<U>()).expression;
+        
+        return this.buildCollectionFilterPredicateBuilder(expression!, ExpressionOperator.All, proxy);
+    }
+
+    private buildCollectionFilterPredicateBuilder<P>(value: Expression, operator: ExpressionOperator, proxy: EntityProxy<P>) {
+        let operand: any = value;
+        const propertyPath = value == null ? null : (value as any)[propertyPathSymbol] as string[] | undefined;
+        if (propertyPath != null) {
+            operand = this.getFieldReference(value as unknown as PropertyProxy<T>)
         }
-        return this.buildPredicateBuilder(value.expression, ExpressionOperator.All);
+        const expression = new Expression(operator, [this.fieldReference, new String(proxy[lambdaSymbol]) ,operand]);
+        return new BooleanPredicateBuilder<P>(expression);
     }
 
     protected buildPredicateBuilder<P>(value: P | PropertyProxy<P>, operator: ExpressionOperator) {
@@ -152,13 +166,13 @@ interface StringProxyFieldPredicateInterface {
 }
 
 interface ArrayProxyFieldPredicateInterface {
-    any(value: BooleanPredicateBuilder<any[]> | ((entity: EntityProxy<any>, compound: ProxyBooleanFunctions<any>) => BooleanPredicateBuilder<any[]>)): BooleanPredicateBuilder<any>;
-    all(value: BooleanPredicateBuilder<any[]> | ((entity: EntityProxy<any>, compound: ProxyBooleanFunctions<any>) => BooleanPredicateBuilder<any[]>)): BooleanPredicateBuilder<any>;
+    any(value: (entity: EntityProxy<any>, compound: ProxyBooleanFunctions<any>) => BooleanPredicateBuilder<any[]>): BooleanPredicateBuilder<any>;
+    all(value: (entity: EntityProxy<any>, compound: ProxyBooleanFunctions<any>) => BooleanPredicateBuilder<any[]>): BooleanPredicateBuilder<any>;
 }
 
 interface ArrayProxyFieldPredicate<T extends Array<any>> {
-    any(value: BooleanPredicateBuilder<T> | ((entity: EntityProxy<T[number]>, compound: ProxyBooleanFunctions<T>) => BooleanPredicateBuilder<T>)): BooleanPredicateBuilder<T>;
-    all(value: BooleanPredicateBuilder<T> | ((entity: EntityProxy<T[number]>, compound: ProxyBooleanFunctions<T>) => BooleanPredicateBuilder<T>)): BooleanPredicateBuilder<T>;
+    any(value: (entity: EntityProxy<T[number]>, compound: ProxyBooleanFunctions<T>) => BooleanPredicateBuilder<T>): BooleanPredicateBuilder<T>;
+    all(value: (entity: EntityProxy<T[number]>, compound: ProxyBooleanFunctions<T>) => BooleanPredicateBuilder<T>): BooleanPredicateBuilder<T>;
 }
 
 interface StringProxyFieldPredicate extends EqualityProxyFieldPredicate<string>, InequalityProxyFieldPredicate<string>, StringProxyFieldPredicateInterface { }
@@ -178,10 +192,22 @@ export function usingProxy<T>(entity: ((entity: EntityProxy<T>, compound: ProxyB
 // foo.filter(usingProxy(u => u.id.equals(10).and(u.lastName.lessThan(u.firstName))));
 // foo.filter(usingProxy((u, {not}) => not(u.id.$is.greaterThanOrEqualTo(12))));
 
-function getEntityProxy<T>(): EntityProxy<T> {
-    return new Proxy({}, {
-        get(_: any, property: string) {
-            return getPropertyProxy([property]);
+let lambdaCounter = 0;
+function getEntityProxy<T>(includeLambdaVariable = false): EntityProxy<T> {
+    let variable = '';
+    if(includeLambdaVariable) {
+        variable = `p${lambdaCounter++}`;
+        if(lambdaCounter >= Number.MAX_SAFE_INTEGER) lambdaCounter = 0;
+    }
+    return new Proxy({[lambdaSymbol]: variable}, {
+        get(instance: any, property: string | Symbol) {
+            if(typeof property === "symbol") return instance[lambdaSymbol];
+
+            const path = [property as string];
+            if(includeLambdaVariable) {
+                path.unshift(variable);
+            }
+            return getPropertyProxy(path);
         }
     });
 }

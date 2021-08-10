@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ODataQuery } from "../../src";
-import {usingProxy} from "../../src/lib/ProxyFilter";
+import {lambdaSymbol, usingProxy} from "../../src/lib/ProxyFilter";
 
 describe("useProxy", () => {
 
@@ -96,13 +96,30 @@ describe("useProxy", () => {
     });
 
     it("should handle 'any' entity collection query", () => {
-        const query = baseQuery.filter(usingProxy(p => p.children.$any(c => c.age.$equals(4))));        
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("children/any(x: x/age eq 4)")}`);
+        let variable = '';
+        const query = baseQuery.filter(usingProxy(p => p.children.$any(c => {
+            variable = c[lambdaSymbol];
+            return c.age.$equals(4);
+        })));
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent(`children/any(${variable}: ${variable}/age eq 4)`)}`);
     });
 
     it("should handle 'all' entity collection query", () => {
-        const query = baseQuery.filter(usingProxy(p => p.children.$all(c => c.age.$equals(4))));        
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent("children/all(x: x/age eq 4)")}`);
+        let variable = '';
+        const query = baseQuery.filter(usingProxy(p => p.children.$all(c => {
+            variable = c[lambdaSymbol];
+            return c.age.$equals(4);
+        })));
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent(`children/all(${variable}: ${variable}/age eq 4)`)}`);
+    });
+
+    it("should handle 'all' entity collection query with contains", () => {
+        let variable = '';
+        const query = baseQuery.filter(usingProxy(p => p.children.$all(c => {
+            variable = c[lambdaSymbol];
+             return c.firstName.$contains('efg');
+        })));
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$filter=${encodeURIComponent(`children/all(${variable}: contains(${variable}/firstName,'efg'))`)}`);
     });
 });
 
@@ -111,8 +128,14 @@ interface Person {
     lastName: string;
     age: number;
     email: string;
-    children: Person[];
+    children: Child[];
     pets: string[];
     mother: Person;
     father: Person;
+}
+
+interface Child {
+    firstName: string;
+    lastName: string;
+    age: number;
 }
