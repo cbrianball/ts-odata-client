@@ -27,4 +27,7 @@ export const enum ExpressionOperator {
     Skip = "skip",
     StartsWith = "startsWith",
     Top = "top",
+    Any = "any",
+    All = "all",
+    Value = "value",
 }

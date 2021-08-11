@@ -2,19 +2,17 @@ import { ODataQueryProvider } from "./ODataQueryProvider";
 import { FieldReference } from "./FieldReference";
 import { Expression } from "./Expression";
 import { ODataQueryResponse, ODataQueryResponseWithCount, ODataResponse } from "./ODataResponse";
-import { PredicateBuilder } from "./PredicateBuilder";
 import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 import { ExpressionOperator } from "./ExpressionOperator";
 import { SubType } from "./SubType";
 import { ExcludeProperties } from "./ExcludeProperties";
 import { ODataV4QueryProvider } from "./ODataV4QueryProvider";
+import { FilterAccessoryFunctions } from "./FilterAccessoryFunctions";
+import { createProxiedEntity, EntityProxy, PropertyProxy, resolveQuery, propertyPath } from "./types";
 
 type FieldsFor<T> = Extract<keyof T, string>;
 
-/**
- * A symbol used to retrieve the resulting query from the @type {ODataQueryProvider}.
- */
-export const resolveQuery = Symbol();
+
 
 /**
  * Represents a query against an OData source.
@@ -59,8 +57,12 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
      * Determines the sort order (ascending) of the records; calls or orderBy() and orderByDescending() are cumulative.
      * @param fields
      */
-    public orderBy(...fields: Array<FieldsFor<T>>) {
-        const expression = new Expression(ExpressionOperator.OrderBy, fields.map(f => new FieldReference<T>(f)), this.expression);
+    public orderBy(fields: (entity: EntityProxy<T>) => PropertyProxy<unknown> | Array<PropertyProxy<unknown>>) {
+        const proxy = this.provider[createProxiedEntity]<T>();
+        const properties = [fields(proxy)].flat()
+        const expression = new Expression(ExpressionOperator.OrderBy,
+            properties.map(f => new FieldReference(f[propertyPath].join('/'))),
+            this.expression);
         return this.provider.createQuery<T, U>(expression);
     }
 
@@ -68,18 +70,22 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
      * Determines the sort order (descending) of the records; calls to orderBy() and orderByDescending() are cumulative.
      * @param fields
      */
-    public orderByDescending(...fields: Array<FieldsFor<T>>) {
-        const expression = new Expression(ExpressionOperator.OrderByDescending, fields.map(f => new FieldReference<T>(f)), this.expression);
+    public orderByDescending(fields: (entity: EntityProxy<T>) => PropertyProxy<unknown> | Array<PropertyProxy<unknown>>) {
+        const proxy = this.provider[createProxiedEntity]<T>();
+        const properties = [fields(proxy)].flat()
+        const expression = new Expression(ExpressionOperator.OrderByDescending,
+            properties.map((f => new FieldReference(f[propertyPath].join('/')))),
+            this.expression);
         return this.provider.createQuery<T, U>(expression);
     }
 
     /**
-     * Filters the records based on the resulting FilterBuilder; calls to filter() and customFilter() are cumulative (as well as UNIONed (AND))
-     * @param predicate Either an existing FilterBuilder, or a function that takes in an empty FilterBuilder and returns a FilterBuilder instance.
+     * Filters the records based on the provided expression; multiple calls to filter() are cumulative (as well as UNIONed (AND))
+     * @param predicate A function that takes in an entity proxy and returns a BooleanPredicateBuilder.
      */
-    public filter(predicate: BooleanPredicateBuilder<T> | ((builder: PredicateBuilder<T>) => BooleanPredicateBuilder<T>)) {
+    public filter(predicate: BooleanPredicateBuilder<T> | ((builder: EntityProxy<T, true>, functions: FilterAccessoryFunctions<T>) => BooleanPredicateBuilder<T>)) {
         if (typeof predicate === "function")
-            predicate = predicate(new PredicateBuilder<T>());
+            predicate = predicate(this.provider[createProxiedEntity](), new FilterAccessoryFunctions<T>());
 
         const expression = new Expression(ExpressionOperator.Predicate, [predicate], this.expression);
         return this.provider.createQuery<T, U>(expression);
@@ -125,6 +131,12 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
     public async getManyWithCountAsync() {
         const expression = new Expression(ExpressionOperator.GetWithCount, [], this.expression);
         return await this.provider.executeQueryAsync<ODataQueryResponseWithCount<U>>(expression);
+    }
+
+    public async getValueAsync() {
+        const expression = new Expression(ExpressionOperator.Value, [], this.expression);
+        const response = await this.provider.executeRequestAsync(expression);
+        return response.blob();
     }
 
     [resolveQuery]() {

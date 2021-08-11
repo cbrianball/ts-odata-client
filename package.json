@@ -5,7 +5,7 @@
   "main": "/index.js",
   "types": "/index.d.ts",
   "scripts": {
-    "build": "rimraf dist && tsc",
+    "build": "rimraf dist && tsc",    
     "test": "mocha -r ts-node/register test/**/*.ts",
     "test-ci": "mocha -r ts-node/register test/**/*.ts --reporter mocha-junit-reporter",
     "pack": "npm run build && cpx {package.json,README.md} dist && npm pack ./dist --dry-run",

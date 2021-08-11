@@ -19,17 +19,29 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
             .createQuery<T, ExcludeProperties<T, any[]>>();
     }
 
-    async executeQueryAsync<T extends ODataResponse>(expression?: Expression) {
+    private async sendRequest(expression?: Expression) {
         const url = this.buildQuery(expression);
 
         let init = this.requestInit?.() ?? {};
         if (init instanceof Promise) init = await init;
 
-        const response = await fetch(url, init);
+        return await fetch(url, init);    
+    }
+
+    async executeQueryAsync<T extends ODataResponse>(expression?: Expression) {
+        const response = await this.sendRequest(expression);
 
         if (response.ok) return await response.json() as T;
 
         throw new Error(JSON.stringify(await response.json()));
+    }
+
+    async executeRequestAsync(expression?: Expression) {
+        const response = await this.sendRequest(expression);
+
+        if (response.ok) return response;
+
+        throw new Error(await response.text());
     }
 
     buildQuery(expression?: Expression) {
@@ -44,6 +56,10 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
 
         if (visitor.oDataQuery.key)
             path += `(${visitor.oDataQuery.key})`;
+
+        if(visitor.oDataQuery.value === true) {
+            path += "/$value";
+        }
 
         const queryString = this.buildQueryString(visitor.oDataQuery);
 

@@ -17,6 +17,7 @@ export interface ODataV4QuerySegments {
     key?: any;
     count?: boolean;
     expand?: string[];
+    value?: boolean;
 }
 
 /**
@@ -49,12 +50,12 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
     }
 
     expandVisitor(...fields: FieldReference<any>[]) {
-        if (!this.oDataQuery.expand || 
+        if (!this.oDataQuery.expand ||
             this.oDataQuery.expand.some(v => v === "*"))
-            this.oDataQuery.expand = [];        
+            this.oDataQuery.expand = [];
 
         this.oDataQuery.expand.push(...fields.map(f => f.toString()));
-        
+
         //ensure unique values
         this.oDataQuery.expand = Array.from(new Set(this.oDataQuery.expand));
     }
@@ -79,6 +80,10 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
             key = new Literal(key);
 
         this.oDataQuery.key = this.deriveLiteral(key);
+    }
+
+    valueVisitor() {
+        this.oDataQuery.value = true;
     }
 
     predicateVisitor(predicate: BooleanPredicateBuilder<any>) {
@@ -155,6 +160,17 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
                     return [`endsWith(${this.reduceTranslatedExpression(left)},${this.reduceTranslatedExpression(right)})`];
                 case ExpressionOperator.In:
                     return [`${this.reduceTranslatedExpression(left)} in (${this.reduceTranslatedExpression(right)})`];
+                default:
+                    throw new Error(`Operator '${expression.operator}' is not supported`);
+            }
+        }
+        else if (translation.length === 3) {
+            let [left, center, right] = translation;
+            switch (expression.operator) {
+                case ExpressionOperator.Any:
+                    return [`${this.reduceTranslatedExpression(left)}/any(${center}: ${this.reduceTranslatedExpression(right)})`];
+                case ExpressionOperator.All:
+                    return [`${this.reduceTranslatedExpression(left)}/all(${center}: ${this.reduceTranslatedExpression(right)})`];
                 default:
                     throw new Error(`Operator '${expression.operator}' is not supported`);
             }
