@@ -17,6 +17,7 @@ export interface ODataV4QuerySegments {
     key?: any;
     count?: boolean;
     expand?: string[];
+    value?: boolean;
 }
 
 /**
@@ -79,6 +80,10 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
             key = new Literal(key);
 
         this.oDataQuery.key = this.deriveLiteral(key);
+    }
+
+    valueVisitor() {
+        this.oDataQuery.value = true;
     }
 
     predicateVisitor(predicate: BooleanPredicateBuilder<any>) {

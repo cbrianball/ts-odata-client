@@ -169,6 +169,13 @@ describe("ODataV4ExpressionVisitor", () => {
 
         expect(visitor.oDataQuery).to.eql({ expand: ["*"] });
     });
+
+    it("should handle value", () => {
+        const visitor = new ODataV4ExpressionVisitor();
+        visitor.visit(new Expression(ExpressionOperator.Value, []));
+
+        expect(visitor.oDataQuery).to.eql({ value: true });
+    });
 });
 
 interface Person {

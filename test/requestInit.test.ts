@@ -14,6 +14,7 @@ let currentFetch!: MockFetch;
 describe("requestInit", () => {
     
     const endpoint = "http://api.purdue.io/odata/Subjects";    
+    const oldFetch = (global as any).fetch;
     
     beforeEach(() => {
         currentFetch = new MockFetch();
@@ -21,8 +22,8 @@ describe("requestInit", () => {
     });
     
     afterEach(() => {
-        delete (global as any).fech;
-    })
+        (global as any).fech = oldFetch;
+    });
     
     it("should not error if not provided", async () => {        
         const query = ODataV4QueryProvider.createQuery<Subject>(endpoint).filter(p => p.Name.$contains("vet"));

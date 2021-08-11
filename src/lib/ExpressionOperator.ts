@@ -29,4 +29,5 @@ export const enum ExpressionOperator {
     Top = "top",
     Any = "any",
     All = "all",
+    Value = "value",
 }

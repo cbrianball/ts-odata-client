@@ -19,10 +19,16 @@ export abstract class ODataQueryProvider {
     }
 
     /**
-     * Executes the provided @type {Expression}.
+     * Executes the provided @type {Expression} and returns the results as a JSON object.
      * @param expression 
      */
     abstract executeQueryAsync<T extends ODataResponse>(expression?: Expression): Promise<T>;
+
+    /**
+     * Executed the provided @type {Expression} and returns the raw response.
+     * @param expression 
+     */
+    abstract executeRequestAsync(expression?: Expression): Promise<Response>;
 
     /**
      * Returns the value that represents the query that will be executed.

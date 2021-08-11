@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { ODataQuery } from "../src";
+import { MockFetch } from "./mock-fetch";
 
 describe("ODataQuery", () => {
     const endpoint = "/odata/users";

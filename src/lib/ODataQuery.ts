@@ -133,6 +133,12 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
         return await this.provider.executeQueryAsync<ODataQueryResponseWithCount<U>>(expression);
     }
 
+    public async getValueAsync() {
+        const expression = new Expression(ExpressionOperator.Value, [], this.expression);
+        const response = await this.provider.executeRequestAsync(expression);
+        return response.blob();
+    }
+
     [resolveQuery]() {
         return this.provider.buildQuery(this.expression);
     }
