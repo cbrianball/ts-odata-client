@@ -69,7 +69,7 @@ const query = ODataQuery.forV4<User>(`http://domain.example/path/to/endpoint/fun
 2.0 introduces a number of breaking changes. The primary breaking changes are with the `filter`, `orderBy` and `orderByDescending` methods on the `ODataQuery` type.
 
 ### filter
-  This method still accepts a `BooleanPredicateBuilder<T>` as an argument; however, the method signature alternative has now changed, instead of a `FilterBuilder` object, the provided argument for the method is now an `EntityProxy`. The best way to demonstrate the difference is with an example.
+  This method still accepts a `BooleanPredicateBuilder<T>` as an argument; however, the method signature alternative has now changed; instead of a `FilterBuilder` object, the provided argument for the method is now an `EntityProxy`. The best way to demonstrate the difference is with an example.
   
   ```typescript
   const userQuery = ...
