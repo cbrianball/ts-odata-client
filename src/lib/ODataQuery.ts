@@ -83,7 +83,7 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
      * Filters the records based on the provided expression; multiple calls to filter() are cumulative (as well as UNIONed (AND))
      * @param predicate A function that takes in an entity proxy and returns a BooleanPredicateBuilder.
      */
-    public filter(predicate: BooleanPredicateBuilder<T> | ((builder: EntityProxy<T>, functions: FilterAccessoryFunctions<T>) => BooleanPredicateBuilder<T>)) {
+    public filter(predicate: BooleanPredicateBuilder<T> | ((builder: EntityProxy<T, true>, functions: FilterAccessoryFunctions<T>) => BooleanPredicateBuilder<T>)) {
         if (typeof predicate === "function")
             predicate = predicate(this.provider[createProxiedEntity](), new FilterAccessoryFunctions<T>());
 

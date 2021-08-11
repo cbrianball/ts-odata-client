@@ -14,27 +14,28 @@ type QueryableFieldsFor<T> =
     T extends Object ? Exclude<keyof T, keyof Object> :
     keyof T & string;
 
-export type EntityProxy<T> = {
-    [P in QueryableFieldsFor<T>]: PropertyProxy<T[P]>;
+export type EntityProxy<T, IncludeFilterMethods = false> = {
+    [P in QueryableFieldsFor<T>]: PropertyProxy<T[P], IncludeFilterMethods> & (IncludeFilterMethods extends true ? ProxyFilterMethods<T[P]> : {});
 } & {
     [lambdaVariable]: string;
 };
+
+export type PropertyProxy<T, IncludeFilterMethods = false> = EntityProxy<T, IncludeFilterMethods>
+& {[propertyPath]: string[]};
 
 type PrefixMembers<T, Prefix extends string> = {
     [P in string & keyof T as `${Prefix}${P}`]: T[P];
 }
 
-
-export type PropertyProxy<T> = EntityProxy<T> &
+export type ProxyFilterMethods<T> = 
     PrefixMembers<
-        T extends boolean ? BooleanProxyFieldPredicate :
-        T extends number ? NumberProxyFieldPredicate :
-        T extends string ? StringProxyFieldPredicate :
-        T extends Date ? DateProxyFieldPredicate :
-        T extends Array<any> ? ArrayProxyFieldPredicate<T> :
-        // TODO: Array
-        unknown, '$'>
-        & {[propertyPath]: string[];};
+    T extends boolean ? BooleanProxyFieldPredicate :
+    T extends number ? NumberProxyFieldPredicate :
+    T extends string ? StringProxyFieldPredicate :
+    T extends Date ? DateProxyFieldPredicate :
+    T extends Array<any> ? ArrayProxyFieldPredicate<T> :
+    // TODO: Array
+    unknown, '$'>
 
 export type PredicateArgument<T> = T | PropertyProxy<T> | null | undefined;
 
@@ -66,13 +67,13 @@ export interface DateProxyFieldPredicate extends EqualityProxyFieldPredicate<Dat
 }
 
 export interface ArrayProxyFieldPredicateInterface {
-    any(value: (entity: EntityProxy<any>, compound: FilterAccessoryFunctions<any>) => BooleanPredicateBuilder<any[]>): BooleanPredicateBuilder<any>;
-    all(value: (entity: EntityProxy<any>, compound: FilterAccessoryFunctions<any>) => BooleanPredicateBuilder<any[]>): BooleanPredicateBuilder<any>;
+    any(value: (entity: EntityProxy<any, true>, compound: FilterAccessoryFunctions<any>) => BooleanPredicateBuilder<any[]>): BooleanPredicateBuilder<any>;
+    all(value: (entity: EntityProxy<any, true>, compound: FilterAccessoryFunctions<any>) => BooleanPredicateBuilder<any[]>): BooleanPredicateBuilder<any>;
 }
 
 interface ArrayProxyFieldPredicate<T extends Array<any>> {
-    any(value: (entity: EntityProxy<T[number]>, compound: FilterAccessoryFunctions<T>) => BooleanPredicateBuilder<T>): BooleanPredicateBuilder<T>;
-    all(value: (entity: EntityProxy<T[number]>, compound: FilterAccessoryFunctions<T>) => BooleanPredicateBuilder<T>): BooleanPredicateBuilder<T>;
+    any(value: (entity: EntityProxy<T[number], true>, compound: FilterAccessoryFunctions<T>) => BooleanPredicateBuilder<T>): BooleanPredicateBuilder<T>;
+    all(value: (entity: EntityProxy<T[number], true>, compound: FilterAccessoryFunctions<T>) => BooleanPredicateBuilder<T>): BooleanPredicateBuilder<T>;
 }
 
 interface StringProxyFieldPredicate extends EqualityProxyFieldPredicate<string>, InequalityProxyFieldPredicate<string>, StringProxyFieldPredicateInterface { }

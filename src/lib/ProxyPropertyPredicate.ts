@@ -57,14 +57,14 @@ export class ProxyPropertyPredicate<T> implements
         return this.buildPredicateBuilder(value, ExpressionOperator.EndsWith);
     }
 
-    any<U>(value: (entity: EntityProxy<U>, compound: FilterAccessoryFunctions<U>) => BooleanPredicateBuilder<U[]>) {
+    any<U>(value: (entity: EntityProxy<U, true>, compound: FilterAccessoryFunctions<U>) => BooleanPredicateBuilder<U[]>) {
         const proxy = this.provider[createProxiedEntity]<U>(true);
         const expression = value(proxy, new FilterAccessoryFunctions<U>()).expression;
 
         return this.buildCollectionFilterPredicateBuilder(expression!, ExpressionOperator.Any, proxy);
     }
 
-    all<U>(value: (entity: EntityProxy<U>, compound: FilterAccessoryFunctions<U>) => BooleanPredicateBuilder<U[]>) {
+    all<U>(value: (entity: EntityProxy<U, true>, compound: FilterAccessoryFunctions<U>) => BooleanPredicateBuilder<U[]>) {
         const proxy = this.provider[createProxiedEntity]<U>(true);
         const expression = value(proxy, new FilterAccessoryFunctions<U>()).expression;
 
