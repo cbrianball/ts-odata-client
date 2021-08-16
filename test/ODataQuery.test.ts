@@ -130,6 +130,10 @@ describe("ODataQuery", () => {
 
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=${encodeURIComponent("children,pets")}`);
     });
+
+    const test = baseQuery.selectWithProxy(p => ({
+        foo: { bar: p.email}
+    }));
 });
 
 interface Person {

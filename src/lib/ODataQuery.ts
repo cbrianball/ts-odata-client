@@ -8,7 +8,7 @@ import { SubType } from "./SubType";
 import { ExcludeProperties } from "./ExcludeProperties";
 import { ODataV4QueryProvider } from "./ODataV4QueryProvider";
 import { FilterAccessoryFunctions } from "./FilterAccessoryFunctions";
-import { createProxiedEntity, EntityProxy, PropertyProxy, resolveQuery, propertyPath, ReplaceDateWithString } from "./types";
+import { createProxiedEntity, EntityProxy, PropertyProxy, resolveQuery, propertyPath, ReplaceDateWithString, ProjectorType } from "./types";
 
 type FieldsFor<T> = Extract<keyof T, string>;
 
@@ -33,6 +33,27 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
     public select<U extends FieldsFor<T>>(...fields: U[]) {
         const expression = new Expression(ExpressionOperator.Select, fields.map(v => new FieldReference<T>(v)), this.expression);
         return this.provider.createQuery<T, Pick<T, U>>(expression);
+    }
+
+    public selectWithProxy<U extends ProjectorType>(projector: (proxy: T) => U) {
+        const proxy = this.provider[createProxiedEntity]() as unknown as T;
+        const f = projector(proxy);
+        const fields = this.getUsedProperties(f);
+        const expression = new Expression(ExpressionOperator.Select, fields, this.expression);
+        
+        return this.provider.createQuery<T, U>(expression);
+    }
+    
+    private getUsedProperties(projectTarget: any): string[] {
+        const fields = Object.keys(projectTarget)
+            .filter(key => isNaN(+key))
+            .map(v => {
+                const value = (v as PropertyProxy<any>)[propertyPath];
+                if(value != null) return value.join('/');
+                return this.getUsedProperties(v);
+            })
+            .flat();
+            return Array.from(new Set(fields));
     }
 
     /**

@@ -99,3 +99,7 @@ export type ReplaceDateWithString<T> = {
  * If getUsers's return type is inferred, then any updates to the OData Query will automatically be reflected in the users field type.
  */
  export type AwaitedReturnType<T extends (...args: any) => any> = T extends (...args: any) => infer R ? R extends Promise<infer P> ? P : R : any;
+
+ export type ProjectorType = {
+     [K: string]: boolean | number | string | Date | Array<any> | ProjectorType;
+ }
