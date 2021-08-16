@@ -77,3 +77,25 @@ interface ArrayProxyFieldPredicate<T extends Array<any>> {
 }
 
 interface StringProxyFieldPredicate extends EqualityProxyFieldPredicate<string>, InequalityProxyFieldPredicate<string>, StringProxyFieldPredicateInterface { }
+
+/**
+ * Returned type from OData call. JSON does not natively support dates.
+ * Interfaces/Types created by consuming libraries should use @type {Date} in their definition;
+ * but when data is actually received from OData service, the type, at runtime, will be a string.
+ */
+export type ReplaceDateWithString<T> = {
+    [P in keyof T]: T[P] extends Date ? string :
+                    T[P] extends boolean | string | number | Array<any> ? T[P] :
+                    ReplaceDateWithString<T[P]>;
+}
+
+/**
+ * Useful to correctly type a class property that will be assigned a method's return value
+ * e.g.,
+ * class {
+ *  users: AwaitedReturnType<typeof getUsers>;
+ *  async getUsers() { ... }
+ * }
+ * If getUsers's return type is inferred, then any updates to the OData Query will automatically be reflected in the users field type.
+ */
+ export type AwaitedReturnType<T extends (...args: any) => any> = T extends (...args: any) => infer R ? R extends Promise<infer P> ? P : R : any;

@@ -8,7 +8,7 @@ import { SubType } from "./SubType";
 import { ExcludeProperties } from "./ExcludeProperties";
 import { ODataV4QueryProvider } from "./ODataV4QueryProvider";
 import { FilterAccessoryFunctions } from "./FilterAccessoryFunctions";
-import { createProxiedEntity, EntityProxy, PropertyProxy, resolveQuery, propertyPath } from "./types";
+import { createProxiedEntity, EntityProxy, PropertyProxy, resolveQuery, propertyPath, ReplaceDateWithString } from "./types";
 
 type FieldsFor<T> = Extract<keyof T, string>;
 
@@ -115,14 +115,14 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
      */
     public async getAsync(key: any) {
         const expression = new Expression(ExpressionOperator.GetByKey, [key], this.expression);
-        return await this.provider.executeQueryAsync<ODataResponse & U>(expression);
+        return await this.provider.executeQueryAsync<ODataResponse & ReplaceDateWithString<U>>(expression);
     }
 
     /**
      * Returns a set of records.
      */
     public async getManyAsync() {
-        return await this.provider.executeQueryAsync<ODataQueryResponse<U>>(this.expression);
+        return await this.provider.executeQueryAsync<ODataQueryResponse<ReplaceDateWithString<U>>>(this.expression);
     }
 
     /**
@@ -130,13 +130,14 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
      */
     public async getManyWithCountAsync() {
         const expression = new Expression(ExpressionOperator.GetWithCount, [], this.expression);
-        return await this.provider.executeQueryAsync<ODataQueryResponseWithCount<U>>(expression);
+        return await this.provider.executeQueryAsync<ODataQueryResponseWithCount<ReplaceDateWithString<U>>>(expression);
     }
 
     public async getValueAsync() {
         const expression = new Expression(ExpressionOperator.Value, [], this.expression);
-        const response = await this.provider.executeRequestAsync(expression);
-        return response.blob();
+        return await this.provider.executeRequestAsync(expression)
+            .then(r => r.blob());
+
     }
 
     [resolveQuery]() {
