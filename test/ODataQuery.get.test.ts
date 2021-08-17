@@ -22,7 +22,7 @@ describe("ODataQuery", () => {
         const lastRequest = currentFetch.lastRequest!;
         const url = typeof lastRequest === "string" ? lastRequest : lastRequest.url;
         expect(url).to.be.eql(endpoint);
-    });    
+    });
 
     it("should produce base URL with key and no query", () => {
         baseQuery.getAsync(123);
@@ -36,6 +36,13 @@ describe("ODataQuery", () => {
         const lastRequest = currentFetch.lastRequest!;
         const url = typeof lastRequest === "string" ? lastRequest : lastRequest.url;
         expect(url).to.be.eql(endpoint + '/$value');
+    });
+
+    it("should transform results", async () => {
+        const query = baseQuery.select(u => ({ id: u.age, name: { first: u.firstName } }));
+        const result = await query.getManyAsync();
+
+        expect(result).to.be.eql({ value: [{ id: undefined, name: { first: undefined } }] });
     });
 });
 

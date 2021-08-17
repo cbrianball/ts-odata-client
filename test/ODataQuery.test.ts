@@ -131,9 +131,21 @@ describe("ODataQuery", () => {
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=${encodeURIComponent("children,pets")}`);
     });
 
-    const test = baseQuery.selectWithProxy(p => ({
-        foo: { bar: p.email}
-    }));
+    it("should find all properties", () => {
+        const query = baseQuery.select(p => ({
+            foo: { bar: p.email},
+            baz: p.firstName,
+            zap: p.mother.lastName,
+            dupe: p.email,
+            constNumber: 5,
+            constBoolean: false,
+            constString: "test",
+        }));
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$select=${encodeURIComponent("email,firstName,mother/lastName")}`);
+
+    });
+
 });
 
 interface Person {
@@ -143,4 +155,5 @@ interface Person {
     email: string;
     children: string[];
     pets: string[];
+    mother: Person;
 }

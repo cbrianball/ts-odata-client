@@ -27,8 +27,10 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
 
     public readonly oDataQuery: ODataV4QuerySegments = {}
 
-    selectVisitor(...fields: FieldReference<any>[]) {
-        this.oDataQuery.select = fields.map(f => f.toString());
+    selectVisitor(...fields: [Function | FieldReference<any>, ...FieldReference<any>[]]) {
+        this.oDataQuery.select = fields
+        .filter(v => typeof v !== "function")
+        .map(f => f.toString());
     }
 
     orderByVisitor(...fields: FieldReference<any>[]) {

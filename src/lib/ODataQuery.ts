@@ -8,11 +8,7 @@ import { SubType } from "./SubType";
 import { ExcludeProperties } from "./ExcludeProperties";
 import { ODataV4QueryProvider } from "./ODataV4QueryProvider";
 import { FilterAccessoryFunctions } from "./FilterAccessoryFunctions";
-import { createProxiedEntity, EntityProxy, PropertyProxy, resolveQuery, propertyPath, ReplaceDateWithString, ProjectorType } from "./types";
-
-type FieldsFor<T> = Extract<keyof T, string>;
-
-
+import { createProxiedEntity, EntityProxy, PropertyProxy, resolveQuery, propertyPath, ReplaceDateWithString, ProjectorType, FieldsFor } from "./types";
 
 /**
  * Represents a query against an OData source.
@@ -27,34 +23,40 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
     constructor(public readonly provider: ODataQueryProvider, public readonly expression?: Expression) { }
 
     /**
-     * Limits the fields that are returned; the most recent call to select() will be used.
+     * Limits the fields that are returned; the most recent call to select() or selectMap() will be used.
      * @param fields
      */
-    public select<U extends FieldsFor<T>>(...fields: U[]) {
-        const expression = new Expression(ExpressionOperator.Select, fields.map(v => new FieldReference<T>(v)), this.expression);
-        return this.provider.createQuery<T, Pick<T, U>>(expression);
-    }
+    public select<U extends FieldsFor<T>>(...fields: U[]): ODataQuery<T, U>;
+    public select<U extends ProjectorType>(projector: (proxy: T) => U): ODataQuery<T, U>;
+    public select<U>(...args: [(proxy: T) => U | FieldsFor<T>, ...FieldsFor<T>[]]) {
+        if (args.length === 0) throw new Error('Parameters are requird');
 
-    public selectWithProxy<U extends ProjectorType>(projector: (proxy: T) => U) {
-        const proxy = this.provider[createProxiedEntity]() as unknown as T;
-        const f = projector(proxy);
-        const fields = this.getUsedProperties(f);
-        const expression = new Expression(ExpressionOperator.Select, fields, this.expression);
-        
+        const firstArg = args[0];
+        if (typeof firstArg === "function") {
+            const projector = firstArg;
+            const projectedObject = projector(this.provider[createProxiedEntity]() as unknown as T);
+            const expression = new Expression(ExpressionOperator.Select, [projector, ...getUsedPropertyPaths(projectedObject)], this.expression);
+
+            return this.provider.createQuery<T, U>(expression);
+        }
+
+        const expression = new Expression(ExpressionOperator.Select, (args as FieldsFor<T>[]).map(v => new FieldReference<T>(v)), this.expression);
         return this.provider.createQuery<T, U>(expression);
     }
-    
-    private getUsedProperties(projectTarget: any): string[] {
-        const fields = Object.keys(projectTarget)
-            .filter(key => isNaN(+key))
-            .map(v => {
-                const value = (v as PropertyProxy<any>)[propertyPath];
-                if(value != null) return value.join('/');
-                return this.getUsedProperties(v);
-            })
-            .flat();
-            return Array.from(new Set(fields));
-    }
+
+    /**
+     * Limits the fields that are returned; the most recent call to select() or SelectMap() will be used.
+     * The provied method will be invoked once to determine which OData properties are used; it will then be invoked again
+     * for each result to perform the transformation
+     * @param projector Only OData fields or constants can be used. No operations may be performed on OData fields (e.g., comparisons, mathematical operations, object creation, etc.)
+     * @returns 
+     */
+    // public selectMap<U extends ProjectorType>(projector: (proxy: T) => U) {
+    //     const projectedObject = projector(this.provider[createProxiedEntity]() as unknown as T);
+    //     const expression = new Expression(ExpressionOperator.Select, [projector, ...getUsedPropertyPaths(projectedObject)], this.expression);
+
+    //     return this.provider.createQuery<T, U>(expression);
+    // }    
 
     /**
      * Returns the top n records; the most recent call to top() will be used.
@@ -136,14 +138,26 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
      */
     public async getAsync(key: any) {
         const expression = new Expression(ExpressionOperator.GetByKey, [key], this.expression);
-        return await this.provider.executeQueryAsync<ODataResponse & ReplaceDateWithString<U>>(expression);
+        // return await this.provider.executeQueryAsync<ODataResponse & ReplaceDateWithString<U>>(expression);
+        const result = await this.provider.executeQueryAsync<ODataResponse & ReplaceDateWithString<U>>(expression);
+        const selectMap = getSelectMap(expression);
+        if (selectMap == null) return result;
+
+        const newResult = selectMap(result) as unknown as ODataResponse & ReplaceDateWithString<U>;
+        newResult["@odata.context"] = result["@odata.context"];
+        return newResult;
     }
 
     /**
      * Returns a set of records.
      */
     public async getManyAsync() {
-        return await this.provider.executeQueryAsync<ODataQueryResponse<ReplaceDateWithString<U>>>(this.expression);
+        const results = await this.provider.executeQueryAsync<ODataQueryResponseWithCount<ReplaceDateWithString<U>>>(this.expression);
+        const selectMap = getSelectMap(this.expression);
+        if (selectMap != null) {
+            results.value = results.value.map(selectMap) as unknown as ReplaceDateWithString<U>[];
+        }
+        return results;
     }
 
     /**
@@ -151,7 +165,12 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
      */
     public async getManyWithCountAsync() {
         const expression = new Expression(ExpressionOperator.GetWithCount, [], this.expression);
-        return await this.provider.executeQueryAsync<ODataQueryResponseWithCount<ReplaceDateWithString<U>>>(expression);
+        const results = await this.provider.executeQueryAsync<ODataQueryResponseWithCount<ReplaceDateWithString<U>>>(expression);
+        const selectMap = getSelectMap(expression);
+        if (selectMap != null) {
+            results.value = results.value.map(selectMap) as unknown as ReplaceDateWithString<U>[];
+        }
+        return results;
     }
 
     public async getValueAsync() {
@@ -164,4 +183,35 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
     [resolveQuery]() {
         return this.provider.buildQuery(this.expression);
     }
+}
+
+
+
+/**
+ * Function that returns all OData paths referenced by the provided object.
+ * @param projectTarget 
+ * @returns An array of paths found within the object (if the same path is used more than once, the duplicates are removed)
+ */
+function getUsedPropertyPaths(projectTarget: any): string[] {
+    const fields = Object.keys(projectTarget)
+        .filter(key => isNaN(+key))
+        .map(key => {
+            const value = projectTarget[key];
+            const path = (value as PropertyProxy<any>)[propertyPath];
+            if (path != null) return path.join('/');
+            return getUsedPropertyPaths(value);
+        })
+        .flat();
+    return Array.from(new Set(fields));
+}
+
+function getSelectMap<T, U>(expression?: Expression): ((entity: T) => U) | undefined {
+    while (expression != null) {
+        if (expression.operator === ExpressionOperator.Select) {
+            const firstOperand = expression.operands[0];
+            return (typeof firstOperand === "function") ? firstOperand : undefined;
+        }
+        expression = expression.previous;
+    }
+    return;
 }

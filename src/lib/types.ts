@@ -6,6 +6,8 @@ export const createProxiedEntity = Symbol();
 export const propertyPath = Symbol();
 export const lambdaVariable = Symbol();
 
+export type FieldsFor<T> = string & keyof T;
+
 type QueryableFieldsFor<T> =
     T extends number ? Exclude<keyof T, keyof number> :
     T extends string ? Exclude<keyof T, keyof string> :
