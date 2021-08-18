@@ -1,31 +1,10 @@
 import type { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 import type { FilterAccessoryFunctions } from "./FilterAccessoryFunctions";
+import type { EntityProxy, PropertyProxy } from "./ProxyTypes";
 
 export const resolveQuery = Symbol();
 export const createProxiedEntity = Symbol();
-export const propertyPath = Symbol();
-export const lambdaVariable = Symbol();
-export const proxyProperties = Symbol();
 
-export type FieldsFor<T> = string & keyof T;
-
-type QueryableFieldsFor<T> =
-    T extends number ? Exclude<keyof T, keyof number> :
-    T extends string ? Exclude<keyof T, keyof string> :
-    T extends Date ? Exclude<keyof T, keyof Date> :
-    T extends Array<any> ? Exclude<keyof T, keyof Array<any>> :
-    T extends Object ? Exclude<keyof T, keyof Object> :
-    keyof T & string;
-
-export type EntityProxy<T, IncludeFilterMethods = false> = {
-    [P in QueryableFieldsFor<T>]: PropertyProxy<T[P], IncludeFilterMethods> & (IncludeFilterMethods extends true ? ProxyFilterMethods<T[P]> : {});
-} & {
-    [lambdaVariable]: string;
-    [proxyProperties]: PropertyProxy<any>[];
-};
-
-export type PropertyProxy<T, IncludeFilterMethods = false> = EntityProxy<T, IncludeFilterMethods>
-& {[propertyPath]: string[]};
 
 type PrefixMembers<T, Prefix extends string> = {
     [P in string & keyof T as `${Prefix}${P}`]: T[P];

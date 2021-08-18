@@ -4,7 +4,8 @@ import { ExpressionOperator } from "./ExpressionOperator";
 import { FieldReference } from "./FieldReference";
 import { FilterAccessoryFunctions } from "./FilterAccessoryFunctions";
 import { ODataQueryProvider } from "./ODataQueryProvider";
-import { ArrayProxyFieldPredicateInterface, EqualityProxyFieldPredicate, InequalityProxyFieldPredicate, PredicateArgument, PropertyProxy, StringProxyFieldPredicateInterface, createProxiedEntity, EntityProxy, propertyPath, lambdaVariable } from "./types";
+import { ArrayProxyFieldPredicateInterface, EqualityProxyFieldPredicate, InequalityProxyFieldPredicate, PredicateArgument, StringProxyFieldPredicateInterface, createProxiedEntity } from "./ProxyFilterTypes";
+import { EntityProxy, propertyPath, lambdaVariable, PropertyProxy } from "./ProxyTypes";
 
 export class ProxyPropertyPredicate<T> implements
     EqualityProxyFieldPredicate<T>,

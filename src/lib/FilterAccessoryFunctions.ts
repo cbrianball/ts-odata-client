@@ -2,7 +2,9 @@ import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 import { Expression } from "./Expression";
 import { ExpressionOperator } from "./ExpressionOperator";
 
-
+/**
+ * Provides additional functionality for the .filter() method on @type {ODataQuery}
+ */
 export class FilterAccessoryFunctions<T> {
     constructor() {
         // Ensure the methods are bound to this object;

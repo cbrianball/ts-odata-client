@@ -2,7 +2,8 @@ import { ODataResponse } from "./ODataResponse";
 import { ODataQuery } from "./ODataQuery";
 import { Expression } from "./Expression";
 import { ProxyPropertyPredicate } from "./ProxyPropertyPredicate";
-import { createProxiedEntity, lambdaVariable, proxyProperties, propertyPath, EntityProxy, PropertyProxy } from "./types";
+import { createProxiedEntity } from "./ProxyFilterTypes";
+import { lambdaVariable, proxyProperties, propertyPath, EntityProxy, PropertyProxy } from "./ProxyTypes";
 
 
 

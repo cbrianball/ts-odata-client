@@ -1,4 +1,4 @@
-import { FieldsFor } from "./types";
+import type { FieldsFor } from "./FieldsForType";
 
 /**
  * Represnets a reference to a field (instead of a literal value).

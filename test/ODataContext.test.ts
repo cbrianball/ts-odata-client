@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { resolveQuery } from "../src/lib/types";
+import { resolveQuery } from "../src/lib/ProxyFilterTypes";
 import { ODataV4Context } from "../src/v4";
 
 class MyContext extends ODataV4Context {

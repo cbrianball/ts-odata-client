@@ -8,7 +8,9 @@ import { SubType } from "./SubType";
 import { ExcludeProperties } from "./ExcludeProperties";
 import { ODataV4QueryProvider } from "./ODataV4QueryProvider";
 import { FilterAccessoryFunctions } from "./FilterAccessoryFunctions";
-import { createProxiedEntity, EntityProxy, PropertyProxy, resolveQuery, propertyPath, ReplaceDateWithString, ProjectorType, FieldsFor, proxyProperties } from "./types";
+import { createProxiedEntity, resolveQuery, ReplaceDateWithString, ProjectorType } from "./ProxyFilterTypes";
+import { EntityProxy, PropertyProxy, propertyPath, proxyProperties } from "./ProxyTypes";
+import { FieldsFor } from "./FieldsForType";
 
 /**
  * Represents a query against an OData source.
@@ -137,7 +139,7 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
      * Returns a set of records.
      */
     public async getManyAsync() {
-        const results = await this.provider.executeQueryAsync<ODataQueryResponseWithCount<ReplaceDateWithString<U>>>(this.expression);
+        const results = await this.provider.executeQueryAsync<ODataQueryResponse<ReplaceDateWithString<U>>>(this.expression);
         const selectMap = getSelectMap(this.expression);
         if (selectMap != null) {
             results.value = results.value.map(selectMap) as unknown as ReplaceDateWithString<U>[];
