@@ -178,8 +178,9 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
  * @returns An array of paths found within the object (if the same path is used more than once, the duplicates are removed)
  */
 function getUsedPropertyPaths(projectTarget: any): string[] {
+    // strings have indexes that each return a string, which causes a stack overflow
+    if(typeof projectTarget === "string") return [];
     const fields = Object.keys(projectTarget)
-        .filter(key => isNaN(+key))
         .map(key => {
             const value = projectTarget[key];
             const path = (value as PropertyProxy<any>)[propertyPath];

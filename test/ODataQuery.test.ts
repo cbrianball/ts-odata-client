@@ -146,6 +146,22 @@ describe("ODataQuery", () => {
 
     });
 
+    it("should find all properties", () => {
+        const outsideVariable = "test"
+        const query = baseQuery.select(p => ({
+            foo: { bar: p.email},
+            names: [p.firstName, p.lastName],
+            zap: p.mother.lastName,
+            dupe: p.email,
+            constNumber: 5,
+            constBoolean: false,
+            constString: outsideVariable,
+        }));
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$select=${encodeURIComponent("email,firstName,lastName,mother/lastName")}`);
+
+    });
+
 });
 
 interface Person {
