@@ -1,4 +1,4 @@
-import { ODataV4QueryProvider } from "./ODataV4QueryProvider";
+import { ODataV4QueryProvider, ODataV4Options } from "./ODataV4QueryProvider";
 import { ODataContext } from "./ODataContext";
 import { ExcludeProperties } from "./ExcludeProperties";
 
@@ -7,11 +7,11 @@ import { ExcludeProperties } from "./ExcludeProperties";
  * This context uses the fetch library; if the runtime environment does not support fetch, please use a polyfill.
  */
 export abstract class ODataV4Context extends ODataContext {
-    constructor(basePath: string, protected requestInit?: () => RequestInit) {
+    constructor(basePath: string, protected options?: Partial<ODataV4Options>) {
         super(basePath);
     }
 
     protected createQuery<T>(endpoint: string) {
-        return new ODataV4QueryProvider(this.basePath + endpoint, this.requestInit).createQuery<T, ExcludeProperties<T, any[]>>();
+        return new ODataV4QueryProvider(this.basePath + endpoint, this.options).createQuery<T, ExcludeProperties<T, any[]>>();
     }
 }

@@ -6,7 +6,7 @@ import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 import { ExpressionOperator } from "./ExpressionOperator";
 import { SubType } from "./SubType";
 import { ExcludeProperties } from "./ExcludeProperties";
-import { ODataV4QueryProvider } from "./ODataV4QueryProvider";
+import { ODataV4QueryProvider, ODataV4Options } from "./ODataV4QueryProvider";
 import { FilterAccessoryFunctions } from "./FilterAccessoryFunctions";
 import { createProxiedEntity, resolveQuery, ReplaceDateWithString, ProjectorType } from "./ProxyFilterTypes";
 import { EntityProxy, PropertyProxy, propertyPath, proxyProperties } from "./ProxyTypes";
@@ -18,8 +18,8 @@ import { FieldsFor } from "./FieldsForType";
  */
 export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
 
-    static forV4<T>(endpoint: string, requestInit?: () => RequestInit | Promise<RequestInit>) {
-        return new ODataQuery<T>(new ODataV4QueryProvider(endpoint, requestInit));
+    static forV4<T>(endpoint: string, options?: Partial<ODataV4Options>) {
+        return new ODataQuery<T>(new ODataV4QueryProvider(endpoint, options));
     }
 
     constructor(public readonly provider: ODataQueryProvider, public readonly expression?: Expression) { }

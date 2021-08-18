@@ -4,25 +4,29 @@ import { ODataResponse } from "./ODataResponse";
 import { ODataV4ExpressionVisitor, ODataV4QuerySegments } from "./ODataV4ExpressionVisitor";
 import { ExcludeProperties } from "./ExcludeProperties";
 
+export interface ODataV4Options {
+    requestInit: () => RequestInit | Promise<RequestInit>;
+}
+
 /**
  * A class used to generate queries that will ultimately be translated into ODataV4 queries.
  * Consumed by ODataContext classes; can also be used directly in lieu of creating an ODataContext class.
  */
 export class ODataV4QueryProvider extends ODataQueryProvider {
 
-    constructor(private readonly path: string, private readonly requestInit?: () => RequestInit | Promise<RequestInit>) {
+    constructor(private readonly path: string, private readonly options?: Partial<ODataV4Options>) {
         super();
     }
 
-    static createQuery<T>(path: string, requestInit?: () => RequestInit | Promise<RequestInit>) {
-        return new ODataV4QueryProvider(path, requestInit)
+    static createQuery<T>(path: string, options?: Partial<ODataV4Options>) {
+        return new ODataV4QueryProvider(path, options)
             .createQuery<T, ExcludeProperties<T, any[]>>();
     }
 
     private async sendRequest(expression?: Expression) {
         const url = this.buildQuery(expression);
 
-        let init = this.requestInit?.() ?? {};
+        let init = this.options?.requestInit?.() ?? {};
         if (init instanceof Promise) init = await init;
 
         return await fetch(url, init);    

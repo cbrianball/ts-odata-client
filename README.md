@@ -6,7 +6,7 @@
 A library for creating and executing OData queries. Makes heavy use of TypeScript for a better developer experience.
 
 ## Prerequisites
-This library does not have any dependencies on any other NPM packages, but it does utilize the `fetch` and `Proxy` APIs. A pollyfil can be used for `fetch`, but there is currently no known pollyfil for `Proxy`. Please [go here](https://caniuse.com/?search=Proxy()) to view Browser compatibility for `Proxy`.
+This library does not have any dependencies on any other NPM packages, but it does utilize the `fetch` and `Proxy` APIs. A pollyfil can be used for `fetch`, but there is currently no known pollyfil for `Proxy`; see [browser support](https://caniuse.com/?search=Proxy()).
 
 ## Supported Versions
 Only OData version 4 is currently supported by this library.
@@ -19,13 +19,13 @@ import { ODataQuery} from 'ts-odata-client';
 
 interface User {id: number; firstName: string; lastName: string; age: number};
 
-const results = await ODataQuery.forV4<User>('http://domain.example/path/to/endpoint' /*, optional function parameter to initialize fetch request */)
+const results = await ODataQuery.forV4<User>('http://domain.example/path/to/endpoint'/*, options object if needed*/)
   .filter(u => u.firstName.$startsWith('St').and(u.age.$greaterThanOrEqualTo(25))
-  .select('firstName', 'lastName')
+  .select(u => ( { givenName: u.firstName, surname: u.lastName } ))
   .getManyAsync();
   
   console.log(results); // results is the json object that is returned by the OData service
-  console.log(results.value); // results.value is of type Array<{firstName: string, lastName: string}>
+  console.log(results.value); // results.value is of type Array<{givenName: string, surname: string}>
 ```
 
 ## Using a Data Context
@@ -38,7 +38,7 @@ interface User {id: number; firstName: string; lastName: string; age: number};
 
 class MyODataContext extends ODataV4Context {
   constructor(baseUrl: string) {
-    super(baseUrl /*, optional function parameter to initialize fetch request */);
+    super(baseUrl/*, options object if needed*/);
   }
   
   get users() { return this.createQuery<User>('relative/path/from/baseUrl'); }
@@ -48,7 +48,6 @@ class MyODataContext extends ODataV4Context {
 const context = new MyODataContext('https://domain.example/odata/');
 const result = await context.users
   .filter(u => u.firstName.$startsWith('St').and(u.age.$greaterThanOrEqualTo(25))
-  .select('firstName', 'lastName')
   .getManyAsync();
 ```
 
@@ -58,7 +57,7 @@ An OData function that returns a collection from an entity set can be treated ju
 ```typescript
 function callODataFunction(parameter: string)
 // Remember: If the parameter is a string and it has a single quote in it, that will need to be escaped with two single quotes
-const query = ODataQuery.forV4<User>(`http://domain.example/path/to/endpoint/function(myParameter='${parameter}')` /*, optional function parameter to initialize fetch request */);
+const query = ODataQuery.forV4<User>(`http://domain.example/path/to/endpoint/function(myParameter='${parameter}')`/*, options object if needed*/);
 ```
 
 `query` can now be used like any other OData Query (e.g., `filter`, `select`, `top`, etc.).
@@ -100,3 +99,33 @@ const query = ODataQuery.forV4<User>(`http://domain.example/path/to/endpoint/fun
   //to sort on multiple properties
   userQuery.orderBy(u => [u.lastName, u.firstName]);
   ```
+
+### New select overload
+The `select` method maitains backwards compatibility, so no change is needed to existing code when updating, but an overload has been added that is more powerful than the one in version 1.x.
+
+```typescript
+const userQuery = ...
+
+//v1.x syntax:
+const result = await userQuery.select('firstName', 'lastName').getManyAsync();
+console.log(result): //{result: [{firstName: string, lastName: string}, ...]}
+
+//v2.x syntax
+const result = await userQuery.select(u => (
+  {
+    managerLastName: u.manager.lastName
+  }
+)).getManyAsync();
+console.log(result); //{result: [{managerLastName: string}, ...]}
+```
+
+The v1.x syntax only allows you to pick and choose which top-level entity properties are returned. The v2.x syntax allows you to choose nested properties AND allows you to change the shape of what is returned to your code after it executes the query.
+
+#### Important Notes/Limitations
+Please note the following when using the newer style syntax:
+1. JavaScript/TypeScript does not support a true expression syntax that allows the content of the method you provide to be inspected. For best results, simply return an object literal from the method and avoid attempting to do anything with the entity values other than assigning them directly to a field or an array.
+1. Note the `()` surrounding the `{}` in the arrow method body. This is needed; wthout it, JavaScript/TypeScript assumes the `{}` are defining a new block, NOT an object literal.
+1. The OData request will include the correct `$select` parameter, only returning the data that is needed for your custom object.
+1. The method you pass in will be executed multiple times
+   - It will be executed immediately before the `select` method returns; For this execution a dummy object is passed in as the parameter. This library will monitor what is accessed on the dummy object to determine which fields are needed. The return value, in this instance, is ignored.
+   - When the data is retrieved from the OData service, the method will be called again, once for each result object; this time the real data object is passed in and the return value is what is actually ulitmately returned to the calling code.
