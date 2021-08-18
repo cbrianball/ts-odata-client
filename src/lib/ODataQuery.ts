@@ -23,7 +23,7 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
     constructor(public readonly provider: ODataQueryProvider, public readonly expression?: Expression) { }
 
     /**
-     * Limits the fields that are returned; the most recent call to select() or selectMap() will be used.
+     * Limits the fields that are returned; the most recent call to select() will be used.
      * @param fields
      */
     public select<U extends FieldsFor<T>>(...fields: U[]): ODataQuery<T, U>;
@@ -36,27 +36,12 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
             const projector = firstArg;
             const projectedObject = projector(this.provider[createProxiedEntity]() as unknown as T);
             const expression = new Expression(ExpressionOperator.Select, [projector, ...getUsedPropertyPaths(projectedObject)], this.expression);
-
             return this.provider.createQuery<T, U>(expression);
         }
 
         const expression = new Expression(ExpressionOperator.Select, (args as FieldsFor<T>[]).map(v => new FieldReference<T>(v)), this.expression);
         return this.provider.createQuery<T, U>(expression);
     }
-
-    /**
-     * Limits the fields that are returned; the most recent call to select() or SelectMap() will be used.
-     * The provied method will be invoked once to determine which OData properties are used; it will then be invoked again
-     * for each result to perform the transformation
-     * @param projector Only OData fields or constants can be used. No operations may be performed on OData fields (e.g., comparisons, mathematical operations, object creation, etc.)
-     * @returns 
-     */
-    // public selectMap<U extends ProjectorType>(projector: (proxy: T) => U) {
-    //     const projectedObject = projector(this.provider[createProxiedEntity]() as unknown as T);
-    //     const expression = new Expression(ExpressionOperator.Select, [projector, ...getUsedPropertyPaths(projectedObject)], this.expression);
-
-    //     return this.provider.createQuery<T, U>(expression);
-    // }    
 
     /**
      * Returns the top n records; the most recent call to top() will be used.
