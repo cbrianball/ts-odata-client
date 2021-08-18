@@ -128,4 +128,4 @@ Please note the following when using the newer style syntax:
 1. The OData request will include the correct `$select` parameter, only returning the data that is needed for your custom object.
 1. The method you pass in will be executed multiple times
    - It will be executed immediately before the `select` method returns; For this execution a dummy object is passed in as the parameter. This library will monitor what is accessed on the dummy object to determine which fields are needed. The return value, in this instance, is ignored.
-   - When the data is retrieved from the OData service, the method will be called again, once for each result object; this time the real data object is passed in and the return value is what is actually ulitmately returned to the calling code.
+   - When the data is retrieved from the OData service, the method will be called again, once for each result object; this time the real data object is passed in and the return value is what is ulitmately returned to the calling code.
