@@ -8,7 +8,7 @@ import { SubType } from "./SubType";
 import { ExcludeProperties } from "./ExcludeProperties";
 import { ODataV4QueryProvider } from "./ODataV4QueryProvider";
 import { FilterAccessoryFunctions } from "./FilterAccessoryFunctions";
-import { createProxiedEntity, EntityProxy, PropertyProxy, resolveQuery, propertyPath, ReplaceDateWithString, ProjectorType, FieldsFor } from "./types";
+import { createProxiedEntity, EntityProxy, PropertyProxy, resolveQuery, propertyPath, ReplaceDateWithString, ProjectorType, FieldsFor, proxyProperties } from "./types";
 
 /**
  * Represents a query against an OData source.
@@ -33,9 +33,9 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
 
         const firstArg = args[0];
         if (typeof firstArg === "function") {
-            const projector = firstArg;
-            const projectedObject = projector(this.provider[createProxiedEntity]() as unknown as T);
-            const expression = new Expression(ExpressionOperator.Select, [projector, ...getUsedPropertyPaths(projectedObject)], this.expression);
+            const proxy = this.provider[createProxiedEntity]();
+            firstArg(proxy as unknown as T);
+            const expression = new Expression(ExpressionOperator.Select, [firstArg, ...getUsedPropertyPaths(proxy)], this.expression);
             return this.provider.createQuery<T, U>(expression);
         }
 
@@ -173,22 +173,18 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
 
 
 /**
- * Function that returns all OData paths referenced by the provided object.
+ * Function that returns all OData paths that were used by the proxy.
  * @param projectTarget 
  * @returns An array of paths found within the object (if the same path is used more than once, the duplicates are removed)
  */
-function getUsedPropertyPaths(projectTarget: any): string[] {
-    // strings have indexes that each return a string, which causes a stack overflow
-    if(typeof projectTarget === "string") return [];
-    const fields = Object.keys(projectTarget)
-        .map(key => {
-            const value = projectTarget[key];
-            const path = (value as PropertyProxy<any>)[propertyPath];
-            if (path != null) return path.join('/');
-            return getUsedPropertyPaths(value);
-        })
-        .flat();
-    return Array.from(new Set(fields));
+function getUsedPropertyPaths(proxy: EntityProxy<any>): string[] {
+    const paths: string[] = [];
+    for (const p of proxy[proxyProperties]) {
+        if (p[proxyProperties].length === 0) paths.push(p[propertyPath].join('/'));
+        else paths.push(...getUsedPropertyPaths(p));
+    }
+
+    return Array.from(new Set(paths.flat()));
 }
 
 function getSelectMap<T, U>(expression?: Expression): ((entity: T) => U) | undefined {

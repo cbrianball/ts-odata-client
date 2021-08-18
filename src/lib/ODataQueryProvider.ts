@@ -2,7 +2,7 @@ import { ODataResponse } from "./ODataResponse";
 import { ODataQuery } from "./ODataQuery";
 import { Expression } from "./Expression";
 import { ProxyPropertyPredicate } from "./ProxyPropertyPredicate";
-import { createProxiedEntity, lambdaVariable, propertyPath, EntityProxy, PropertyProxy } from "./types";
+import { createProxiedEntity, lambdaVariable, proxyProperties, propertyPath, EntityProxy, PropertyProxy } from "./types";
 
 
 
@@ -39,33 +39,52 @@ export abstract class ODataQueryProvider {
     private lambdaProxyCounter = 0;
     [createProxiedEntity]<T>(isLambdaProxy = false): EntityProxy<T> {
         const lambdaVariableName = isLambdaProxy ? `p${this.lambdaProxyCounter++}` : '';
-        return new Proxy({ [lambdaVariable]: lambdaVariableName }, {
-            get: (instance: any, property: string | Symbol) => {
-                if (typeof property === "symbol") return instance[lambdaVariable];
-
+        return new Proxy({ [lambdaVariable]: lambdaVariableName, [proxyProperties]: [] }, {
+            get: (instance: any, property: string | Symbol) => {                
+                if (typeof property === "symbol") {
+                    switch(property) {
+                        case lambdaVariable:
+                            return instance[lambdaVariable];
+                        case proxyProperties:
+                            return instance[proxyProperties];
+                        default:
+                            throw new Error('Unkonwn symbol');
+                    }
+                }
                 const path = [property as string];
                 if (isLambdaProxy) {
                     path.unshift(lambdaVariableName);
                 }
-                return this.createPropertyProxy(path);
+                const proxyProperty = this.createPropertyProxy(path);
+                instance[proxyProperties].push(proxyProperty);
+                return proxyProperty;
             }
         });
     }
 
     private createPropertyProxy<T>(navigationPath: string[]): PropertyProxy<T> {
         if (navigationPath.length === 0) throw new Error('PropertyProxy must be initialized with at least one proprety path');
-        const target = { [propertyPath]: navigationPath };
+        const target = { [propertyPath]: navigationPath, [proxyProperties]: [] };
         const predicate = new ProxyPropertyPredicate<T>(target as unknown as PropertyProxy<T>, this);
         return new Proxy(target, {
             get: (target: any, property: string | symbol) => {
                 if(typeof property === "symbol") {
-                    return target[property];
+                    switch(property) {
+                        case propertyPath:
+                            return target[propertyPath];
+                        case proxyProperties:
+                            return target[proxyProperties];
+                        default:
+                            throw new Error('Unknown symbol');
+                    }
                 }
                 
                 if ((property).startsWith("$")) {                    
                     return ((predicate as unknown as any)[property.slice(1)] as Function).bind(predicate);
                 }
-                return this.createPropertyProxy([...navigationPath, property]);
+                const propertyProxy = this.createPropertyProxy([...navigationPath, property]);
+                target[proxyProperties].push(propertyProxy);
+                return propertyProxy;
             }
         });
     }

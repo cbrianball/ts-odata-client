@@ -5,6 +5,7 @@ export const resolveQuery = Symbol();
 export const createProxiedEntity = Symbol();
 export const propertyPath = Symbol();
 export const lambdaVariable = Symbol();
+export const proxyProperties = Symbol();
 
 export type FieldsFor<T> = string & keyof T;
 
@@ -20,6 +21,7 @@ export type EntityProxy<T, IncludeFilterMethods = false> = {
     [P in QueryableFieldsFor<T>]: PropertyProxy<T[P], IncludeFilterMethods> & (IncludeFilterMethods extends true ? ProxyFilterMethods<T[P]> : {});
 } & {
     [lambdaVariable]: string;
+    [proxyProperties]: PropertyProxy<any>[];
 };
 
 export type PropertyProxy<T, IncludeFilterMethods = false> = EntityProxy<T, IncludeFilterMethods>
