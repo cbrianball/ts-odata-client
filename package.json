@@ -1,11 +1,11 @@
 {
   "name": "ts-odata-client",
-  "version": "2.0.0-preview2",
+  "version": "2.0.0-preview2.1",
   "description": "OData TypeScript Client",
   "main": "/index.js",
   "types": "/index.d.ts",
   "scripts": {
-    "build": "rimraf dist && tsc",    
+    "build": "rimraf dist && tsc",
     "test": "mocha -r ts-node/register test/**/*.ts",
     "test-ci": "mocha -r ts-node/register test/**/*.ts --reporter mocha-junit-reporter",
     "pack": "npm run build && cpx {package.json,README.md} dist && npm pack ./dist --dry-run",
