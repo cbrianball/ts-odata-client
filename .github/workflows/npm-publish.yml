@@ -32,3 +32,4 @@ jobs:
       - run: npm run publish-npm
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+          GITHUB_REF: ${{github.ref}}
