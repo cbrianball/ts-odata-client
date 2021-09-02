@@ -5,6 +5,11 @@
 
 A library for creating and executing OData queries. Makes heavy use of TypeScript for a better developer experience.
 
+## Installation
+```console
+npm install ts-odata-client
+```
+
 ## Prerequisites
 This library does not have any dependencies on any other NPM packages, but it does utilize the `fetch` and `Proxy` APIs. A pollyfil can be used for `fetch`, but there is currently no known pollyfil for `Proxy`; see [browser support](https://caniuse.com/?search=Proxy()).
 
@@ -14,7 +19,7 @@ Only OData version 4 is currently supported by this library.
 ## Quick Start
 If you want to start coding immediately, install the NPM package, then use the following as reference.
 
-```typescript
+```ts
 import { ODataQuery} from 'ts-odata-client';
 
 interface User {id: number; firstName: string; lastName: string; age: number};
@@ -31,7 +36,7 @@ const results = await ODataQuery.forV4<User>('http://domain.example/path/to/endp
 ## Using a Data Context
 The above is great for one-off queries, but if you have an OData service with mutliple endpoints, and you want to encapsulate that in a single class, then write a class that extends the provided `ODataContextV4` class
 
-```typescript
+```ts
 import { ODataV4Context } from 'ts-odata-client';
 
 interface User {id: number; firstName: string; lastName: string; age: number};
@@ -54,7 +59,7 @@ const result = await context.users
 ## Executing OData Functions
 An OData function that returns a collection from an entity set can be treated just like any other endpoint, but it has the advantage that it can take parameter values
 
-```typescript
+```ts
 function callODataFunction(parameter: string)
 // Remember: If the parameter is a string and it has a single quote in it, that will need to be escaped with two single quotes
 const query = ODataQuery.forV4<User>(`http://domain.example/path/to/endpoint/function(myParameter='${parameter}')`/*, options object if needed*/);
@@ -70,7 +75,7 @@ const query = ODataQuery.forV4<User>(`http://domain.example/path/to/endpoint/fun
 ### filter
   This method still accepts a `BooleanPredicateBuilder<T>` as an argument; however, the method signature alternative has now changed; instead of a `FilterBuilder` object, the provided argument for the method is now an `EntityProxy`. The best way to demonstrate the difference is with an example.
   
-  ```typescript
+  ```ts
   const userQuery = ...
   
   //v1.x syntax:
@@ -88,7 +93,7 @@ const query = ODataQuery.forV4<User>(`http://domain.example/path/to/endpoint/fun
 ### orderBy and orderByDescending
   Similar to filter, these methods now take an `EntityProxy` type as the method parameter.
   
-  ```typescript
+  ```ts
   const userQuery = ...
   
   //v1.x syntax:
@@ -103,7 +108,7 @@ const query = ODataQuery.forV4<User>(`http://domain.example/path/to/endpoint/fun
 ### New select overload
 The `select` method maitains backwards compatibility, so no change is needed to existing code when updating, but an overload has been added that is more powerful than the one in version 1.x.
 
-```typescript
+```ts
 const userQuery = ...
 
 //v1.x syntax:
