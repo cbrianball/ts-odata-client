@@ -131,6 +131,12 @@ describe("ODataQuery", () => {
         expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=${encodeURIComponent("children,pets")}`);
     });
 
+    it("should allow expand on non-array types", () => {
+        const query = baseQuery.expand("mother");
+
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=${encodeURIComponent("mother")}`);
+    });
+
     it("should find all properties", () => {
         const query = baseQuery.select(p => ({
             foo: { bar: p.email},
