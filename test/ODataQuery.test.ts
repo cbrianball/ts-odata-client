@@ -178,4 +178,5 @@ interface Person {
     children: string[];
     pets: string[];
     mother: Person;
+    dateOfBirth: Date;
 }
