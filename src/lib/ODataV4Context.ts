@@ -11,7 +11,7 @@ export abstract class ODataV4Context extends ODataContext {
         super(basePath);
     }
 
-    protected createQuery<T>(endpoint: string) {
-        return new ODataV4QueryProvider(this.basePath + endpoint, this.options).createQuery<T, ExcludeProperties<T, any[]>>();
+    protected createQuery<T, U = ExcludeProperties<T, any[]>>(endpoint: string) {
+        return new ODataV4QueryProvider(this.basePath + endpoint, this.options).createQuery<T, U>();
     }
 }
