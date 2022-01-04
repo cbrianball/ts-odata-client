@@ -114,21 +114,21 @@ describe("ODataQuery", () => {
     });
 
     it("should handle cumulative expands", () => {
-        const query = baseQuery.expand("children").expand("pets");
+        const query = baseQuery.expand("children").expand("mother");
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=${encodeURIComponent("children,pets")}`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=${encodeURIComponent("children,mother")}`);
     });
 
     it("should handle mulitple expands in one call", () => {
-        const query = baseQuery.expand("children", "pets");
+        const query = baseQuery.expand("children", "mother");
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=${encodeURIComponent("children,pets")}`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=${encodeURIComponent("children,mother")}`);
     });
 
     it("should not repeat expands", () => {
-        const query = baseQuery.expand("children", "pets").expand("pets");
+        const query = baseQuery.expand("children", "mother").expand("mother");
 
-        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=${encodeURIComponent("children,pets")}`);
+        expect(query.provider.buildQuery(query.expression)).to.be.eql(`${endpoint}?$expand=${encodeURIComponent("children,mother")}`);
     });
 
     it("should allow expand on non-array types", () => {
@@ -175,7 +175,7 @@ interface Person {
     lastName: string;
     age: number;
     email: string;
-    children: string[];
+    children: Person[];
     pets: string[];
     mother: Person;
     dateOfBirth: Date;

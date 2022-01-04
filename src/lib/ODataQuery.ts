@@ -106,7 +106,7 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
      * Includes the indicated arrays are to be returned as part of the query results.
      * @param fields 
      */
-    public expand<K extends keyof ExcludeProperties<T, JsonPrimitiveValueTypes | Date>>(...fields: K[]) {
+    public expand<K extends keyof ExcludeProperties<T, JsonPrimitiveValueTypes | ArrayLike<JsonPrimitiveValueTypes> | Date | ArrayLike<Date>>>(...fields: K[]) {
         const expression = new Expression(ExpressionOperator.Expand, fields.map(f => new FieldReference<T>(<any>f)), this.expression);
         return this.provider.createQuery<T, U & Pick<T, K>>(expression);
     }
