@@ -28,7 +28,7 @@ jobs:
       with:
         node-version: '21.5'
     - run: npm ci    
-    - run: npm test
+    - run: npm run test-ci
     - name: Report Coverage
       uses: davelosert/vitest-coverage-report-action@v2
       if: always()
