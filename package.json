@@ -7,7 +7,7 @@
   "scripts": {
     "build": "rimraf dist && tsc",
     "test": "vitest run",
-    "test-ci": "vitest run --coverage.enabled true --reporter default --reporter json --coverage.reporter json-summary",
+    "test-ci": "vitest run --coverage.enabled true",
     "pack": "npm run build && cpx {package.json,README.md} dist && npm pack ./dist --dry-run",
     "publish-npm": "npm run build && cpx {package.json,README.md} dist && npm publish ./dist"
   },
