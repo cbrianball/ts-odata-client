@@ -7,7 +7,7 @@
   "scripts": {
     "build": "rimraf dist && tsc",
     "test": "vitest run",
-    "test-ci": "vitest run",
+    "test-ci": "vitest run --coverage.enabled true --reporter default --reporter json",
     "pack": "npm run build && cpx {package.json,README.md} dist && npm pack ./dist --dry-run",
     "publish-npm": "npm run build && cpx {package.json,README.md} dist && npm publish ./dist"
   },
@@ -27,6 +27,7 @@
   "homepage": "https://github.com/cbrianball/ts-odata-client#readme",
   "devDependencies": {
     "@types/node-fetch": "^2.5.12",
+    "@vitest/coverage-v8": "^1.1.0",
     "chai": "^4.3.4",
     "cpx": "^1.5.0",
     "node-fetch": "^3.3.2",
