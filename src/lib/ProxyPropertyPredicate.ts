@@ -2,6 +2,7 @@ import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 import { Expression } from "./Expression";
 import { ExpressionOperator } from "./ExpressionOperator";
 import { FieldReference } from "./FieldReference";
+import { FieldsFor } from "./FieldsForType";
 import { FilterAccessoryFunctions } from "./FilterAccessoryFunctions";
 import { ODataQueryProvider } from "./ODataQueryProvider";
 import { ArrayProxyFieldPredicateInterface, EqualityProxyFieldPredicate, InequalityProxyFieldPredicate, PredicateArgument, StringProxyFieldPredicateInterface, createProxiedEntity } from "./ProxyFilterTypes";
@@ -60,14 +61,14 @@ export class ProxyPropertyPredicate<T> implements
 
     any<U>(value: (entity: EntityProxy<U, true>, compound: FilterAccessoryFunctions<U>) => BooleanPredicateBuilder<U[]>) {
         const proxy = this.provider[createProxiedEntity]<U>(true);
-        const expression = value(proxy, new FilterAccessoryFunctions<U>()).expression;
+        const expression = value(proxy as unknown as EntityProxy<U, true>, new FilterAccessoryFunctions<U>()).expression;
 
         return this.buildCollectionFilterPredicateBuilder(expression!, ExpressionOperator.Any, proxy);
     }
 
     all<U>(value: (entity: EntityProxy<U, true>, compound: FilterAccessoryFunctions<U>) => BooleanPredicateBuilder<U[]>) {
         const proxy = this.provider[createProxiedEntity]<U>(true);
-        const expression = value(proxy, new FilterAccessoryFunctions<U>()).expression;
+        const expression = value(proxy as unknown as EntityProxy<U, true>, new FilterAccessoryFunctions<U>()).expression;
 
         return this.buildCollectionFilterPredicateBuilder(expression!, ExpressionOperator.All, proxy);
     }
@@ -95,6 +96,6 @@ export class ProxyPropertyPredicate<T> implements
     private getFieldReference(propertyProxy: PropertyProxy<T>) {
         const propertyPaths = propertyProxy[propertyPath];
         // TODO: Better handle typing here
-        return new FieldReference(propertyPaths.join('/')) as unknown as FieldReference<T>;
+        return new FieldReference<T>(propertyPaths.join('/') as unknown as FieldsFor<T>);
     }
 }
