@@ -26,7 +26,7 @@ jobs:
     - name: Use Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '21.5'
+        node-version: 'lts/Hydrogen'
     - run: npm ci    
     - run: npm run test-ci
     - name: Report Coverage
