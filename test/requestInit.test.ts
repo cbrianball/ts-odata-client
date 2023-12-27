@@ -1,6 +1,6 @@
 import { ODataV4QueryProvider } from "../src/v4";
-import { expect } from "chai";
 import { MockFetch } from './mock-fetch';
+import { describe, beforeEach, afterEach, it, expect } from "vitest";
 
 interface Subject {
     SubjectId: string,

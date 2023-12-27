@@ -1,6 +1,6 @@
-import { expect } from "chai";
 import { resolveQuery } from "../src/lib/ProxyFilterTypes";
 import { ODataV4Context } from "../src/v4";
+import { describe, it, expect } from "vitest";
 
 class MyContext extends ODataV4Context {
     constructor() {

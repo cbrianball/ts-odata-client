@@ -1,10 +1,9 @@
-import { expect } from "chai";
 import { ODataV4ExpressionVisitor } from "../src/lib/ODataV4ExpressionVisitor";
 import { FieldReference } from "../src/lib/FieldReference";
 import { Expression } from "../src/lib/Expression";
 import { ExpressionOperator } from "../src/lib/ExpressionOperator";
 import { ODataType } from "../src/lib/ODataType";
-
+import { describe, it, expect } from "vitest";
 
 describe("ODataV4ExpressionVisitor", () => {
     it("should handle single select", () => {

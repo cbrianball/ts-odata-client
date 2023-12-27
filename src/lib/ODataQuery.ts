@@ -72,7 +72,7 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
         const proxy = this.provider[createProxiedEntity]<T>();
         const properties = [fields(proxy)].flat()
         const expression = new Expression(ExpressionOperator.OrderBy,
-            properties.map(f => new FieldReference(f[propertyPath].join('/'))),
+            properties.map(f => new FieldReference(f[propertyPath].join('/') as unknown as FieldsFor<unknown>)),
             this.expression);
         return this.provider.createQuery<T, U>(expression);
     }
@@ -85,7 +85,7 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
         const proxy = this.provider[createProxiedEntity]<T>();
         const properties = [fields(proxy)].flat()
         const expression = new Expression(ExpressionOperator.OrderByDescending,
-            properties.map((f => new FieldReference(f[propertyPath].join('/')))),
+            properties.map((f => new FieldReference(f[propertyPath].join('/') as unknown as FieldsFor<unknown>))),
             this.expression);
         return this.provider.createQuery<T, U>(expression);
     }
@@ -96,7 +96,7 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
      */
     public filter(predicate: BooleanPredicateBuilder<T> | ((builder: EntityProxy<T, true>, functions: FilterAccessoryFunctions<T>) => BooleanPredicateBuilder<T>)) {
         if (typeof predicate === "function")
-            predicate = predicate(this.provider[createProxiedEntity](), new FilterAccessoryFunctions<T>());
+            predicate = predicate(this.provider[createProxiedEntity]() as unknown as EntityProxy<T, true>, new FilterAccessoryFunctions<T>());
 
         const expression = new Expression(ExpressionOperator.Predicate, [predicate], this.expression);
         return this.provider.createQuery<T, U>(expression);
@@ -180,7 +180,7 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
  * @param projectTarget 
  * @returns An array of paths found within the object (if the same path is used more than once, the duplicates are removed)
  */
-function getUsedPropertyPaths(proxy: EntityProxy<any>): string[] {
+function getUsedPropertyPaths(proxy: EntityProxy<unknown>): string[] {
     const paths: string[] = [];
     for (const p of proxy[proxyProperties]) {
         if (p[proxyProperties].length === 0) paths.push(p[propertyPath].join('/'));

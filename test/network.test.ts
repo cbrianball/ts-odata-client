@@ -1,6 +1,6 @@
-import { expect } from "chai";
 import { ODataV4QueryProvider } from "../src/v4";
 import fetch from "node-fetch";
+import { describe, it, expect } from "vitest";
 
 (global as any).fetch = fetch;
 
@@ -12,7 +12,7 @@ interface Subject {
 }
 
 //do not run this test by default
-xdescribe("executing getManyAsync", () => {
+describe.skip("executing getManyAsync", () => {
 
     const endpoint = "http://api.purdue.io/odata/Subjects";
     const baseQuery = ODataV4QueryProvider.createQuery<Subject>(endpoint);
