@@ -6,8 +6,8 @@
   "types": "/index.d.ts",
   "scripts": {
     "build": "rimraf dist && tsc",
-    "test": "mocha -r ts-node/register test/**/*.ts",
-    "test-ci": "mocha -r ts-node/register test/**/*.ts --reporter mocha-junit-reporter",
+    "test": "vitest run",
+    "test-ci": "vitest run",
     "pack": "npm run build && cpx {package.json,README.md} dist && npm pack ./dist --dry-run",
     "publish-npm": "npm run build && cpx {package.json,README.md} dist && npm publish ./dist"
   },
@@ -26,8 +26,6 @@
   },
   "homepage": "https://github.com/cbrianball/ts-odata-client#readme",
   "devDependencies": {
-    "@types/chai": "4.2.21",
-    "@types/mocha": "^9.0.0",
     "@types/node-fetch": "^2.5.12",
     "chai": "^4.3.4",
     "cpx": "^1.5.0",
@@ -36,6 +34,7 @@
     "node-fetch": "^2.6.1",
     "rimraf": "^3.0.0",
     "ts-node": "^10.0.0",
-    "typescript": "^4.0.0"
+    "typescript": "^4.0.0",
+    "vitest": "^1.1.0"
   }
 }

@@ -1,6 +1,5 @@
-import { expect } from "chai";
 import { ODataQuery } from "../src";
-import { MockFetch } from "./mock-fetch";
+import { describe, it, expect } from "vitest";
 
 describe("ODataQuery", () => {
     const endpoint = "/odata/users";
@@ -139,7 +138,7 @@ describe("ODataQuery", () => {
 
     it("should find all properties", () => {
         const query = baseQuery.select(p => ({
-            foo: { bar: p.email},
+            foo: { bar: p.email },
             baz: p.firstName,
             zap: p.mother.lastName,
             dupe: p.email,
@@ -155,7 +154,7 @@ describe("ODataQuery", () => {
     it("should find all properties", () => {
         const outsideVariable = "test"
         const query = baseQuery.select(p => ({
-            foo: { bar: p.email},
+            foo: { bar: p.email },
             names: [p.firstName, p.lastName],
             zap: p.mother.lastName,
             dupe: p.email,

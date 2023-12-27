@@ -1,7 +1,6 @@
-import { expect } from "chai";
 import { ODataQuery } from "../src";
 import { lambdaVariable } from "../src/lib/ProxyTypes";
-
+import { describe, it, expect } from "vitest";
 
 describe("useProxy", () => {
 
