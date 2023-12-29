@@ -1,6 +1,7 @@
-import { ODataV4QueryProvider, ODataV4Options } from "./ODataV4QueryProvider";
+import type { ODataV4Options } from "./ODataV4QueryProvider";
+import { ODataV4QueryProvider } from "./ODataV4QueryProvider";
 import { ODataContext } from "./ODataContext";
-import { ExcludeProperties } from "./ExcludeProperties";
+import type { ExcludeProperties } from "./ExcludeProperties";
 
 /**
  * Base ODataContext class; use this class as a base for communicating with services that are compatible with OData v4.

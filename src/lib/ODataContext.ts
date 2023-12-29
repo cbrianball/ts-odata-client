@@ -1,4 +1,4 @@
-import { ODataQuery } from "./ODataQuery";
+import type { ODataQuery } from "./ODataQuery";
 import type { ExcludeProperties } from "./ExcludeProperties";
 
 /**

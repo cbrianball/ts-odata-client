@@ -1,9 +1,10 @@
-import { ODataResponse } from "./ODataResponse";
+import type { ODataResponse } from "./ODataResponse";
 import { ODataQuery } from "./ODataQuery";
-import { Expression } from "./Expression";
+import type { Expression } from "./Expression";
 import { ProxyPropertyPredicate } from "./ProxyPropertyPredicate";
 import { createProxiedEntity } from "./ProxyFilterTypes";
-import { lambdaVariable, proxyProperties, propertyPath, EntityProxy, PropertyProxy } from "./ProxyTypes";
+import type { EntityProxy, PropertyProxy } from "./ProxyTypes";
+import { lambdaVariable, proxyProperties, propertyPath } from "./ProxyTypes";
 
 /**
  * Base type used by all @type {ODataQueryProvider} implementations.

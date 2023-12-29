@@ -1,6 +1,6 @@
 import { TypedExpressionVisitor } from "./TypedExpressionVisitor";
 import { FieldReference } from "./FieldReference";
-import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
+import type { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 import { Expression } from "./Expression";
 import { Literal } from "./Literal";
 import { ExpressionOperator } from "./ExpressionOperator";

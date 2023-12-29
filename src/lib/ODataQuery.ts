@@ -1,15 +1,18 @@
-import { ODataQueryProvider } from "./ODataQueryProvider";
+import type { ODataQueryProvider } from "./ODataQueryProvider";
 import { FieldReference } from "./FieldReference";
 import { Expression } from "./Expression";
-import { ODataQueryResponse, ODataQueryResponseWithCount, ODataResponse } from "./ODataResponse";
-import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
+import type { ODataQueryResponse, ODataQueryResponseWithCount, ODataResponse } from "./ODataResponse";
+import type { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 import { ExpressionOperator } from "./ExpressionOperator";
-import { ExcludeProperties } from "./ExcludeProperties";
-import { ODataV4QueryProvider, ODataV4Options } from "./ODataV4QueryProvider";
+import type { ExcludeProperties } from "./ExcludeProperties";
+import type { ODataV4Options } from "./ODataV4QueryProvider";
+import { ODataV4QueryProvider } from "./ODataV4QueryProvider";
 import { FilterAccessoryFunctions } from "./FilterAccessoryFunctions";
-import { createProxiedEntity, resolveQuery, ReplaceDateWithString, ProjectorType } from "./ProxyFilterTypes";
-import { EntityProxy, PropertyProxy, propertyPath, proxyProperties } from "./ProxyTypes";
-import { FieldsFor } from "./FieldsForType";
+import type { ReplaceDateWithString, ProjectorType } from "./ProxyFilterTypes";
+import { createProxiedEntity, resolveQuery } from "./ProxyFilterTypes";
+import type { EntityProxy, PropertyProxy } from "./ProxyTypes";
+import { propertyPath, proxyProperties } from "./ProxyTypes";
+import type { FieldsFor } from "./FieldsForType";
 import type { JsonPrimitiveValueTypes } from "./JsonPrimitiveTypes";
 
 /**

@@ -2,18 +2,19 @@ import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 import { Expression } from "./Expression";
 import { ExpressionOperator } from "./ExpressionOperator";
 import { FieldReference } from "./FieldReference";
-import { FieldsFor } from "./FieldsForType";
+import type { FieldsFor } from "./FieldsForType";
 import { FilterAccessoryFunctions } from "./FilterAccessoryFunctions";
-import { ODataQueryProvider } from "./ODataQueryProvider";
-import {
+import type { ODataQueryProvider } from "./ODataQueryProvider";
+import type {
   ArrayProxyFieldPredicateInterface,
   EqualityProxyFieldPredicate,
   InequalityProxyFieldPredicate,
   PredicateArgument,
   StringProxyFieldPredicateInterface,
-  createProxiedEntity,
 } from "./ProxyFilterTypes";
-import { EntityProxy, propertyPath, lambdaVariable, PropertyProxy } from "./ProxyTypes";
+import { createProxiedEntity } from "./ProxyFilterTypes";
+import type { EntityProxy, PropertyProxy } from "./ProxyTypes";
+import { propertyPath, lambdaVariable } from "./ProxyTypes";
 
 export class ProxyPropertyPredicate<T>
   implements

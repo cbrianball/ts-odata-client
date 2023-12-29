@@ -1,8 +1,9 @@
 import { ODataQueryProvider } from "./ODataQueryProvider";
-import { Expression } from "./Expression";
-import { ODataResponse } from "./ODataResponse";
-import { ODataV4ExpressionVisitor, ODataV4QuerySegments } from "./ODataV4ExpressionVisitor";
-import { ExcludeProperties } from "./ExcludeProperties";
+import type { Expression } from "./Expression";
+import type { ODataResponse } from "./ODataResponse";
+import type { ODataV4QuerySegments } from "./ODataV4ExpressionVisitor";
+import { ODataV4ExpressionVisitor } from "./ODataV4ExpressionVisitor";
+import type { ExcludeProperties } from "./ExcludeProperties";
 
 export interface ODataV4Options {
   requestInit: () => RequestInit | Promise<RequestInit>;
