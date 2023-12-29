@@ -27,7 +27,6 @@
   },
   "homepage": "https://github.com/cbrianball/ts-odata-client#readme",
   "devDependencies": {
-    "@types/node-fetch": "^2.5.12",
     "@typescript-eslint/eslint-plugin": "^6.16.0",
     "@typescript-eslint/parser": "^6.16.0",
     "@vitest/coverage-v8": "^1.1.0",
