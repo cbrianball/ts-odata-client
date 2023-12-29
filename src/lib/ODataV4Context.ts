@@ -7,11 +7,14 @@ import { ExcludeProperties } from "./ExcludeProperties";
  * This context uses the fetch library; if the runtime environment does not support fetch, please use a polyfill.
  */
 export abstract class ODataV4Context extends ODataContext {
-    constructor(basePath: string, protected options?: Partial<ODataV4Options>) {
-        super(basePath);
-    }
+  constructor(
+    basePath: string,
+    protected options?: Partial<ODataV4Options>,
+  ) {
+    super(basePath);
+  }
 
-    protected createQuery<T, U = ExcludeProperties<T, unknown[]>>(endpoint: string) {
-        return new ODataV4QueryProvider(this.basePath + endpoint, this.options).createQuery<T, U>();
-    }
+  protected createQuery<T, U = ExcludeProperties<T, unknown[]>>(endpoint: string) {
+    return new ODataV4QueryProvider(this.basePath + endpoint, this.options).createQuery<T, U>();
+  }
 }

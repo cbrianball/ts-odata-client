@@ -6,18 +6,19 @@ import { Expression } from "./Expression";
  * The operands are passed in as parameters.
  */
 export abstract class TypedExpressionVisitor implements ExpressionVisitor {
-    visit(expression: Expression): void {
-        if (!expression) throw new Error(`'expression' is a required parameter.`);
+  visit(expression: Expression): void {
+    if (!expression) throw new Error(`'expression' is a required parameter.`);
 
-        if (expression.previous)
-            this.visit(expression.previous);
+    if (expression.previous) this.visit(expression.previous);
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- looking for existence of function in derivied type at runtime
-        const member = (this as any)[expression.operator + "Visitor"];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- looking for existence of function in derivied type at runtime
+    const member = (this as any)[expression.operator + "Visitor"];
 
-        if (typeof member !== "function")
-            throw new Error(`No method found named '${expression.operator}Visitor'; '${expression.operator}' operator is not supported.`);
+    if (typeof member !== "function")
+      throw new Error(
+        `No method found named '${expression.operator}Visitor'; '${expression.operator}' operator is not supported.`,
+      );
 
-        member.apply(this, expression.operands);
-    }
+    member.apply(this, expression.operands);
+  }
 }
