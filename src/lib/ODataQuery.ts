@@ -4,7 +4,6 @@ import { Expression } from "./Expression";
 import { ODataQueryResponse, ODataQueryResponseWithCount, ODataResponse } from "./ODataResponse";
 import { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 import { ExpressionOperator } from "./ExpressionOperator";
-import { SubType } from "./SubType";
 import { ExcludeProperties } from "./ExcludeProperties";
 import { ODataV4QueryProvider, ODataV4Options } from "./ODataV4QueryProvider";
 import { FilterAccessoryFunctions } from "./FilterAccessoryFunctions";
@@ -17,7 +16,7 @@ import type { JsonPrimitiveValueTypes } from "./JsonPrimitiveTypes";
  * Represents a query against an OData source.
  * This query is agnostic of the version of OData supported by the server (the provided @type {ODataQueryProvider} is responsible for translating the query into the correct syntax for the desired OData version supported by the endpoint).
  */
-export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
+export class ODataQuery<T, U = ExcludeProperties<T, unknown[]>> {
 
     static forV4<T>(endpoint: string, options?: Partial<ODataV4Options>) {
         return new ODataQuery<T>(new ODataV4QueryProvider(endpoint, options));
@@ -107,7 +106,7 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
      * @param fields 
      */
     public expand<K extends keyof ExcludeProperties<T, JsonPrimitiveValueTypes | ArrayLike<JsonPrimitiveValueTypes> | Date | ArrayLike<Date>>>(...fields: K[]) {
-        const expression = new Expression(ExpressionOperator.Expand, fields.map(f => new FieldReference<T>(<any>f)), this.expression);
+        const expression = new Expression(ExpressionOperator.Expand, fields.map(f => new FieldReference<T>(f as unknown as FieldsFor<T>)), this.expression);
         return this.provider.createQuery<T, U & Pick<T, K>>(expression);
     }
 
@@ -124,7 +123,7 @@ export class ODataQuery<T, U = ExcludeProperties<T, any[]>> {
      * Returns a single record with the provided key value. Some functions (such as top, skip, filter, etc.) are ignored when this function is invoked.
      * @param key
      */
-    public async getAsync(key: any) {
+    public async getAsync(key: unknown) {
         const expression = new Expression(ExpressionOperator.GetByKey, [key], this.expression);
         // return await this.provider.executeQueryAsync<ODataResponse & ReplaceDateWithString<U>>(expression);
         const result = await this.provider.executeQueryAsync<ODataResponse & ReplaceDateWithString<U>>(expression);
@@ -194,7 +193,7 @@ function getSelectMap<T, U>(expression?: Expression): ((entity: T) => U) | undef
     while (expression != null) {
         if (expression.operator === ExpressionOperator.Select) {
             const firstOperand = expression.operands[0];
-            return (typeof firstOperand === "function") ? firstOperand : undefined;
+            return (typeof firstOperand === "function") ? firstOperand as (entity: T) => U : undefined;
         }
         expression = expression.previous;
     }

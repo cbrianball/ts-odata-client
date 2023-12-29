@@ -14,7 +14,7 @@ export interface ODataV4QuerySegments {
     skip?: number;
     top?: number;
     filter?: string;
-    key?: any;
+    key?: unknown;
     count?: boolean;
     expand?: string[];
     value?: boolean;
@@ -27,18 +27,18 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
 
     public readonly oDataQuery: ODataV4QuerySegments = {}
 
-    selectVisitor(...fields: [Function | FieldReference<any>, ...FieldReference<any>[]]) {
+    selectVisitor(...fields: [FieldReference<unknown>, ...FieldReference<unknown>[]]) {
         this.oDataQuery.select = fields
-        .filter(v => typeof v !== "function")
-        .map(f => f.toString());
+            .filter(v => typeof v !== "function")
+            .map(f => f.toString());
     }
 
-    orderByVisitor(...fields: FieldReference<any>[]) {
+    orderByVisitor(...fields: FieldReference<unknown>[]) {
         if (!this.oDataQuery.orderBy) this.oDataQuery.orderBy = [];
         this.oDataQuery.orderBy.push(...fields.map(f => ({ field: f.toString() })));
     }
 
-    orderByDescendingVisitor(...fields: FieldReference<any>[]) {
+    orderByDescendingVisitor(...fields: FieldReference<unknown>[]) {
         if (!this.oDataQuery.orderBy) this.oDataQuery.orderBy = [];
         this.oDataQuery.orderBy.push(...fields.map<Sort>(f => ({ field: f.toString(), sort: 'desc' })));
     }
@@ -51,7 +51,7 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
         this.oDataQuery.top = value;
     }
 
-    expandVisitor(...fields: FieldReference<any>[]) {
+    expandVisitor(...fields: FieldReference<unknown>[]) {
         if (!this.oDataQuery.expand ||
             this.oDataQuery.expand.some(v => v === "*"))
             this.oDataQuery.expand = [];
@@ -70,7 +70,7 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
         this.oDataQuery.count = true;
     }
 
-    getByKeyVisitor(key: any) {
+    getByKeyVisitor(key: unknown) {
         if (key instanceof Expression) {
             if (key.operator !== ExpressionOperator.Literal)
                 throw new Error(`Only literal expressions allowed for ${ExpressionOperator.Literal} expession types`);
@@ -81,14 +81,14 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
         if (!(key instanceof Literal))
             key = new Literal(key);
 
-        this.oDataQuery.key = this.deriveLiteral(key);
+        this.oDataQuery.key = this.deriveLiteral(key as Literal);
     }
 
     valueVisitor() {
         this.oDataQuery.value = true;
     }
 
-    predicateVisitor(predicate: BooleanPredicateBuilder<any>) {
+    predicateVisitor(predicate: BooleanPredicateBuilder<unknown>) {
         if (!predicate.expression) return;
 
         if (predicate.expression.previous)
@@ -107,8 +107,8 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
     }
 
     private translatePredicateExpression(expression: Expression): string[] {
-        let translation: string[][] = [];
-        for (let operand of expression.operands) {
+        const translation: string[][] = [];
+        for (const operand of expression.operands) {
             if (operand instanceof Literal) {
                 translation.push([this.deriveLiteral(operand)]);
             }
@@ -135,7 +135,7 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
 
         }
         else if (translation.length === 2) {
-            let [left, right] = translation;
+            const [left, right] = translation;
 
             switch (expression.operator) {
                 case ExpressionOperator.And:
@@ -167,7 +167,7 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
             }
         }
         else if (translation.length === 3) {
-            let [left, center, right] = translation;
+            const [left, center, right] = translation;
             switch (expression.operator) {
                 case ExpressionOperator.Any:
                     return [`${this.reduceTranslatedExpression(left)}/any(${center}: ${this.reduceTranslatedExpression(right)})`];
@@ -196,9 +196,9 @@ export class ODataV4ExpressionVisitor extends TypedExpressionVisitor {
 
         switch (literal.literalType) {
             case ODataType.Date:
-                return new Date(value).toISOString().substring(0, 10);
+                return new Date(value as string).toISOString().substring(0, 10);
             case ODataType.Guid:
-                return value.toString();
+                return (value as string).toString();
         }
 
         switch (typeof value) {

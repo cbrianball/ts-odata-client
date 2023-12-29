@@ -74,8 +74,8 @@ export class ProxyPropertyPredicate<T> implements
     }
 
     private buildCollectionFilterPredicateBuilder<P>(value: Expression, operator: ExpressionOperator, proxy: EntityProxy<P>) {
-        let operand: any = value;
-        const propertyPaths = value == null ? null : (value as any)[propertyPath] as string[] | undefined;
+        let operand: typeof value | FieldReference<T> = value;
+        const propertyPaths = value == null ? null : typeof value === "object" && propertyPath in value ? value[propertyPath] : undefined;
         if (propertyPaths != null) {
             operand = this.getFieldReference(value as unknown as PropertyProxy<T>)
         }
@@ -83,9 +83,9 @@ export class ProxyPropertyPredicate<T> implements
         return new BooleanPredicateBuilder<P>(expression);
     }
 
-    protected buildPredicateBuilder<P>(value: P | PropertyProxy<P>, operator: ExpressionOperator) {
-        let operand: any = value;
-        const propertyPaths = value == null ? null : (value as any)[propertyPath] as string[] | undefined;
+    protected buildPredicateBuilder<P>(value: PredicateArgument<P>, operator: ExpressionOperator) {
+        let operand: typeof value | FieldReference<T> = value;
+        const propertyPaths = value == null ? null : typeof value === "object" && propertyPath in value ? value[propertyPath] : undefined;
         if (propertyPaths != null) {
             operand = this.getFieldReference(value as unknown as PropertyProxy<T>)
         }

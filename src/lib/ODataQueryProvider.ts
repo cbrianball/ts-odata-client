@@ -35,15 +35,15 @@ export abstract class ODataQueryProvider {
      * Returns the value that represents the query that will be executed.
      * @param expression 
      */
-    abstract buildQuery(expression?: Expression): any;
+    abstract buildQuery(expression?: Expression): unknown;
 
     private lambdaProxyCounter = 0;
     [createProxiedEntity]<T>(isLambdaProxy = false): EntityProxy<T> {
         const lambdaVariableName = isLambdaProxy ? `p${this.lambdaProxyCounter++}` : '';
-        return new Proxy({ [lambdaVariable]: lambdaVariableName, [proxyProperties]: [] }, {
-            get: (instance: any, property: string | Symbol) => {                
+        return new Proxy({ [lambdaVariable]: lambdaVariableName, [proxyProperties]: new Array<PropertyProxy<unknown>>() }, {
+            get: (instance, property) => {
                 if (typeof property === "symbol") {
-                    switch(property) {
+                    switch (property) {
                         case lambdaVariable:
                             return instance[lambdaVariable];
                         case proxyProperties:
@@ -60,17 +60,17 @@ export abstract class ODataQueryProvider {
                 instance[proxyProperties].push(proxyProperty);
                 return proxyProperty;
             }
-        });
+        }) as unknown as EntityProxy<T>;
     }
 
     private createPropertyProxy<T>(navigationPath: string[]): PropertyProxy<T> {
         if (navigationPath.length === 0) throw new Error('PropertyProxy must be initialized with at least one proprety path');
-        const target = { [propertyPath]: navigationPath, [proxyProperties]: [] };
+        const target = { [propertyPath]: navigationPath, [proxyProperties]: new Array<PropertyProxy<unknown>>() };
         const predicate = new ProxyPropertyPredicate<T>(target as unknown as PropertyProxy<T>, this);
         return new Proxy(target, {
-            get: (target: any, property: string | symbol) => {
-                if(typeof property === "symbol") {
-                    switch(property) {
+            get: (target, property) => {
+                if (typeof property === "symbol") {
+                    switch (property) {
                         case propertyPath:
                             return target[propertyPath];
                         case proxyProperties:
@@ -79,14 +79,14 @@ export abstract class ODataQueryProvider {
                             throw new Error('Unknown symbol');
                     }
                 }
-                
-                if ((property).startsWith("$")) {                    
-                    return ((predicate as unknown as any)[property.slice(1)] as Function).bind(predicate);
+
+                if ((property).startsWith("$")) {
+                    return ((predicate as unknown as Record<string, () => unknown>)[property.slice(1)]).bind(predicate);
                 }
                 const propertyProxy = this.createPropertyProxy([...navigationPath, property]);
                 target[proxyProperties].push(propertyProxy);
                 return propertyProxy;
             }
-        });
+        }) as unknown as PropertyProxy<T>;
     }
 }

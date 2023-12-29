@@ -6,15 +6,15 @@ describe("ODataQuery", () => {
     const endpoint = "/odata/users";
     const baseQuery = ODataQuery.forV4<Person>(endpoint);
     let currentFetch!: MockFetch;
-    const oldFetch = (global as any).fetch;
+    const oldFetch = global.fetch;
 
     beforeEach(() => {
         currentFetch = new MockFetch();
-        (global as any).fetch = currentFetch.fetch.bind(currentFetch);
+        global.fetch = currentFetch.fetch.bind(currentFetch);
     });
 
     afterEach(() => {
-        (global as any).fech = oldFetch;
+        global.fech = oldFetch;
     });
 
     it("should produce base URL with no query", () => {

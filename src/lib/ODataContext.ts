@@ -11,5 +11,5 @@ export abstract class ODataContext {
      * Creates an @type {ODataQuery} instance used to query the provided endpoint.
      * @param endpoint The path, relative to the basePath provided to the contructor.
      */
-    protected abstract createQuery<T, U = ExcludeProperties<T, any[]>>(endpoint: string): ODataQuery<T, U>;
+    protected abstract createQuery<T, U = ExcludeProperties<T, unknown[]>>(endpoint: string): ODataQuery<T, U>;
 }

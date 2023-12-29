@@ -1,8 +1,5 @@
 import { ODataV4QueryProvider } from "../src/v4";
-import fetch from "node-fetch";
 import { describe, it, expect } from "vitest";
-
-(global as any).fetch = fetch;
 
 interface Subject {
     SubjectId: string,
@@ -20,7 +17,7 @@ describe.skip("executing getManyAsync", () => {
     it("should not error", async () => {
         const query = baseQuery.filter(p => p.Name.$contains("vet"));
 
-        let results = await query.getManyAsync();
+        const results = await query.getManyAsync();
 
         expect(results).to.not.be.undefined;
         expect(results.value).to.not.be.undefined;

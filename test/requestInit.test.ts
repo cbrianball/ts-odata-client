@@ -14,15 +14,15 @@ let currentFetch!: MockFetch;
 describe("requestInit", () => {
 
     const endpoint = "http://api.purdue.io/odata/Subjects";
-    const oldFetch = (global as any).fetch;
+    const oldFetch = global.fetch;
 
     beforeEach(() => {
         currentFetch = new MockFetch();
-        (global as any).fetch = currentFetch.fetch.bind(currentFetch);
+        global.fetch = currentFetch.fetch.bind(currentFetch);
     });
 
     afterEach(() => {
-        (global as any).fech = oldFetch;
+        global.fech = oldFetch;
     });
 
     it("should not error if not provided", async () => {
