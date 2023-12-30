@@ -18,6 +18,11 @@ export interface ODataQueryResponse<T> extends ODataResponse {
   ["@odata.nextLink"]?: string;
 
   /**
+   * If server-side paging is implemented, and the server returned a value for "@odata.nextLink", this method will fetch the next paging of data using that link.
+   */
+  next?(): Promise<ODataQueryResponse<T>>;
+
+  /**
    * The results of the OData query
    */
   value: T[];

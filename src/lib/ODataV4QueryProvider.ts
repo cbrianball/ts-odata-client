@@ -22,28 +22,32 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
   }
 
   static createQuery<T>(path: string, options?: Partial<ODataV4Options>) {
-    return new ODataV4QueryProvider(path, options).createQuery<T, ExcludeProperties<T, unknown[]>>();
+    return new ODataV4QueryProvider(path, options).createQuery<T, ExcludeProperties<T, []>>();
   }
 
-  private async sendRequest(expression?: Expression) {
-    const url = this.buildQuery(expression);
-
+  private async sendRequest(url: string) {
     let init = this.options?.requestInit?.() ?? {};
     if (init instanceof Promise) init = await init;
 
     return await fetch(url, init);
   }
 
-  async executeQueryAsync<T extends ODataResponse>(expression?: Expression) {
-    const response = await this.sendRequest(expression);
+  executeQueryAsync<T extends ODataResponse>(expression?: Expression): Promise<T>;
+  executeQueryAsync<T extends ODataResponse>(odataUrl: string): Promise<T>;
+  async executeQueryAsync<T extends ODataResponse>(value?: Expression | string): Promise<T> {
+    if (typeof value !== "string") value = this.buildQuery(value);
+    const response = await this.sendRequest(value);
 
-    if (response.ok) return (await response.json()) as T;
+    if (response.ok) {
+      return (await response.json()) as T;
+    }
 
     throw new Error(JSON.stringify(await response.json()));
   }
 
   async executeRequestAsync(expression?: Expression) {
-    const response = await this.sendRequest(expression);
+    const url = this.buildQuery(expression);
+    const response = await this.sendRequest(url);
 
     if (response.ok) return response;
 
@@ -86,7 +90,8 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
   }
 
   private buildQueryString(query: ODataV4QuerySegments) {
-    const queryString: string[] = [];
+    // Not using URLSearchParams as it will escape the leading $ character in the querystring name, which is not desired
+    const queryString = new Array<string>();
 
     if (query.filter) queryString.push(`$filter=${encodeURIComponent(query.filter)}`);
 

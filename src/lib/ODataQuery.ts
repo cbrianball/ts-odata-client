@@ -12,7 +12,7 @@ import { resolveQuery, type ReplaceDateWithString } from "./ProxyFilterTypes";
  * Represents a query against an OData source.
  * This query is agnostic of the version of OData supported by the server (the provided @type {ODataQueryProvider} is responsible for translating the query into the correct syntax for the desired OData version supported by the endpoint).
  */
-export class ODataQuery<T, U = ExcludeProperties<T, unknown[]>> extends ODataQueryBase<T, U> {
+export class ODataQuery<T, U = ExcludeProperties<T, []>> extends ODataQueryBase<T, U> {
   static forV4<T>(endpoint: string, options?: Partial<ODataV4Options>) {
     return new ODataQuery<T>(new ODataV4QueryProvider(endpoint, options));
   }
@@ -30,7 +30,6 @@ export class ODataQuery<T, U = ExcludeProperties<T, unknown[]>> extends ODataQue
    */
   public async getAsync(key: unknown) {
     const expression = new Expression(ExpressionOperator.GetByKey, [key], this.expression);
-    // return await this.provider.executeQueryAsync<ODataResponse & ReplaceDateWithString<U>>(expression);
     const result = await this.provider.executeQueryAsync<ODataResponse & ReplaceDateWithString<U>>(expression);
     const selectMap = getSelectMap(expression);
     if (selectMap == null) return result;
@@ -47,10 +46,13 @@ export class ODataQuery<T, U = ExcludeProperties<T, unknown[]>> extends ODataQue
     const results = await this.provider.executeQueryAsync<ODataQueryResponse<ReplaceDateWithString<U>>>(
       this.expression,
     );
-    const selectMap = getSelectMap(this.expression);
-    if (selectMap != null) {
-      results.value = results.value.map(selectMap) as unknown as ReplaceDateWithString<U>[];
+    if (this.expression != null) {
+      applySelectMapIfExists(this.expression, results);
     }
+    // const selectMap = getSelectMap<ReplaceDateWithString<U>, ReplaceDateWithString<U>>(this.expression);
+    // if (selectMap != null) {
+    //   results.value = results.value.map(selectMap);
+    // }
     return results;
   }
 
@@ -61,10 +63,8 @@ export class ODataQuery<T, U = ExcludeProperties<T, unknown[]>> extends ODataQue
     const expression = new Expression(ExpressionOperator.GetWithCount, [], this.expression);
     const results =
       await this.provider.executeQueryAsync<ODataQueryResponseWithCount<ReplaceDateWithString<U>>>(expression);
-    const selectMap = getSelectMap(expression);
-    if (selectMap != null) {
-      results.value = results.value.map(selectMap) as unknown as ReplaceDateWithString<U>[];
-    }
+    handleODataQueryResults(this.provider, this.expression, results);
+
     return results;
   }
 
@@ -76,6 +76,24 @@ export class ODataQuery<T, U = ExcludeProperties<T, unknown[]>> extends ODataQue
   [resolveQuery]() {
     return this.provider.buildQuery(this.expression);
   }
+
+  [Symbol.asyncIterator]() {
+    return odataAsyncIterator(this);
+  }
+}
+
+async function* odataAsyncIterator<T, U>(query: ODataQuery<T, U>) {
+  let results = await query.getManyAsync();
+
+  do {
+    if (results.value.length === 0) return undefined;
+    yield* results.value;
+    if (results.next != null) {
+      results = await results.next();
+    } else {
+      return undefined;
+    }
+  } while (true);
 }
 
 function getSelectMap<T, U>(expression?: Expression): ((entity: T) => U) | undefined {
