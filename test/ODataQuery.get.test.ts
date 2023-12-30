@@ -57,7 +57,7 @@ describe("ODataQuery", () => {
     expect(counter).toBe(1);
   });
 
-  it("should not enter for await...of loop if not results are returned", async () => {
+  it("should not enter for await...of loop if no results are returned", async () => {
     const query = baseQuery.select((u) => ({ id: u.age, name: { first: u.firstName } }));
     let counter = 0;
     currentFetch.nextResponse = new Response(`{"value":[]}`, { status: 200 });
@@ -68,6 +68,22 @@ describe("ODataQuery", () => {
     }
 
     expect(counter).toBe(0);
+  });
+
+  it("should invoke multiple network calls if needed in for await ... of", async () => {
+    const query = baseQuery.select((u) => ({ id: u.age, name: { first: u.firstName } }));
+    currentFetch.nextResponse = new Response(`{"value":[{}], "@odata.nextLink": "/odata/users?$skip=10&$take=10"}`, {
+      status: 200,
+    });
+    let counter = 0;
+
+    for await (const person of query) {
+      currentFetch.nextResponse = new Response(`{"value":[{}]}`, { status: 200 });
+      counter++;
+      expect(person).to.toEqual({ id: undefined, name: { first: undefined } });
+    }
+
+    expect(counter).toBe(2);
   });
 });
 

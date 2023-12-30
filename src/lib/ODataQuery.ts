@@ -46,13 +46,7 @@ export class ODataQuery<T, U = ExcludeProperties<T, []>> extends ODataQueryBase<
     const results = await this.provider.executeQueryAsync<ODataQueryResponse<ReplaceDateWithString<U>>>(
       this.expression,
     );
-    if (this.expression != null) {
-      applySelectMapIfExists(this.expression, results);
-    }
-    // const selectMap = getSelectMap<ReplaceDateWithString<U>, ReplaceDateWithString<U>>(this.expression);
-    // if (selectMap != null) {
-    //   results.value = results.value.map(selectMap);
-    // }
+    handleODataQueryResults(this.provider, this.expression, results);
     return results;
   }
 
@@ -77,6 +71,7 @@ export class ODataQuery<T, U = ExcludeProperties<T, []>> extends ODataQueryBase<
     return this.provider.buildQuery(this.expression);
   }
 
+  // enables usage of for await ... of operator
   [Symbol.asyncIterator]() {
     return odataAsyncIterator(this);
   }
@@ -84,15 +79,10 @@ export class ODataQuery<T, U = ExcludeProperties<T, []>> extends ODataQueryBase<
 
 async function* odataAsyncIterator<T, U>(query: ODataQuery<T, U>) {
   let results = await query.getManyAsync();
-
   do {
-    if (results.value.length === 0) return undefined;
     yield* results.value;
-    if (results.next != null) {
-      results = await results.next();
-    } else {
-      return undefined;
-    }
+    if (results.next == null) return undefined;
+    results = await results.next();
   } while (true);
 }
 
