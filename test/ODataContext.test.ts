@@ -8,7 +8,7 @@ class MyContext extends ODataV4Context {
   }
 
   get subjects() {
-              return this.createQuery<Subject>("Subjects");
+    return this.createQuery<Subject>("Subjects");
   }
 }
 
