@@ -11,6 +11,7 @@ export abstract class TypedExpressionVisitor implements ExpressionVisitor {
 
     if (expression.previous) this.visit(expression.previous);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- looking for existence of function in derivied type at runtime
     const member = (this as any)[expression.operator + "Visitor"];
 
     if (typeof member !== "function")
