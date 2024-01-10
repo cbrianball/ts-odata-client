@@ -54,7 +54,14 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
     return expression ? this.generateUrl(expression) : this.path;
   }
 
-  private generateUrl(expression: Expression) {
+  build(expression?: Expression): ODataV4QuerySegments {
+    return expression ?  this.prepareExpression(expression).oDataQuerySegments : {};
+  }
+
+  private prepareExpression(expression: Expression): {
+    oDataQuerySegments: ODataV4QuerySegments;
+    path: string;
+  } {
     const visitor = new ODataV4ExpressionVisitor();
     visitor.visit(expression);
 
@@ -66,8 +73,15 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
       path += "/$value";
     }
 
-    const queryString = this.buildQueryString(visitor.oDataQuery);
+    return {
+      oDataQuerySegments: visitor.oDataQuery,
+      path,
+    };
+  }
 
+  private generateUrl(expression: Expression) {
+    const { oDataQuerySegments, path } = this.prepareExpression(expression);
+    const queryString = this.buildQueryString(oDataQuerySegments);
     return path + queryString;
   }
 

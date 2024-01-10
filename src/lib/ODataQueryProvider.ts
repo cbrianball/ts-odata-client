@@ -36,6 +36,12 @@ export abstract class ODataQueryProvider {
    */
   abstract buildQuery(expression?: Expression): unknown;
 
+  /**
+   * Returns the value that represents the expression that will be executed.
+   * @param expression
+   */
+  abstract build(expression?: Expression): unknown;
+
   private lambdaProxyCounter = 0;
   [createProxiedEntity]<T>(isLambdaProxy = false): EntityProxy<T> {
     const lambdaVariableName = isLambdaProxy ? `p${this.lambdaProxyCounter++}` : "";

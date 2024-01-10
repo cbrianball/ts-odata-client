@@ -23,6 +23,7 @@ export class ODataQueryBase<T, U = ExcludeProperties<T, unknown[]>> {
     public readonly provider: ODataQueryProvider,
     public readonly expression?: Expression,
   ) {}
+  
 
   /**
    * Limits the fields that are returned; the most recent call to select() will be used.
