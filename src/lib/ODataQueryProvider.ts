@@ -5,6 +5,7 @@ import { ProxyPropertyPredicate } from "./ProxyPropertyPredicate";
 import { createProxiedEntity } from "./ProxyFilterTypes";
 import type { EntityProxy, PropertyProxy } from "./ProxyTypes";
 import { lambdaVariable, proxyProperties, propertyPath } from "./ProxyTypes";
+import type { ODataV4QuerySegments } from "./ODataV4ExpressionVisitor";
 
 /**
  * Base type used by all @type {ODataQueryProvider} implementations.
@@ -40,7 +41,7 @@ export abstract class ODataQueryProvider {
    * Returns the value that represents the expression that will be executed.
    * @param expression
    */
-  abstract build(expression?: Expression): unknown;
+  abstract build(expression?: Expression): ODataV4QuerySegments;
 
   private lambdaProxyCounter = 0;
   [createProxiedEntity]<T>(isLambdaProxy = false): EntityProxy<T> {

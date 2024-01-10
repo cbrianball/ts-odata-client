@@ -1,13 +1,12 @@
 import type { ODataQueryProvider } from "./ODataQueryProvider";
 import { FieldReference } from "./FieldReference";
 import { Expression } from "./Expression";
-import type { ODataQueryResponse, ODataQueryResponseWithCount, ODataResponse } from "./ODataResponse";
 import type { BooleanPredicateBuilder } from "./BooleanPredicateBuilder";
 import { ExpressionOperator } from "./ExpressionOperator";
 import type { ExcludeProperties } from "./ExcludeProperties";
 import { FilterAccessoryFunctions } from "./FilterAccessoryFunctions";
-import type { ReplaceDateWithString, ProjectorType } from "./ProxyFilterTypes";
-import { createProxiedEntity, resolveQuery } from "./ProxyFilterTypes";
+import type { ProjectorType } from "./ProxyFilterTypes";
+import { createProxiedEntity } from "./ProxyFilterTypes";
 import type { EntityProxy, PropertyProxy } from "./ProxyTypes";
 import { propertyPath, proxyProperties } from "./ProxyTypes";
 import type { FieldsFor } from "./FieldsForType";
@@ -18,12 +17,10 @@ import type { JsonPrimitiveValueTypes } from "./JsonPrimitiveTypes";
  * This query is agnostic of the version of OData supported by the server (the provided @type {ODataQueryProvider} is responsible for translating the query into the correct syntax for the desired OData version supported by the endpoint).
  */
 export class ODataQueryBase<T, U = ExcludeProperties<T, unknown[]>> {
-
   constructor(
     public readonly provider: ODataQueryProvider,
     public readonly expression?: Expression,
   ) {}
-  
 
   /**
    * Limits the fields that are returned; the most recent call to select() will be used.
@@ -148,57 +145,8 @@ export class ODataQueryBase<T, U = ExcludeProperties<T, unknown[]>> {
     return this.provider.createQuery<T, U>(expression);
   }
 
-  /**
-   * Returns a single record with the provided key value. Some functions (such as top, skip, filter, etc.) are ignored when this function is invoked.
-   * @param key
-   */
-  public async getAsync(key: unknown) {
-    const expression = new Expression(ExpressionOperator.GetByKey, [key], this.expression);
-    // return await this.provider.executeQueryAsync<ODataResponse & ReplaceDateWithString<U>>(expression);
-    const result = await this.provider.executeQueryAsync<ODataResponse & ReplaceDateWithString<U>>(expression);
-    const selectMap = getSelectMap(expression);
-    if (selectMap == null) return result;
-
-    const newResult = selectMap(result) as unknown as ODataResponse & ReplaceDateWithString<U>;
-    newResult["@odata.context"] = result["@odata.context"];
-    return newResult;
-  }
-
-  /**
-   * Returns a set of records.
-   */
-  public async getManyAsync() {
-    const results = await this.provider.executeQueryAsync<ODataQueryResponse<ReplaceDateWithString<U>>>(
-      this.expression,
-    );
-    const selectMap = getSelectMap(this.expression);
-    if (selectMap != null) {
-      results.value = results.value.map(selectMap) as unknown as ReplaceDateWithString<U>[];
-    }
-    return results;
-  }
-
-  /**
-   * Returns a set of records, including the total count of records, which may not be the same as the number of records return if the results are paginated.
-   */
-  public async getManyWithCountAsync() {
-    const expression = new Expression(ExpressionOperator.GetWithCount, [], this.expression);
-    const results =
-      await this.provider.executeQueryAsync<ODataQueryResponseWithCount<ReplaceDateWithString<U>>>(expression);
-    const selectMap = getSelectMap(expression);
-    if (selectMap != null) {
-      results.value = results.value.map(selectMap) as unknown as ReplaceDateWithString<U>[];
-    }
-    return results;
-  }
-
-  public async getValueAsync() {
-    const expression = new Expression(ExpressionOperator.Value, [], this.expression);
-    return await this.provider.executeRequestAsync(expression).then((r) => r.blob());
-  }
-
-  [resolveQuery]() {
-    return this.provider.buildQuery(this.expression);
+  build(){
+    return this.provider.build(this.expression);
   }
 }
 
@@ -215,15 +163,4 @@ function getUsedPropertyPaths(proxy: EntityProxy<unknown>): string[] {
   }
 
   return Array.from(new Set(paths.flat()));
-}
-
-function getSelectMap<T, U>(expression?: Expression): ((entity: T) => U) | undefined {
-  while (expression != null) {
-    if (expression.operator === ExpressionOperator.Select) {
-      const firstOperand = expression.operands[0];
-      return typeof firstOperand === "function" ? (firstOperand as (entity: T) => U) : undefined;
-    }
-    expression = expression.previous;
-  }
-  return;
 }

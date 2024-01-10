@@ -219,6 +219,13 @@ describe("ODataExpression", () => {
       select: ["email", "firstName", "lastName", "mother/lastName"],
     } satisfies ODataV4QuerySegments);
   });
+
+  it("should call build", () => {
+    const expression = ODataExpression.forV4<Person>().select("firstName", "lastName").build();
+    expect(expression).toStrictEqual({
+      select: ["firstName", "lastName"],
+    } satisfies ODataV4QuerySegments);
+  });
 });
 
 interface Person {
