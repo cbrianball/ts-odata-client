@@ -6,7 +6,7 @@
   "types": "/index.d.ts",
   "scripts": {
     "build": "rimraf dist && tsc",
-    "test": "vitest run",
+    "test": "vitest",
     "test-ci": "vitest run --coverage.enabled true",
     "lint": "npx eslint ./src ./test && npx prettier -c src test",
     "lint:fix": "npx eslint --fix ./src ./test && npx prettier -w src test",
