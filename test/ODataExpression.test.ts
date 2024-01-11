@@ -197,7 +197,7 @@ describe("ODataExpression", () => {
       constBoolean: false,
       constString: "test",
     }));
-    
+
     expect(query.provider.build(query.expression)).toStrictEqual({
       select: ["email", "firstName", "mother/lastName"],
     } satisfies ODataV4QuerySegments);

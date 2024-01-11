@@ -145,7 +145,7 @@ export class ODataQueryBase<T, U = ExcludeProperties<T, unknown[]>> {
     return this.provider.createQuery<T, U>(expression);
   }
 
-  build(){
+  build() {
     return this.provider.build(this.expression);
   }
 }

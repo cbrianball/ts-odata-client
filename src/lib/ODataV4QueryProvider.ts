@@ -55,7 +55,7 @@ export class ODataV4QueryProvider extends ODataQueryProvider {
   }
 
   build(expression?: Expression): ODataV4QuerySegments {
-    return expression ?  this.prepareExpression(expression).oDataQuerySegments : {};
+    return expression ? this.prepareExpression(expression).oDataQuerySegments : {};
   }
 
   private prepareExpression(expression: Expression): {

@@ -6,8 +6,7 @@ import { ODataV4QueryProvider } from "./ODataV4QueryProvider";
  * Represents a query expression builder only, with empty endpoiont.
  */
 
-export class ODataExpression<T, U = ExcludeProperties<T, unknown[]>>  {
-
+export class ODataExpression<T, U = ExcludeProperties<T, unknown[]>> {
   oDataQuery: ODataQueryBase<T, U>;
 
   static forV4<T>() {
@@ -15,7 +14,6 @@ export class ODataExpression<T, U = ExcludeProperties<T, unknown[]>>  {
   }
 
   constructor() {
-    this.oDataQuery = new ODataQueryBase<T, U>(new ODataV4QueryProvider(''));
+    this.oDataQuery = new ODataQueryBase<T, U>(new ODataV4QueryProvider(""));
   }
-  
 }
