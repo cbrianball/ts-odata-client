@@ -68,6 +68,21 @@ const query = ODataQuery.forV4<User>(`http://domain.example/path/to/endpoint/fun
 `query` can now be used like any other OData Query (e.g., `filter`, `select`, `top`, etc.).
 
 
+## Query Builder
+
+This library also provides a query builder option that returns only the plain filter and query object, ensuring type safety. Utilizing the same syntax as `ODataQuery`, you can create precise filter expressions and query objects, For example:
+
+```ts
+// Create a type-safe filter expression
+const result = ODataExpression.forV4<User>()
+    .filter((p) => p.firstName.$equals("john"))
+    .build();
+
+console.log(results); 
+// Output: { "$filter": "firstName eq 'john'", ... }
+```
+
+By employing the query builder, you can adhere to the familiar syntax of `ODataQuery` while obtaining a streamlined result containing only the essential filter and query information.
 
 ## Upgrading from v1.x to 2.x
 2.0 introduces a number of breaking changes. The primary breaking changes are with the `filter`, `orderBy` and `orderByDescending` methods on the `ODataQuery` type.
