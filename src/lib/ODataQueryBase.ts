@@ -29,7 +29,7 @@ export class ODataQueryBase<T, U = ExcludeProperties<T, unknown[]>> {
   public select<U extends FieldsFor<T>>(...fields: U[]): ODataQueryBase<T, U>;
   public select<U extends ProjectorType>(projector: (proxy: T) => U): ODataQueryBase<T, U>;
   public select<U>(...args: [(proxy: T) => U | FieldsFor<T>, ...FieldsFor<T>[]]) {
-    if (args.length === 0) throw new Error("Parameters are requird");
+    if (args.length === 0) throw new Error("Parameters are required");
 
     const firstArg = args[0];
     if (typeof firstArg === "function") {
