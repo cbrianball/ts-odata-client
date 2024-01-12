@@ -96,3 +96,27 @@ function getSelectMap<T, U>(expression?: Expression): ((entity: T) => U) | undef
   }
   return;
 }
+
+function handleODataQueryResults<T>(
+  provider: ODataQueryProvider,
+  expression: Expression | undefined,
+  result: ODataQueryResponse<T>,
+) {
+  if (expression != null) applySelectMapIfExists(expression, result);
+  if (result["@odata.nextLink"] != null) {
+    result.next = async () => {
+      const nextPageResult = (await provider.executeQueryAsync(
+        result["@odata.nextLink"] as string,
+      )) as ODataQueryResponse<T>;
+      handleODataQueryResults(provider, expression, nextPageResult);
+      return nextPageResult;
+    };
+  }
+}
+
+function applySelectMapIfExists<T>(expression: Expression, results: ODataQueryResponse<T>) {
+  const mapper = getSelectMap<T, T>(expression);
+  if (mapper == null) return results;
+  results.value = results.value.map(mapper);
+  return results;
+}
