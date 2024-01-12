@@ -26,6 +26,12 @@ export abstract class ODataQueryProvider {
   abstract executeQueryAsync<T extends ODataResponse>(expression?: Expression): Promise<T>;
 
   /**
+   * Fetches the OData response from the provided URL. Primarily used to fetch subsequent pages
+   * @param url
+   */
+  abstract executeQueryAsync<T extends ODataResponse>(odataUrl: string): Promise<T>;
+
+  /**
    * Executed the provided @type {Expression} and returns the raw response.
    * @param expression
    */
