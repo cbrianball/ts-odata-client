@@ -17,7 +17,7 @@ jobs:
           node-version: "lts/Hydrogen"
       - run: npm ci
       - run: npm run lint
-      - run: npm test-ci
+      - run: npm run test-ci
       - name: report coverage
         uses: davelosert/vitest-coverage-report-action@v2
         if: always()
