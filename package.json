@@ -2,16 +2,28 @@
   "name": "ts-odata-client",
   "version": "2.0.0-dev.local",
   "description": "OData TypeScript Client",
-  "main": "/index.js",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
   "types": "/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index/cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
-    "build": "rimraf dist && tsc",
+    "build": "rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
     "test": "vitest run",
     "test-ci": "vitest run --coverage.enabled true",
     "lint": "npx eslint ./src ./test && npx prettier -c src test",
     "lint:fix": "npx eslint --fix ./src ./test && npx prettier -w src test",
-    "pack": "npm run build && cpx {package.json,README.md} dist && npm pack ./dist --dry-run",
-    "publish-npm": "npm run build && cpx {package.json,README.md} dist && npm publish ./dist"
+    "pack": "npm run build && npm pack --dry-run",
+    "publish-npm": "npm run build && npm publish"
   },
   "repository": {
     "type": "git",
@@ -29,11 +41,11 @@
   "homepage": "https://github.com/cbrianball/ts-odata-client#readme",
   "sideEffects": false,
   "devDependencies": {
+    "@rollup/plugin-typescript": "^11.1.6",
     "@typescript-eslint/eslint-plugin": "^6.16.0",
     "@typescript-eslint/parser": "^6.16.0",
     "@vitest/coverage-v8": "^1.1.0",
     "chai": "^4.3.4",
-    "cpx": "^1.5.0",
     "eslint": "^8.2.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^9.1.0",
@@ -42,7 +54,10 @@
     "eslint-plugin-prettier": "^5.1.2",
     "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-react-hooks": "^4.3.0",
-    "rimraf": "^5.0.5",
+    "rollup": "^4.9.6",
+    "rollup-plugin-delete": "^2.0.0",
+    "rollup-plugin-dts": "^6.1.0",
+    "rollup-plugin-esbuild": "^6.1.1",
     "ts-node": "^10.0.0",
     "typescript": "^5.3.3",
     "vitest": "^1.1.0"
